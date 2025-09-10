@@ -9,11 +9,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Enum untuk Arah Surat (Masuk/Keluar)
 enum ArahSurat {
   MASUK
   KELUAR
 }
 
+// Enum untuk Tipe Dokumen
 enum TipeDokumen {
   NOTA_DINAS
   SURAT_BIASA
@@ -21,13 +23,7 @@ enum TipeDokumen {
   TELEGRAM
 }
 
-enum TujuanDisposisi {
-  KASUBBID_TEKKOM
-  KASUBBID_TEKINFO
-  KASUBBAG_RENMIN
-  KAUR_KEU
-}
-
+// Model untuk pengguna yang bisa login (admin/operator)
 model Operator {
   id        String   @id @default(uuid())
   username  String   @unique
@@ -39,27 +35,31 @@ model Operator {
   @@map("operator")
 }
 
+// Model utama untuk data surat
 model Surat {
-  id               String          @id @default(uuid())
-  nomor_surat      String          @unique
-  tanggal_surat    DateTime
-  perihal          String          @db.Text
-  asal_surat       String
-  tujuan_surat     String
-  arah_surat       ArahSurat
-  tipe_dokumen     TipeDokumen
-  tujuan_disposisi TujuanDisposisi
-  isi_disposisi    String          @db.Text
-  id_operator      String
-  operator         Operator        @relation(fields: [id_operator], references: [id])
-  lampiran         Lampiran[]
-  deletedAt        DateTime?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  id                      String     @id @default(uuid())
+  nomor_agenda            String     @unique // Field baru untuk Nomor Agenda
+  nomor_surat             String     @unique
+  tanggal_surat           DateTime
+  tanggal_diterima_dibuat DateTime   // Field yang dimodifikasi, bisa diisi manual
+  perihal                 String     @db.Text
+  asal_surat              String
+  tujuan_surat            String
+  arah_surat              ArahSurat
+  tipe_dokumen            TipeDokumen
+  tujuan_disposisi        String[]   // Diubah menjadi array String untuk multi-pilih
+  isi_disposisi           String     @db.Text
+  id_operator             String
+  operator                Operator   @relation(fields: [id_operator], references: [id])
+  lampiran                Lampiran[]
+  deletedAt               DateTime?  // Untuk soft delete
+  createdAt               DateTime   @default(now())
+  updatedAt               DateTime   @updatedAt
 
   @@map("surat")
 }
 
+// Model untuk menyimpan file lampiran yang di-upload
 model Lampiran {
   id          String   @id @default(uuid())
   nama_file   String

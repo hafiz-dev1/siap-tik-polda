@@ -4,9 +4,6 @@ CREATE TYPE "public"."ArahSurat" AS ENUM ('MASUK', 'KELUAR');
 -- CreateEnum
 CREATE TYPE "public"."TipeDokumen" AS ENUM ('NOTA_DINAS', 'SURAT_BIASA', 'SPRIN', 'TELEGRAM');
 
--- CreateEnum
-CREATE TYPE "public"."TujuanDisposisi" AS ENUM ('KASUBBID_TEKKOM', 'KASUBBID_TEKINFO', 'KASUBBAG_RENMIN', 'KAUR_KEU');
-
 -- CreateTable
 CREATE TABLE "public"."operator" (
     "id" TEXT NOT NULL,
@@ -21,14 +18,16 @@ CREATE TABLE "public"."operator" (
 -- CreateTable
 CREATE TABLE "public"."surat" (
     "id" TEXT NOT NULL,
+    "nomor_agenda" TEXT NOT NULL,
     "nomor_surat" TEXT NOT NULL,
     "tanggal_surat" TIMESTAMP(3) NOT NULL,
+    "tanggal_diterima_dibuat" TIMESTAMP(3) NOT NULL,
     "perihal" TEXT NOT NULL,
     "asal_surat" TEXT NOT NULL,
     "tujuan_surat" TEXT NOT NULL,
     "arah_surat" "public"."ArahSurat" NOT NULL,
     "tipe_dokumen" "public"."TipeDokumen" NOT NULL,
-    "tujuan_disposisi" "public"."TujuanDisposisi" NOT NULL,
+    "tujuan_disposisi" TEXT[],
     "isi_disposisi" TEXT NOT NULL,
     "id_operator" TEXT NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -53,6 +52,9 @@ CREATE TABLE "public"."lampiran" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "operator_username_key" ON "public"."operator"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "surat_nomor_agenda_key" ON "public"."surat"("nomor_agenda");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "surat_nomor_surat_key" ON "public"."surat"("nomor_surat");
