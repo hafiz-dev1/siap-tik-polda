@@ -1,51 +1,57 @@
 // file: app/admin/components/SuratFormModal.tsx
 'use client';
 
-import { useState, FormEvent, useRef, Fragment, ReactNode } from 'react';
+import { useState, FormEvent, useRef, Fragment, MouseEvent } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { createSurat, updateSurat } from '../actions';
 import toast from 'react-hot-toast';
 import { SuratType } from '../types';
 
-// Constants for building form elements
+// Konstanta untuk membangun elemen form
 const TUJUAN_DISPOSISI = [ 'KASUBBID_TEKKOM', 'KASUBBID_TEKINFO', 'KASUBBAG_RENMIN', 'KAUR_KEU' ];
 const TIPE_DOKUMEN = ['NOTA_DINAS', 'SURAT_BIASA', 'SPRIN', 'TELEGRAM'];
 const ARAH_SURAT = ['MASUK', 'KELUAR'];
 
-// The component accepts an optional `suratToEdit` prop to determine its mode.
+// Komponen menerima prop `suratToEdit` opsional untuk menentukan modenya
 type Props = {
   suratToEdit?: SuratType;
-  children: ReactNode; // A trigger element (button/link) will be passed here
 };
 
-export default function SuratFormModal({ suratToEdit, children }: Props) {
+export default function SuratFormModal({ suratToEdit }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const isEditMode = suratToEdit !== undefined;
 
+  // Fungsi openModal sekarang menerima event dan menghentikan propagasinya
+  const openModal = (e?: MouseEvent) => {
+    e?.stopPropagation(); // Mencegah klik "merambat" ke <tr>
+    setIsOpen(true);
+  }
   const closeModal = () => setIsOpen(false);
-  const openModal = () => setIsOpen(true);
 
-  // Helper function to format date strings for input fields
+  // Fungsi helper untuk memformat tanggal
   const formatDateForInput = (date: string | Date, includeTime = false) => {
     const d = new Date(date);
+    // Sesuaikan dengan timezone lokal (WIB adalah UTC+7) sebelum mengubah ke string
+    d.setHours(d.getHours() + 7);
     if (isNaN(d.getTime())) return '';
-    const datePart = d.toISOString().split('T')[0];
+    
+    const isoString = d.toISOString();
+    const datePart = isoString.split('T')[0];
+    
     if (includeTime) {
-      const timePart = d.toTimeString().split(' ')[0].substring(0, 5);
+      const timePart = isoString.split('T')[1].substring(0, 5);
       return `${datePart}T${timePart}`;
     }
     return datePart;
   };
 
-  // Helper to format enum text for display
   const formatEnumText = (text: string) => text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     
-    // Call the appropriate server action based on the mode
     const result = isEditMode
       ? await updateSurat(suratToEdit.id, formData)
       : await createSurat(formData);
@@ -60,32 +66,28 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
 
   return (
     <>
-      {/* The trigger element (e.g., a button or link) is passed as a child */}
-      <div onClick={openModal} className="cursor-pointer">
-        {children}
-      </div>
+      {/* Komponen ini sekarang merender tombol pemicunya sendiri */}
+      {isEditMode ? (
+        <button onClick={openModal} className="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Ubah</button>
+      ) : (
+        <button onClick={() => openModal()} className="px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+          + Tambah Surat Baru
+        </button>
+      )}
 
       <Transition appear show={isOpen} as={Fragment}>
         <Dialog as="div" className="relative z-10 focus:outline-none" onClose={closeModal}>
           <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
           <div className="fixed inset-0 w-screen overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4">
-              <TransitionChild
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
+              <TransitionChild as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
                 <DialogPanel className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl">
                   <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900 border-b pb-2">
                     {isEditMode ? 'Ubah Arsip Surat' : 'Tambah Arsip Surat Baru'}
                   </DialogTitle>
                   
                   <form ref={formRef} onSubmit={handleSubmit} className="mt-4 max-h-[70vh] overflow-y-auto pr-2 space-y-4">
-                    {/* Form Inputs with defaultValue for Edit Mode */}
+                    {/* Semua input diisi dengan defaultValue untuk mode Ubah */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label htmlFor="nomor_agenda" className="block text-sm font-medium text-gray-700">Nomor Agenda</label>
@@ -146,9 +148,7 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                                 defaultChecked={suratToEdit?.tujuan_disposisi.includes(tujuan)}
                                 className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                               />
-                              <span className="text-sm text-gray-800">
-                                {formatEnumText(tujuan.replace('KASUBBID_', '').replace('KASUBBAG_', '').replace('KAUR_', ''))}
-                              </span>
+                              <span className="text-sm text-gray-800">{formatEnumText(tujuan.replace('KASUBBID_', '').replace('KASUBBAG_', '').replace('KAUR_', ''))}</span>
                             </label>
                           ))}
                         </div>
@@ -157,21 +157,14 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                         <label htmlFor="isi_disposisi" className="block text-sm font-medium text-gray-700">Isi Disposisi</label>
                         <textarea name="isi_disposisi" id="isi_disposisi" rows={2} required defaultValue={suratToEdit?.isi_disposisi} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
                     </div>
-                    {/* File input is only shown and required for 'Add' mode to simplify the edit process */}
-                    {!isEditMode && (
-                      <div>
-                          <label htmlFor="scan_surat" className="block text-sm font-medium text-gray-700">Upload Scan Surat (PDF, JPG, PNG)</label>
-                          <input type="file" name="scan_surat" id="scan_surat" required={!isEditMode} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
-                      </div>
-                    )}
-
+                    <div className={isEditMode ? 'hidden' : 'block'}>
+                        <label htmlFor="scan_surat" className="block text-sm font-medium text-gray-700">Upload Scan Surat (PDF, JPG, PNG)</label>
+                        <input type="file" name="scan_surat" id="scan_surat" required={!isEditMode} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
+                    </div>
+                    {isEditMode && <p className="text-xs text-gray-500">Upload ulang scan surat tidak didukung dalam mode ubah.</p>}
                     <div className="mt-6 flex justify-end gap-4 border-t pt-4">
-                      <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none" onClick={closeModal}>
-                        Batal
-                      </button>
-                      <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none">
-                        Simpan
-                      </button>
+                      <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200" onClick={closeModal}>Batal</button>
+                      <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">{isEditMode ? 'Simpan Perubahan' : 'Simpan'}</button>
                     </div>
                   </form>
                 </DialogPanel>

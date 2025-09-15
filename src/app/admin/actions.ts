@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import fs from 'fs/promises';
 import path from 'path';
+import { getSession } from '@/lib/session'; // Impor helper sesi
 
 const prisma = new PrismaClient();
 
@@ -23,6 +24,12 @@ export async function logout() {
  * Creates a new letter record and uploads its attachment.
  */
 export async function createSurat(formData: FormData) {
+  // Pengecekan sesi keamanan
+  const session = await getSession();
+  if (!session?.operatorId) {
+    return { message: 'Gagal: Anda tidak terautentikasi.' };
+  }
+
   try {
     const nomor_agenda = formData.get('nomor_agenda') as string;
     const tanggal_diterima_dibuat = new Date(formData.get('tanggal_diterima_dibuat') as string);
@@ -60,7 +67,7 @@ export async function createSurat(formData: FormData) {
         tipe_dokumen,
         tujuan_disposisi,
         isi_disposisi,
-        id_operator: 'e993ca5f-85e6-4ba5-9102-2046d5e4200f', // IMPORTANT: Replace with your actual admin ID
+        id_operator: session.operatorId,
         lampiran: {
           create: {
             nama_file: scan_surat.name,
@@ -88,6 +95,12 @@ export async function createSurat(formData: FormData) {
  * Performs a soft delete on a letter record.
  */
 export async function deleteSurat(suratId: string) {
+  // Pengecekan sesi keamanan
+  const session = await getSession();
+  if (!session?.operatorId) {
+    return { message: 'Gagal: Anda tidak terautentikasi.' };
+  }
+
   try {
     if (!suratId) {
       return { message: 'Gagal: ID Surat tidak valid.' };
@@ -113,6 +126,12 @@ export async function deleteSurat(suratId: string) {
  * Updates an existing letter record in the database.
  */
 export async function updateSurat(suratId: string, formData: FormData) {
+  // Pengecekan sesi keamanan
+  const session = await getSession();
+  if (!session?.operatorId) {
+    return { message: 'Gagal: Anda tidak terautentikasi.' };
+  }
+
   try {
     if (!suratId) {
       return { message: 'Gagal: ID Surat tidak valid.' };

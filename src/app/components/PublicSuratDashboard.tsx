@@ -1,37 +1,27 @@
-// file: app/admin/components/SuratDashboardClient.tsx
+// file: app/components/PublicSuratDashboard.tsx
 'use client';
 
-import { useState, useMemo, Fragment } from 'react';
-import { SuratType } from '../types';
-import { Lampiran } from '@prisma/client';
+import { useState, useMemo } from 'react';
+import { Surat, Lampiran } from '@prisma/client';
+import SuratDetailModal from '../admin/components/SuratDetailModal'; // Re-using the detail modal from the admin section
 
-// Import child components
-import SuratFormModal from './SuratFormModal';
-import DeleteSuratButton from './DeleteSuratButton';
-import SuratDetailModal from './SuratDetailModal';
+// Define the type for the props, which includes the related Lampiran data
+type SuratWithLampiran = Surat & { lampiran: Lampiran[] };
+type Props = {
+  suratList: SuratWithLampiran[];
+};
 
 // Constants for building the UI
 const TIPE_DOKUMEN = ['NOTA_DINAS', 'SURAT_BIASA', 'SPRIN', 'TELEGRAM'];
-const TUJUAN_DISPOSISI = [
-  'KASUBBID_TEKKOM',
-  'KASUBBID_TEKINFO',
-  'KASUBBAG_RENMIN',
-  'KAUR_KEU',
-];
+const TUJUAN_DISPOSISI = ['KASUBBID_TEKKOM', 'KASUBBID_TEKINFO', 'KASUBBAG_RENMIN', 'KAUR_KEU'];
 
-// Define the props for this component, including the related Lampiran data
-type Props = {
-  suratList: (SuratType & { lampiran: Lampiran[] })[];
-};
-
-export default function SuratDashboardClient({ suratList }: Props) {
-  // State management for all UI interactivity
+export default function PublicSuratDashboard({ suratList }: Props) {
+  // All state and filtering logic is reused from the admin dashboard
   const [activeTipe, setActiveTipe] = useState('NOTA_DINAS');
   const [activeArah, setActiveArah] = useState<'MASUK' | 'KELUAR'>('MASUK');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTujuan, setSelectedTujuan] = useState<string[]>([]);
 
-  // Memoized filtering logic for high performance on the client-side
   const filteredSurat = useMemo(() => {
     return suratList.filter((surat) => {
       const tipeMatch = surat.tipe_dokumen === activeTipe;
@@ -43,26 +33,21 @@ export default function SuratDashboardClient({ suratList }: Props) {
       const tujuanMatch =
         selectedTujuan.length === 0 ||
         selectedTujuan.some(tujuan => surat.tujuan_disposisi.includes(tujuan));
-
       return tipeMatch && arahMatch && searchMatch && tujuanMatch;
     });
   }, [suratList, activeTipe, activeArah, searchQuery, selectedTujuan]);
 
-  // Handler for checkbox state changes
   const handleTujuanChange = (tujuan: string) => {
     setSelectedTujuan((prev) =>
-      prev.includes(tujuan)
-        ? prev.filter((t) => t !== tujuan)
-        : [...prev, tujuan]
+      prev.includes(tujuan) ? prev.filter((t) => t !== tujuan) : [...prev, tujuan]
     );
   };
   
-  // Helper to format enum text for display
   const formatEnumText = (text: string) => text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
-      {/* Left Column: Document Type Sidebar */}
+      {/* Left Column: Sidebar for Document Type Selection */}
       <aside className="w-full md:w-1/4">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Tipe Dokumen</h2>
         <ul className="space-y-2">
@@ -85,37 +70,31 @@ export default function SuratDashboardClient({ suratList }: Props) {
 
       {/* Right Column: Main Content */}
       <main className="w-full md:w-3/4">
-        {/* Filter Bar */}
+        {/* Filter Bar (without the "Add New" button) */}
         <div className="bg-white p-4 rounded-lg shadow mb-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-            <div className="flex-grow w-full">
-              <input
-                type="text"
-                placeholder="Cari perihal atau nomor surat..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
-              <div className="mt-4">
-                <label className="text-sm font-medium text-gray-700">Filter Tujuan Disposisi:</label>
-                <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2">
-                  {TUJUAN_DISPOSISI.map((tujuan) => (
-                    <label key={tujuan} className="flex items-center space-x-2 text-sm cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedTujuan.includes(tujuan)}
-                        onChange={() => handleTujuanChange(tujuan)}
-                        className="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
-                      />
-                      <span>{formatEnumText(tujuan.replace('KASUBBID_', '').replace('KASUBBAG_', '').replace('KAUR_', ''))}</span>
-                    </label>
-                  ))}
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            <input
+              type="text"
+              placeholder="Cari perihal atau nomor surat..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
+            <div>
+              <label className="text-sm font-medium text-gray-700">Filter Tujuan Disposisi:</label>
+              <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2">
+                {TUJUAN_DISPOSISI.map((tujuan) => (
+                  <label key={tujuan} className="flex items-center space-x-2 text-sm cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedTujuan.includes(tujuan)}
+                      onChange={() => handleTujuanChange(tujuan)}
+                      className="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                    />
+                    <span>{formatEnumText(tujuan.replace('KASUBBID_', '').replace('KASUBBAG_', '').replace('KAUR_', ''))}</span>
+                  </label>
+                ))}
               </div>
-            </div>
-            <div className="flex-shrink-0 pt-1">
-              {/* SuratFormModal for "Add" mode */}
-              <SuratFormModal />
             </div>
           </div>
         </div>
@@ -144,7 +123,7 @@ export default function SuratDashboardClient({ suratList }: Props) {
           </button>
         </div>
 
-        {/* Data Table */}
+        {/* Data Table (without the "Aksi" column for edit/delete) */}
         <div className="bg-white rounded-b-lg shadow overflow-x-auto">
           <table className="min-w-full leading-normal">
             <thead>
@@ -152,8 +131,8 @@ export default function SuratDashboardClient({ suratList }: Props) {
                 <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Detail Surat & Disposisi
                 </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40">
-                  Download & Aksi
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">
+                  Lampiran
                 </th>
               </tr>
             </thead>
@@ -167,7 +146,6 @@ export default function SuratDashboardClient({ suratList }: Props) {
               ) : (
                 filteredSurat.map((surat) => (
                   <SuratDetailModal key={surat.id} surat={surat}>
-                    {/* The table row itself acts as the trigger for the detail modal */}
                     <tr className="hover:bg-gray-50">
                       <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                         <div className="flex flex-col">
@@ -184,27 +162,20 @@ export default function SuratDashboardClient({ suratList }: Props) {
                         </div>
                       </td>
                       <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <div className="flex flex-col items-start gap-2">
-                          {surat.lampiran[0] ? (
-                            <a
-                              href={surat.lampiran[0].path_file}
-                              download
-                              onClick={(e) => e.stopPropagation()} // Prevents the modal from opening when the link is clicked
-                              className="px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded-full hover:bg-green-700 no-underline"
-                            >
-                              Download Scan
-                            </a>
-                          ) : (
-                            <span className="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-200 rounded-full">
-                              No File
-                            </span>
-                          )}
-                          <div className="flex items-center space-x-4 pt-1">
-                            {/* SuratFormModal for "Edit" mode, passing the letter data */}
-                            <SuratFormModal suratToEdit={surat} />
-                            <DeleteSuratButton suratId={surat.id} />
-                          </div>
-                        </div>
+                        {surat.lampiran[0] ? (
+                          <a
+                            href={surat.lampiran[0].path_file}
+                            download
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-block px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded-full hover:bg-green-700 no-underline"
+                          >
+                            Download Scan
+                          </a>
+                        ) : (
+                          <span className="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-200 rounded-full">
+                            No File
+                          </span>
+                        )}
                       </td>
                     </tr>
                   </SuratDetailModal>
