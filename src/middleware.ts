@@ -1,69 +1,78 @@
-// file: middleware.ts
+// file: middleware.ts (Lokasi: src/middleware.ts)
 
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET!);
 
+// Daftar halaman yang BISA diakses TANPA login
+const PUBLIC_PATHS = ['/login'];
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('token')?.value;
 
-  // 1. Tangani kasus jika pengguna mencoba akses halaman login
-  if (pathname.startsWith('/login')) {
-    // Jika sudah punya token valid, jangan biarkan akses halaman login lagi.
-    if (token) {
-      try {
-        const { payload } = await jwtVerify(token, JWT_SECRET);
-        // Arahkan ke dashboard yang sesuai berdasarkan peran
-        const redirectUrl = payload.role === 'ADMIN' ? '/admin/dashboard' : '/';
-        return NextResponse.redirect(new URL(redirectUrl, request.url));
-      } catch (error) {
-        // Token tidak valid, izinkan untuk login ulang.
-        return NextResponse.next();
-      }
+  // 1. ATURAN EKSPLISIT UNTUK HALAMAN UTAMA ('/')
+  if (pathname === '/') {
+    if (!token) {
+      // Jika tidak ada token, paksa ke login
+      return NextResponse.redirect(new URL('/login', request.url));
     }
-    // Jika tidak ada token, izinkan akses ke halaman login.
+    // Jika ada token, verifikasi
+    try {
+      await jwtVerify(token, JWT_SECRET);
+      // Jika token valid, kirim ke dashboard (ini akan ditangkap oleh grup '(app)')
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    } catch (e) {
+      // Token tidak valid, paksa login
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+
+  const isPublicPath = PUBLIC_PATHS.some(path => pathname.startsWith(path));
+
+  // 2. ATURAN UNTUK HALAMAN PUBLIK (seperti /login)
+  if (isPublicPath) {
+    if (token) {
+       try {
+         const { payload } = await jwtVerify(token, JWT_SECRET);
+         // Jika sudah login, jangan biarkan di halaman login, kirim ke dashboard
+         return NextResponse.redirect(new URL('/dashboard', request.url));
+       } catch (error) { /* Token tidak valid, biarkan di halaman login */ }
+    }
     return NextResponse.next();
   }
 
-  // 2. Untuk semua halaman LAINNYA, jika tidak ada token, wajib login.
+  // 3. ATURAN UNTUK SEMUA HALAMAN TERPROTEKSI LAINNYA
   if (!token) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // 3. Jika ADA token, verifikasi dan terapkan aturan otorisasi
+  // 4. VERIFIKASI TOKEN DAN ROLE
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    
-    // ATURAN BARU: Jika ADMIN mencoba akses halaman utama, arahkan ke dashboard admin
-    if (payload.role === 'ADMIN' && pathname === '/') {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-    }
+    const userRole = payload.role as string;
 
-    // ATURAN LAMA: Jika USER mencoba akses area admin, usir ke halaman utama
-    if (pathname.startsWith('/admin') && payload.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/', request.url));
+    // Jika USER biasa mencoba akses area /admin, tolak
+    if (pathname.startsWith('/admin') && userRole !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
   } catch (error) {
-    // Token tidak valid (kedaluwarsa, dll), paksa login ulang
     const loginUrl = new URL('/login', request.url);
     const response = NextResponse.redirect(loginUrl);
-    response.cookies.delete('token'); // Hapus cookie yang buruk
+    response.cookies.delete('token');
     return response;
   }
-
-  // Jika semua pengecekan lolos, izinkan akses.
+  
   return NextResponse.next();
 }
 
 export const config = {
-  // Regex ini akan menjalankan middleware di SEMUA rute,
-  // KECUALI untuk rute internal Next.js dan file-file publik.
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|default-profile.png).*)',
+    '/', // Pastikan '/' ditangkap secara eksplisit
+    '/((?!api|_next/static|_next/image|favicon.ico|default-profile.png|uploads).*)',
   ],
 };

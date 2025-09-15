@@ -3,9 +3,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation'; // Hook to detect the current page
-import { logout } from '@/app/admin/actions'; // Adjust path if your alias is different
+import { logout } from '@/app/(app)/admin/actions'; // Import the server action for logout
 
-// Define the type for the user prop, allowing it to be null
+// Define the type for the user prop, allowing it to be null if not logged in
 type User = {
   nama: string;
   role: string;
@@ -16,7 +16,7 @@ type Props = {
 };
 
 export default function PublicNavbar({ user }: Props) {
-  const pathname = usePathname(); // Get the current URL path
+  const pathname = usePathname(); // Get the current URL path to highlight the active link
 
   return (
     <nav className="bg-white border-b border-gray-200 shadow-sm">
@@ -25,10 +25,21 @@ export default function PublicNavbar({ user }: Props) {
           <div className="flex items-center space-x-8">
             <span className="font-bold text-xl text-gray-800">Arsip Surat Digital</span>
             
-            {/* Navigation links are only shown if a user is logged in */}
+            {/* Navigation links are only shown if a regular user is logged in */}
             {user && user.role === 'USER' && (
               <div className="hidden md:flex md:space-x-6">
-                {/* Link styling changes based on whether it's the active page */}
+                {/* Link to the user's dashboard */}
+                <Link
+                  href="/user/dashboard"
+                  className={`text-sm font-medium transition-colors ${
+                    pathname === '/user/dashboard'
+                      ? 'text-indigo-600' // Style for the active link
+                      : 'text-gray-500 hover:text-gray-900' // Style for inactive links
+                  }`}
+                >
+                  Dashboard
+                </Link>
+                {/* Link to the user's archive page */}
                 <Link
                   href="/"
                   className={`text-sm font-medium transition-colors ${
@@ -37,14 +48,14 @@ export default function PublicNavbar({ user }: Props) {
                       : 'text-gray-500 hover:text-gray-900' // Style for inactive links
                   }`}
                 >
-                  Dashboard
+                  Arsip Surat
                 </Link>
               </div>
             )}
           </div>
           <div className="flex items-center space-x-4">
             {user ? (
-              // If user is logged in, show their name and a logout button
+              // If a user is logged in, show their name and a logout button
               <>
                 <span className="text-sm text-gray-600 hidden sm:block">
                   Selamat datang, <span className="font-semibold">{user.nama}</span>!

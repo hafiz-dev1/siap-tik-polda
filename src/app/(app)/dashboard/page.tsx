@@ -101,7 +101,7 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <div className="flex justify-between items-center border-b pb-4">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <Link href="/admin/arsip" className="px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+        <Link href="/arsip" className="px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
           Buka Arsip Surat
         </Link>
       </div>

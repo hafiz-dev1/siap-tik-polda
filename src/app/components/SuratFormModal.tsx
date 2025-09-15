@@ -3,7 +3,7 @@
 
 import { useState, FormEvent, useRef, Fragment, ReactNode } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import { createSurat, updateSurat } from '@/app/admin/actions'; // Using path alias
+import { createSurat, updateSurat } from '@/app/(app)/admin/actions'; // Using path alias
 import toast from 'react-hot-toast';
 import { Surat } from '@prisma/client';
 

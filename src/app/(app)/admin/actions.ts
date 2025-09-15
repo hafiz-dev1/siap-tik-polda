@@ -12,22 +12,24 @@ import { getSession } from '@/lib/session';
 const prisma = new PrismaClient();
 
 /**
- * Handles the admin logout process.
+ * Menangani proses logout pengguna (Admin dan User).
  */
 export async function logout() {
-  const cookieStore = await cookies();
+  const cookieStore = await cookies(); // Menggunakan await sesuai kebutuhan lingkungan Anda
   cookieStore.delete('token');
   redirect('/login');
 }
 
 /**
- * Creates a new letter record and uploads its attachment.
+ * Membuat data surat baru. Hanya bisa dilakukan oleh ADMIN.
  */
 export async function createSurat(formData: FormData) {
+  // --- ROLE GUARD ---
   const session = await getSession();
-  if (!session?.operatorId) {
-    return { message: 'Gagal: Anda tidak terautentikasi.' };
+  if (!session?.operatorId || session.role !== 'ADMIN') {
+    return { message: 'Gagal: Anda tidak memiliki hak akses untuk aksi ini.' };
   }
+  // --- AKHIR ROLE GUARD ---
 
   try {
     const nomor_agenda = formData.get('nomor_agenda') as string;
@@ -47,6 +49,7 @@ export async function createSurat(formData: FormData) {
       return { message: 'Gagal: Scan surat wajib diupload.' };
     }
 
+    // Logika upload file
     const buffer = Buffer.from(await scan_surat.arrayBuffer());
     const filename = `${Date.now()}-${scan_surat.name.replace(/\s/g, '_')}`;
     const uploadPath = path.join(process.cwd(), 'public/uploads', filename);
@@ -67,7 +70,7 @@ export async function createSurat(formData: FormData) {
         tipe_dokumen,
         tujuan_disposisi,
         isi_disposisi,
-        id_operator: session.operatorId,
+        id_operator: session.operatorId, // ID Operator diambil dari sesi
         lampiran: {
           create: {
             nama_file: scan_surat.name,
@@ -87,18 +90,21 @@ export async function createSurat(formData: FormData) {
     return { message: 'Gagal membuat surat karena kesalahan tak terduga.' };
   }
 
-  revalidatePath('/admin/arsip');
+  revalidatePath('/arsip'); // Merevalidasi halaman arsip baru
+  revalidatePath('/dashboard'); // Merevalidasi dashboard (untuk statistik)
   return { message: 'Surat berhasil ditambahkan.' };
 }
 
 /**
- * Performs a soft delete on a letter record.
+ * Melakukan soft delete pada surat. Hanya bisa dilakukan oleh ADMIN.
  */
 export async function deleteSurat(suratId: string) {
+  // --- ROLE GUARD ---
   const session = await getSession();
-  if (!session?.operatorId) {
-    return { message: 'Gagal: Anda tidak terautentikasi.' };
+  if (!session?.operatorId || session.role !== 'ADMIN') {
+    return { message: 'Gagal: Anda tidak memiliki hak akses untuk aksi ini.' };
   }
+  // --- AKHIR ROLE GUARD ---
 
   try {
     if (!suratId) {
@@ -117,24 +123,28 @@ export async function deleteSurat(suratId: string) {
     return { message: 'Gagal menghapus surat.' };
   }
 
-  revalidatePath('/admin/arsip');
+  revalidatePath('/arsip');
+  revalidatePath('/dashboard');
   return { message: 'Surat berhasil dihapus.' };
 }
 
 /**
- * Updates an existing letter record in the database.
+ * Memperbarui data surat yang ada. Hanya bisa dilakukan oleh ADMIN.
  */
 export async function updateSurat(suratId: string, formData: FormData) {
+  // --- ROLE GUARD ---
   const session = await getSession();
-  if (!session?.operatorId) {
-    return { message: 'Gagal: Anda tidak terautentikasi.' };
+  if (!session?.operatorId || session.role !== 'ADMIN') {
+    return { message: 'Gagal: Anda tidak memiliki hak akses untuk aksi ini.' };
   }
+  // --- AKHIR ROLE GUARD ---
 
   try {
     if (!suratId) {
       return { message: 'Gagal: ID Surat tidak valid.' };
     }
     
+    // Ekstrak data dari form
     const nomor_agenda = formData.get('nomor_agenda') as string;
     const tanggal_diterima_dibuat = new Date(formData.get('tanggal_diterima_dibuat') as string);
     const nomor_surat = formData.get('nomor_surat') as string;
@@ -169,6 +179,7 @@ export async function updateSurat(suratId: string, formData: FormData) {
     return { message: 'Gagal memperbarui surat.' };
   }
 
-  revalidatePath('/admin/arsip');
+  revalidatePath('/arsip');
+  revalidatePath('/dashboard');
   return { message: 'Surat berhasil diperbarui.' };
 }
