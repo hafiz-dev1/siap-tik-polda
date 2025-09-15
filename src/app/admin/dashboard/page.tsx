@@ -2,8 +2,8 @@
 
 import { Prisma, PrismaClient } from '@prisma/client';
 import Link from 'next/link';
-import StatsCard from '../components/StatsCard';
-import SuratChart from '../components/SuratChart';
+import StatsCard from '@/app/components/StatsCard'; // Menggunakan path alias yang benar
+import SuratChart from '@/app/components/SuratChart'; // Menggunakan path alias yang benar
 
 const prisma = new PrismaClient();
 
@@ -16,7 +16,7 @@ const TUJUAN_DISPOSISI = [
 
 const formatEnumText = (text: string) => text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-// Function to prepare chart data (no changes needed here)
+// Fungsi untuk menyiapkan data diagram
 async function getChartData() {
   const twelveMonthsAgo = new Date();
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
@@ -35,6 +35,7 @@ async function getChartData() {
   const monthlyData: Record<string, { month: string; masuk: number; keluar: number }> = {};
   const monthFormatter = new Intl.DateTimeFormat('id-ID', { year: 'numeric', month: 'short' });
 
+  // Inisialisasi 12 bulan terakhir untuk memastikan semua bulan ada di chart
   for (let i = 11; i >= 0; i--) {
     const d = new Date();
     d.setMonth(d.getMonth() - i);
@@ -42,6 +43,7 @@ async function getChartData() {
     monthlyData[monthKey] = { month: monthKey, masuk: 0, keluar: 0 };
   }
 
+  // Isi data dari hasil query
   rawData.forEach(item => {
     const monthKey = monthFormatter.format(new Date(item.month));
     if (monthlyData[monthKey]) {
@@ -57,7 +59,7 @@ async function getChartData() {
 }
 
 export default async function DashboardPage() {
-  // Add a query for disposition data to Promise.all
+  // Mengambil semua data yang dibutuhkan secara bersamaan untuk efisiensi
   const [
     totalMasuk, 
     totalKeluar, 
@@ -75,13 +77,13 @@ export default async function DashboardPage() {
       orderBy: { createdAt: 'desc' },
       take: 5,
     }),
-    prisma.surat.findMany({ // Query to get all disposition data
+    prisma.surat.findMany({
       where: { deletedAt: null },
       select: { tujuan_disposisi: true },
     }),
   ]);
 
-  // Logic to process disposition data
+  // Memproses data untuk rincian disposisi
   const disposisiCounts = TUJUAN_DISPOSISI.reduce((acc, tujuan) => {
     acc[tujuan] = 0;
     return acc;
@@ -104,24 +106,24 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Top Statistics Cards */}
+      {/* Kartu Statistik Utama */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatsCard title="Total Surat Masuk" value={totalMasuk} />
         <StatsCard title="Total Surat Keluar" value={totalKeluar} />
         <StatsCard title="Total Semua Dokumen" value={totalDokumen} />
       </div>
 
-      {/* Main Dashboard Layout (Grid with 3 columns on large screens) */}
+      {/* Tata Letak Utama Dashboard (Grid 3 Kolom) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Left Column (takes up 2 grid columns) */}
+        {/* Kolom Kiri (mengambil 2 bagian grid) */}
         <div className="lg:col-span-2">
           <SuratChart data={chartData} />
         </div>
 
-        {/* Right Column (takes up 1 grid column) */}
+        {/* Kolom Kanan (mengambil 1 bagian grid) */}
         <div className="space-y-8">
-          {/* Disposition Breakdown Panel */}
+          {/* Panel Rincian Disposisi */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Rincian Disposisi</h3>
             <ul className="mt-4 space-y-3">
@@ -134,7 +136,7 @@ export default async function DashboardPage() {
             </ul>
           </div>
 
-          {/* Recent Activity Panel */}
+          {/* Panel Aktivitas Terbaru */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Aktivitas Terbaru</h3>
             <ul className="mt-4 space-y-4">

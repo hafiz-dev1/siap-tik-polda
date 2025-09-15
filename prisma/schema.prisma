@@ -23,36 +23,45 @@ enum TipeDokumen {
   TELEGRAM
 }
 
-// Model untuk pengguna yang bisa login (admin/operator)
-model Operator {
-  id        String   @id @default(uuid())
-  username  String   @unique
-  password  String
-  surat     Surat[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// Enum baru untuk Tipe User (Peran)
+enum Role {
+  ADMIN
+  USER
+}
 
-  @@map("operator")
+// Model untuk pengguna yang bisa login, sekarang disebut Pengguna
+model Pengguna {
+  id                String    @id @default(uuid())
+  nama              String    // Nama lengkap pengguna
+  username          String    @unique
+  password          String
+  role              Role      @default(USER) // Peran pengguna (Admin/User Biasa)
+  profilePictureUrl String?   // URL foto profil (opsional)
+  surat             Surat[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("pengguna")
 }
 
 // Model utama untuk data surat
 model Surat {
   id                      String     @id @default(uuid())
-  nomor_agenda            String     @unique // Field baru untuk Nomor Agenda
+  nomor_agenda            String     @unique
   nomor_surat             String     @unique
   tanggal_surat           DateTime
-  tanggal_diterima_dibuat DateTime   // Field yang dimodifikasi, bisa diisi manual
+  tanggal_diterima_dibuat DateTime
   perihal                 String     @db.Text
   asal_surat              String
   tujuan_surat            String
   arah_surat              ArahSurat
   tipe_dokumen            TipeDokumen
-  tujuan_disposisi        String[]   // Diubah menjadi array String untuk multi-pilih
+  tujuan_disposisi        String[]
   isi_disposisi           String     @db.Text
   id_operator             String
-  operator                Operator   @relation(fields: [id_operator], references: [id])
+  operator                Pengguna   @relation(fields: [id_operator], references: [id]) // Relasi diperbarui ke model Pengguna
   lampiran                Lampiran[]
-  deletedAt               DateTime?  // Untuk soft delete
+  deletedAt               DateTime?
   createdAt               DateTime   @default(now())
   updatedAt               DateTime   @updatedAt
 

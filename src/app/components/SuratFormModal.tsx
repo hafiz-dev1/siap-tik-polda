@@ -1,20 +1,20 @@
-// file: app/admin/components/SuratFormModal.tsx
+// file: app/components/SuratFormModal.tsx
 'use client';
 
-import { useState, FormEvent, useRef, Fragment, MouseEvent } from 'react';
+import { useState, FormEvent, useRef, Fragment, ReactNode } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import { createSurat, updateSurat } from '../actions';
+import { createSurat, updateSurat } from '@/app/admin/actions'; // Using path alias
 import toast from 'react-hot-toast';
-import { SuratType } from '../types';
+import { Surat } from '@prisma/client';
 
-// Konstanta untuk membangun elemen form
+// Constants for building form elements
 const TUJUAN_DISPOSISI = [ 'KASUBBID_TEKKOM', 'KASUBBID_TEKINFO', 'KASUBBAG_RENMIN', 'KAUR_KEU' ];
 const TIPE_DOKUMEN = ['NOTA_DINAS', 'SURAT_BIASA', 'SPRIN', 'TELEGRAM'];
 const ARAH_SURAT = ['MASUK', 'KELUAR'];
 
-// Komponen menerima prop `suratToEdit` opsional untuk menentukan modenya
+// The component accepts an optional `suratToEdit` prop to determine its mode.
 type Props = {
-  suratToEdit?: SuratType;
+  suratToEdit?: Surat;
 };
 
 export default function SuratFormModal({ suratToEdit }: Props) {
@@ -22,28 +22,21 @@ export default function SuratFormModal({ suratToEdit }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const isEditMode = suratToEdit !== undefined;
 
-  // Fungsi openModal sekarang menerima event dan menghentikan propagasinya
-  const openModal = (e?: MouseEvent) => {
-    e?.stopPropagation(); // Mencegah klik "merambat" ke <tr>
-    setIsOpen(true);
-  }
   const closeModal = () => setIsOpen(false);
+  const openModal = () => setIsOpen(true);
 
-  // Fungsi helper untuk memformat tanggal
+  // Helper function to format date strings for input fields (YYYY-MM-DD or YYYY-MM-DDTHH:mm)
   const formatDateForInput = (date: string | Date, includeTime = false) => {
     const d = new Date(date);
-    // Sesuaikan dengan timezone lokal (WIB adalah UTC+7) sebelum mengubah ke string
-    d.setHours(d.getHours() + 7);
+    // Adjust for local timezone (WIB is UTC+7) before converting to string
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
     if (isNaN(d.getTime())) return '';
     
     const isoString = d.toISOString();
-    const datePart = isoString.split('T')[0];
-    
     if (includeTime) {
-      const timePart = isoString.split('T')[1].substring(0, 5);
-      return `${datePart}T${timePart}`;
+      return isoString.substring(0, 16); // Returns 'YYYY-MM-DDTHH:mm'
     }
-    return datePart;
+    return isoString.split('T')[0]; // Returns 'YYYY-MM-DD'
   };
 
   const formatEnumText = (text: string) => text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -52,6 +45,7 @@ export default function SuratFormModal({ suratToEdit }: Props) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     
+    // Call the appropriate server action based on the mode
     const result = isEditMode
       ? await updateSurat(suratToEdit.id, formData)
       : await createSurat(formData);
@@ -66,11 +60,11 @@ export default function SuratFormModal({ suratToEdit }: Props) {
 
   return (
     <>
-      {/* Komponen ini sekarang merender tombol pemicunya sendiri */}
+      {/* This component now renders its own trigger button */}
       {isEditMode ? (
-        <button onClick={openModal} className="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Ubah</button>
+        <button onClick={(e) => { e.stopPropagation(); openModal(); }} className="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Ubah</button>
       ) : (
-        <button onClick={() => openModal()} className="px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+        <button onClick={openModal} className="px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
           + Tambah Surat Baru
         </button>
       )}
@@ -80,14 +74,22 @@ export default function SuratFormModal({ suratToEdit }: Props) {
           <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
           <div className="fixed inset-0 w-screen overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4">
-              <TransitionChild as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
+              <TransitionChild
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
                 <DialogPanel className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl">
                   <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900 border-b pb-2">
                     {isEditMode ? 'Ubah Arsip Surat' : 'Tambah Arsip Surat Baru'}
                   </DialogTitle>
                   
                   <form ref={formRef} onSubmit={handleSubmit} className="mt-4 max-h-[70vh] overflow-y-auto pr-2 space-y-4">
-                    {/* Semua input diisi dengan defaultValue untuk mode Ubah */}
+                    {/* All form inputs have a 'defaultValue' or 'defaultChecked' for Edit Mode */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label htmlFor="nomor_agenda" className="block text-sm font-medium text-gray-700">Nomor Agenda</label>
@@ -157,11 +159,13 @@ export default function SuratFormModal({ suratToEdit }: Props) {
                         <label htmlFor="isi_disposisi" className="block text-sm font-medium text-gray-700">Isi Disposisi</label>
                         <textarea name="isi_disposisi" id="isi_disposisi" rows={2} required defaultValue={suratToEdit?.isi_disposisi} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
                     </div>
+                    {/* File input is hidden during edit mode for simplicity */}
                     <div className={isEditMode ? 'hidden' : 'block'}>
                         <label htmlFor="scan_surat" className="block text-sm font-medium text-gray-700">Upload Scan Surat (PDF, JPG, PNG)</label>
                         <input type="file" name="scan_surat" id="scan_surat" required={!isEditMode} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
                     </div>
                     {isEditMode && <p className="text-xs text-gray-500">Upload ulang scan surat tidak didukung dalam mode ubah.</p>}
+
                     <div className="mt-6 flex justify-end gap-4 border-t pt-4">
                       <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200" onClick={closeModal}>Batal</button>
                       <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">{isEditMode ? 'Simpan Perubahan' : 'Simpan'}</button>

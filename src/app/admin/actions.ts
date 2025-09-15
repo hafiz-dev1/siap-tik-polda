@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import fs from 'fs/promises';
 import path from 'path';
-import { getSession } from '@/lib/session'; // Impor helper sesi
+import { getSession } from '@/lib/session';
 
 const prisma = new PrismaClient();
 
@@ -24,7 +24,6 @@ export async function logout() {
  * Creates a new letter record and uploads its attachment.
  */
 export async function createSurat(formData: FormData) {
-  // Pengecekan sesi keamanan
   const session = await getSession();
   if (!session?.operatorId) {
     return { message: 'Gagal: Anda tidak terautentikasi.' };
@@ -51,6 +50,7 @@ export async function createSurat(formData: FormData) {
     const buffer = Buffer.from(await scan_surat.arrayBuffer());
     const filename = `${Date.now()}-${scan_surat.name.replace(/\s/g, '_')}`;
     const uploadPath = path.join(process.cwd(), 'public/uploads', filename);
+    await fs.mkdir(path.dirname(uploadPath), { recursive: true });
     await fs.writeFile(uploadPath, buffer);
     const publicPath = `/uploads/${filename}`;
 
@@ -87,7 +87,7 @@ export async function createSurat(formData: FormData) {
     return { message: 'Gagal membuat surat karena kesalahan tak terduga.' };
   }
 
-  revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/arsip');
   return { message: 'Surat berhasil ditambahkan.' };
 }
 
@@ -95,7 +95,6 @@ export async function createSurat(formData: FormData) {
  * Performs a soft delete on a letter record.
  */
 export async function deleteSurat(suratId: string) {
-  // Pengecekan sesi keamanan
   const session = await getSession();
   if (!session?.operatorId) {
     return { message: 'Gagal: Anda tidak terautentikasi.' };
@@ -118,7 +117,7 @@ export async function deleteSurat(suratId: string) {
     return { message: 'Gagal menghapus surat.' };
   }
 
-  revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/arsip');
   return { message: 'Surat berhasil dihapus.' };
 }
 
@@ -126,7 +125,6 @@ export async function deleteSurat(suratId: string) {
  * Updates an existing letter record in the database.
  */
 export async function updateSurat(suratId: string, formData: FormData) {
-  // Pengecekan sesi keamanan
   const session = await getSession();
   if (!session?.operatorId) {
     return { message: 'Gagal: Anda tidak terautentikasi.' };
@@ -171,6 +169,6 @@ export async function updateSurat(suratId: string, formData: FormData) {
     return { message: 'Gagal memperbarui surat.' };
   }
 
-  revalidatePath('/admin/dashboard');
+  revalidatePath('/admin/arsip');
   return { message: 'Surat berhasil diperbarui.' };
 }

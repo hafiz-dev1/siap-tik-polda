@@ -1,9 +1,9 @@
-// file: app/admin/components/DeleteSuratButton.tsx
+// file: app/components/DeleteSuratButton.tsx
 'use client';
 
 import { useState, useTransition, MouseEvent, Fragment } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import { deleteSurat } from '../actions';
+import { deleteSurat } from '@/app/admin/actions'; // Using path alias for clean imports
 import toast from 'react-hot-toast';
 
 // The component accepts the ID of the letter to be deleted as a prop.

@@ -1,11 +1,8 @@
-// file: app/admin/components/SuratDashboardClient.tsx
+// file: app/components/SuratDashboardClient.tsx
 'use client';
 
-import { useState, useMemo, Fragment } from 'react';
-import { SuratType } from '../types';
-import { Lampiran } from '@prisma/client';
-
-// Import child components
+import { useState, useMemo } from 'react';
+import { Surat, Lampiran, Role } from '@prisma/client';
 import SuratFormModal from './SuratFormModal';
 import DeleteSuratButton from './DeleteSuratButton';
 import SuratDetailModal from './SuratDetailModal';
@@ -19,12 +16,13 @@ const TUJUAN_DISPOSISI = [
   'KAUR_KEU',
 ];
 
-// Define the props for this component, including the related Lampiran data
+// Define the props for this component, including the user's role
 type Props = {
-  suratList: (SuratType & { lampiran: Lampiran[] })[];
+  suratList: (Surat & { lampiran: Lampiran[] })[];
+  role?: Role | null;
 };
 
-export default function SuratDashboardClient({ suratList }: Props) {
+export default function SuratDashboardClient({ suratList, role }: Props) {
   // State management for all UI interactivity
   const [activeTipe, setActiveTipe] = useState('NOTA_DINAS');
   const [activeArah, setActiveArah] = useState<'MASUK' | 'KELUAR'>('MASUK');
@@ -62,7 +60,7 @@ export default function SuratDashboardClient({ suratList }: Props) {
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
-      {/* Left Column: Document Type Sidebar */}
+      {/* Left Column: Sidebar for Document Type Selection */}
       <aside className="w-full md:w-1/4">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Tipe Dokumen</h2>
         <ul className="space-y-2">
@@ -113,35 +111,20 @@ export default function SuratDashboardClient({ suratList }: Props) {
                 </div>
               </div>
             </div>
-            <div className="flex-shrink-0 pt-1">
-              {/* SuratFormModal for "Add" mode */}
-              <SuratFormModal />
-            </div>
+            
+            {/* CONDITIONAL RENDERING: Show "Add" button only for ADMIN role */}
+            {role === 'ADMIN' && (
+              <div className="flex-shrink-0 pt-1">
+                <SuratFormModal />
+              </div>
+            )}
           </div>
         </div>
 
         {/* Tabs for Incoming & Outgoing Mail */}
         <div className="flex border-b border-gray-200">
-          <button
-            onClick={() => setActiveArah('MASUK')}
-            className={`px-6 py-3 text-sm font-medium transition-colors duration-200 ${
-              activeArah === 'MASUK'
-                ? 'border-b-2 border-indigo-600 text-indigo-600'
-                : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'
-            }`}
-          >
-            Surat Masuk
-          </button>
-          <button
-            onClick={() => setActiveArah('KELUAR')}
-            className={`px-6 py-3 text-sm font-medium transition-colors duration-200 ${
-              activeArah === 'KELUAR'
-                ? 'border-b-2 border-indigo-600 text-indigo-600'
-                : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'
-            }`}
-          >
-            Surat Keluar
-          </button>
+          <button onClick={() => setActiveArah('MASUK')} className={`px-6 py-3 text-sm font-medium transition-colors duration-200 ${activeArah === 'MASUK' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'}`}>Surat Masuk</button>
+          <button onClick={() => setActiveArah('KELUAR')} className={`px-6 py-3 text-sm font-medium transition-colors duration-200 ${activeArah === 'KELUAR' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'}`}>Surat Keluar</button>
         </div>
 
         {/* Data Table */}
@@ -149,25 +132,16 @@ export default function SuratDashboardClient({ suratList }: Props) {
           <table className="min-w-full leading-normal">
             <thead>
               <tr>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Detail Surat & Disposisi
-                </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40">
-                  Download & Aksi
-                </th>
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Detail Surat & Disposisi</th>
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40">Lampiran & Aksi</th>
               </tr>
             </thead>
             <tbody>
               {filteredSurat.length === 0 ? (
-                <tr>
-                  <td colSpan={2} className="text-center py-10 text-gray-500">
-                    Tidak ada data surat yang cocok dengan filter.
-                  </td>
-                </tr>
+                <tr><td colSpan={2} className="text-center py-10 text-gray-500">Tidak ada data surat yang cocok dengan filter.</td></tr>
               ) : (
                 filteredSurat.map((surat) => (
                   <SuratDetailModal key={surat.id} surat={surat}>
-                    {/* The table row itself acts as the trigger for the detail modal */}
                     <tr className="hover:bg-gray-50">
                       <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                         <div className="flex flex-col">
@@ -186,24 +160,18 @@ export default function SuratDashboardClient({ suratList }: Props) {
                       <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                         <div className="flex flex-col items-start gap-2">
                           {surat.lampiran[0] ? (
-                            <a
-                              href={surat.lampiran[0].path_file}
-                              download
-                              onClick={(e) => e.stopPropagation()} // Prevents the modal from opening when the link is clicked
-                              className="px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded-full hover:bg-green-700 no-underline"
-                            >
-                              Download Scan
-                            </a>
+                            <a href={surat.lampiran[0].path_file} download onClick={(e) => e.stopPropagation()} className="px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded-full hover:bg-green-700 no-underline">Download Scan</a>
                           ) : (
-                            <span className="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-200 rounded-full">
-                              No File
-                            </span>
+                            <span className="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-200 rounded-full">No File</span>
                           )}
-                          <div className="flex items-center space-x-4 pt-1">
-                            {/* SuratFormModal for "Edit" mode, passing the letter data */}
-                            <SuratFormModal suratToEdit={surat} />
-                            <DeleteSuratButton suratId={surat.id} />
-                          </div>
+                          
+                          {/* CONDITIONAL RENDERING: Show "Edit" and "Delete" buttons only for ADMIN role */}
+                          {role === 'ADMIN' && (
+                            <div className="flex items-center space-x-4 pt-1">
+                              <SuratFormModal suratToEdit={surat} />
+                              <DeleteSuratButton suratId={surat.id} />
+                            </div>
+                          )}
                         </div>
                       </td>
                     </tr>
