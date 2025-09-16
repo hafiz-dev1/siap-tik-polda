@@ -1,22 +1,22 @@
 // file: app/components/DeleteSuratButton.tsx
 'use client';
 
-import { useState, useTransition, MouseEvent, Fragment } from 'react';
+import { useState, useTransition, MouseEvent, Fragment, cloneElement, isValidElement } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import { deleteSurat } from '@/app/(app)/admin/actions'; // Menggunakan path alias yang benar
+import { deleteSurat } from '@/app/(app)/admin/actions';
 import toast from 'react-hot-toast';
 
 // Komponen menerima ID surat yang akan dihapus sebagai prop
 type Props = {
   suratId: string;
+  children?: React.ReactNode;
 };
 
-export default function DeleteSuratButton({ suratId }: Props) {
+export default function DeleteSuratButton({ suratId, children }: Props) {
   // State untuk mengelola visibilitas modal konfirmasi
   let [isOpen, setIsOpen] = useState(false);
-  
+
   // Hook useTransition untuk melacak status pending dari server action
-  // Ini membantu memberikan umpan balik visual (misalnya, "Menghapus...") tanpa memblokir UI
   let [isPending, startTransition] = useTransition();
 
   function closeModal() {
@@ -42,16 +42,50 @@ export default function DeleteSuratButton({ suratId }: Props) {
     });
   };
 
-  return (
-    <>
-      {/* Tombol "Hapus" awal yang ditampilkan di baris tabel */}
+  // Jika ada children, gunakan sebagai trigger. Jika children adalah elemen React,
+  // clone element dan tambahkan handler onClick untuk membuka modal (dan stopPropagation).
+  const renderTrigger = () => {
+    if (!children) {
+      return (
+        <button
+          type="button"
+          onClick={openModal}
+          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium transition-colors duration-200"
+        >
+          Hapus
+        </button>
+      );
+    }
+
+    if (isValidElement(children)) {
+      return cloneElement(children as any, {
+        onClick: (e: MouseEvent) => {
+          // Panggil onClick asli jika ada, lalu buka modal (dan hentikan propagasi)
+          const originalOnClick = (children as any).props?.onClick;
+          if (typeof originalOnClick === 'function') {
+            originalOnClick(e);
+          }
+          openModal(e);
+        },
+      });
+    }
+
+    // Jika children bukan elemen React (mis. teks/icon), bungkus ke dalam tombol
+    return (
       <button
         type="button"
         onClick={openModal}
-        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium transition-colors duration-200"
+        className="p-1 rounded-full text-red-600 hover:bg-gray-100 dark:text-red-400 dark:hover:bg-gray-600"
       >
-        Hapus
+        {children}
       </button>
+    );
+  };
+
+  return (
+    <>
+      {/* Trigger (bisa custom via children) */}
+      {renderTrigger()}
 
       {/* Modal konfirmasi yang muncul saat tombol diklik */}
       <Transition appear show={isOpen} as={Fragment}>
@@ -73,7 +107,8 @@ export default function DeleteSuratButton({ suratId }: Props) {
                     Konfirmasi Penghapusan
                   </DialogTitle>
                   <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    Apakah Anda yakin ingin menghapus arsip surat ini? Aksi ini akan memindahkan data ke tempat sampah.
+                    Apakah Anda yakin ingin menghapus arsip surat ini? Aksi ini akan memindahkan data ke tempat
+                    sampah.
                   </p>
                   <div className="mt-6 flex justify-end gap-4">
                     <button

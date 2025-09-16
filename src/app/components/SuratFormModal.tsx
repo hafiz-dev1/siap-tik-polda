@@ -1,47 +1,47 @@
 // file: app/components/SuratFormModal.tsx
 'use client';
 
-import { useState, FormEvent, useRef, Fragment, MouseEvent } from 'react';
+import { useState, FormEvent, useRef, Fragment, ReactNode, MouseEvent } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { createSurat, updateSurat } from '@/app/(app)/admin/actions'; // Menggunakan path alias yang benar
 import toast from 'react-hot-toast';
-import { Surat } from '@prisma/client'; // Menggunakan tipe dari Prisma
-import { SuratType } from '@/app/(app)/admin/types'; // Asumsi path types Anda
+import { Surat } from '@prisma/client';
 
 // Konstanta untuk membangun form
 const TUJUAN_DISPOSISI = [ 'KASUBBID_TEKKOM', 'KASUBBID_TEKINFO', 'KASUBBAG_RENMIN', 'KAUR_KEU' ];
 const TIPE_DOKUMEN = ['NOTA_DINAS', 'SURAT_BIASA', 'SPRIN', 'TELEGRAM'];
 const ARAH_SURAT = ['MASUK', 'KELUAR'];
 
-// Komponen menerima prop `suratToEdit` opsional untuk menentukan modenya
+// Komponen sekarang menerima prop `children` untuk pemicu modal
 type Props = {
-  suratToEdit?: SuratType; // SuratType adalah tipe Surat Anda
+  suratToEdit?: Surat;
+  children: ReactNode; // Prop untuk elemen pemicu (tombol/link)
 };
 
-export default function SuratFormModal({ suratToEdit }: Props) {
+export default function SuratFormModal({ suratToEdit, children }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const isEditMode = suratToEdit !== undefined;
 
   const closeModal = () => setIsOpen(false);
   
-  // Fungsi openModal sekarang menerima event dan menghentikan propagasinya
+  // Menghentikan propagasi event agar tidak memicu modal lain
   const openModal = (e?: MouseEvent) => {
-    e?.stopPropagation(); // Mencegah klik "merambat" ke <tr>
+    e?.stopPropagation(); 
     setIsOpen(true);
   }
 
-  // Helper untuk format tanggal agar sesuai dengan input datetime-local dan date
+  // Helper untuk format tanggal
   const formatDateForInput = (date: string | Date, includeTime = false) => {
     const d = new Date(date);
-    d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); // Sesuaikan dengan timezone lokal
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
     if (isNaN(d.getTime())) return '';
     
     const isoString = d.toISOString();
     if (includeTime) {
-      return isoString.substring(0, 16); // Format: YYYY-MM-DDTHH:mm
+      return isoString.substring(0, 16);
     }
-    return isoString.split('T')[0]; // Format: YYYY-MM-DD
+    return isoString.split('T')[0];
   };
 
   const formatEnumText = (text: string) => text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -54,7 +54,6 @@ export default function SuratFormModal({ suratToEdit }: Props) {
       ? await updateSurat(suratToEdit.id, formData)
       : await createSurat(formData);
     
-    // Menangani respons standar { success: ... } atau { error: ... }
     if (result.error) {
       toast.error(result.error);
     } else if (result.success) {
@@ -65,16 +64,10 @@ export default function SuratFormModal({ suratToEdit }: Props) {
 
   return (
     <>
-      {/* Komponen ini merender tombol pemicunya sendiri, tergantung mode */}
-      {isEditMode ? (
-        <button onClick={openModal} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm font-medium">
-          Ubah
-        </button>
-      ) : (
-        <button onClick={() => openModal()} className="px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
-          + Tambah Surat Baru
-        </button>
-      )}
+      {/* Elemen pemicu (children) dibungkus dengan div yang memiliki onClick */}
+      <div onClick={openModal} className="contents cursor-pointer">
+        {children}
+      </div>
 
       <Transition appear show={isOpen} as={Fragment}>
         <Dialog as="div" className="relative z-10 focus:outline-none" onClose={closeModal}>
@@ -88,6 +81,7 @@ export default function SuratFormModal({ suratToEdit }: Props) {
                   </DialogTitle>
                   
                   <form ref={formRef} onSubmit={handleSubmit} className="mt-4 max-h-[70vh] overflow-y-auto pr-2 space-y-4">
+                    {/* Semua input diisi dengan defaultValue untuk mode Ubah */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label htmlFor="nomor_agenda" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Agenda</label>
@@ -157,13 +151,11 @@ export default function SuratFormModal({ suratToEdit }: Props) {
                         <label htmlFor="isi_disposisi" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Isi Disposisi</label>
                         <textarea name="isi_disposisi" id="isi_disposisi" rows={2} required defaultValue={suratToEdit?.isi_disposisi} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"></textarea>
                     </div>
-                    {/* File input disembunyikan dan tidak wajib saat mode edit */}
                     <div className={isEditMode ? 'hidden' : 'block'}>
                         <label htmlFor="scan_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Upload Scan Surat (PDF, JPG, PNG)</label>
                         <input type="file" name="scan_surat" id="scan_surat" required={!isEditMode} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-900/50 file:text-indigo-700 dark:file:text-indigo-300 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900"/>
                     </div>
-                    {isEditMode && <p className="text-xs text-gray-500 dark:text-gray-400">Upload ulang scan surat tidak didukung dalam mode ubah. Buat entri surat baru jika file scan berbeda.</p>}
-
+                    {isEditMode && <p className="text-xs text-gray-500 dark:text-gray-400">Upload ulang scan surat tidak didukung dalam mode ubah.</p>}
                     <div className="mt-6 flex justify-end gap-4 border-t dark:border-gray-700 pt-4">
                       <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600" onClick={closeModal}>Batal</button>
                       <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">{isEditMode ? 'Simpan Perubahan' : 'Simpan'}</button>
