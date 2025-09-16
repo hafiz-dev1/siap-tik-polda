@@ -1,17 +1,9 @@
 // file: app/layout.tsx
+import './globals.css';
+import { AppThemeProvider } from './providers'; // <-- 1. Impor provider
+import { Toaster } from 'react-hot-toast'; // Kita sudah punya ini
 
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-// Impor Toaster
-import { Toaster } from "react-hot-toast";
-
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "SIAD POLDA",
-  description: "Sistem Informasi Arsip Digital POLDA",
-};
+export const metadata = { /* ... */ };
 
 export default function RootLayout({
   children,
@@ -19,11 +11,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        {/* Tambahkan komponen Toaster di sini */}
-        <Toaster position="top-center" reverseOrder={false} />
-        {children}
+    <html lang="id" suppressHydrationWarning> 
+      <body>
+        {/* 2. Bungkus children dengan AppThemeProvider */}
+        <AppThemeProvider> 
+          <Toaster position="top-center" />
+          {children}
+        </AppThemeProvider>
       </body>
     </html>
   );

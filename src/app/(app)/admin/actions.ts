@@ -27,7 +27,7 @@ export async function createSurat(formData: FormData) {
   // --- ROLE GUARD ---
   const session = await getSession();
   if (!session?.operatorId || session.role !== 'ADMIN') {
-    return { message: 'Gagal: Anda tidak memiliki hak akses untuk aksi ini.' };
+    return { error: 'Gagal: Anda tidak memiliki hak akses untuk aksi ini.' };
   }
   // --- AKHIR ROLE GUARD ---
 
@@ -46,7 +46,7 @@ export async function createSurat(formData: FormData) {
     const isi_disposisi = formData.get('isi_disposisi') as string;
     
     if (!scan_surat || scan_surat.size === 0) {
-      return { message: 'Gagal: Scan surat wajib diupload.' };
+      return { error: 'Gagal: Scan surat wajib diupload.' };
     }
 
     // Logika upload file
@@ -84,28 +84,24 @@ export async function createSurat(formData: FormData) {
 
   } catch (error) {
     console.error('Gagal membuat surat:', error);
-    // Penanganan error spesifik untuk data duplikat
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2002') {
-        const target = error.meta?.target as string[];
-        if (target && target.includes('nomor_agenda')) {
-           return { message: 'Gagal: Nomor Agenda ini sudah digunakan.' };
-        }
-        if (target && target.includes('nomor_surat')) {
-           return { message: 'Gagal: Nomor Surat ini sudah digunakan.' };
-        }
+    // Penanganan error spesifik untuk data duplikat (Unique Constraint)
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      const target = error.meta?.target as string[];
+      if (target?.includes('nomor_agenda')) {
+         return { error: 'Gagal: Nomor Agenda ini sudah digunakan.' };
       }
+      if (target?.includes('nomor_surat')) {
+         return { error: 'Gagal: Nomor Surat ini sudah digunakan.' };
+      }
+      return { error: 'Gagal: Data duplikat terdeteksi.'};
     }
     
-    if (error instanceof Error) {
-        return { message: `Gagal membuat surat: ${error.message}` };
-    }
-    return { message: 'Gagal membuat surat karena kesalahan tak terduga.' };
+    return { error: 'Gagal membuat surat karena kesalahan tak terduga.' };
   }
 
   revalidatePath('/arsip'); // Merevalidasi halaman arsip
   revalidatePath('/dashboard'); // Merevalidasi dashboard (untuk statistik)
-  return { message: 'Surat berhasil ditambahkan.' };
+  return { success: 'Surat berhasil ditambahkan.' };
 }
 
 /**
@@ -115,13 +111,13 @@ export async function deleteSurat(suratId: string) {
   // --- ROLE GUARD ---
   const session = await getSession();
   if (!session?.operatorId || session.role !== 'ADMIN') {
-    return { message: 'Gagal: Anda tidak memiliki hak akses untuk aksi ini.' };
+    return { error: 'Gagal: Anda tidak memiliki hak akses untuk aksi ini.' };
   }
   // --- AKHIR ROLE GUARD ---
 
   try {
     if (!suratId) {
-      return { message: 'Gagal: ID Surat tidak valid.' };
+      return { error: 'Gagal: ID Surat tidak valid.' };
     }
     await prisma.surat.update({
       where: {
@@ -133,12 +129,13 @@ export async function deleteSurat(suratId: string) {
     });
   } catch (error) {
     console.error('Gagal menghapus surat:', error);
-    return { message: 'Gagal menghapus surat.' };
+    return { error: 'Gagal menghapus surat.' };
   }
 
   revalidatePath('/arsip');
   revalidatePath('/dashboard');
-  return { message: 'Surat berhasil dihapus.' };
+  revalidatePath('/admin/trash'); // Revalidasi halaman tempat sampah
+  return { success: 'Surat berhasil dihapus.' };
 }
 
 /**
@@ -148,15 +145,16 @@ export async function updateSurat(suratId: string, formData: FormData) {
   // --- ROLE GUARD ---
   const session = await getSession();
   if (!session?.operatorId || session.role !== 'ADMIN') {
-    return { message: 'Gagal: Anda tidak memiliki hak akses untuk aksi ini.' };
+    return { error: 'Gagal: Anda tidak memiliki hak akses untuk aksi ini.' };
   }
   // --- AKHIR ROLE GUARD ---
 
   try {
     if (!suratId) {
-      return { message: 'Gagal: ID Surat tidak valid.' };
+      return { error: 'Gagal: ID Surat tidak valid.' };
     }
     
+    // Ekstrak data dari form
     const nomor_agenda = formData.get('nomor_agenda') as string;
     const tanggal_diterima_dibuat = new Date(formData.get('tanggal_diterima_dibuat') as string);
     const nomor_surat = formData.get('nomor_surat') as string;
@@ -188,18 +186,15 @@ export async function updateSurat(suratId: string, formData: FormData) {
 
   } catch (error) {
     console.error('Gagal memperbarui surat:', error);
-    // Penanganan error spesifik untuk data duplikat (jika nomor agenda/surat diubah jadi duplikat)
-     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2002') {
-         return { message: 'Gagal: Nomor Agenda atau Nomor Surat sudah digunakan oleh data lain.' };
-      }
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+       return { error: 'Gagal: Nomor Agenda atau Nomor Surat sudah digunakan oleh data lain.' };
     }
-    return { message: 'Gagal memperbarui surat.' };
+    return { error: 'Gagal memperbarui surat.' };
   }
 
   revalidatePath('/arsip');
   revalidatePath('/dashboard');
-  return { message: 'Surat berhasil diperbarui.' };
+  return { success: 'Surat berhasil diperbarui.' };
 }
 
 /**
@@ -208,7 +203,7 @@ export async function updateSurat(suratId: string, formData: FormData) {
 export async function restoreSurat(suratId: string) {
   const session = await getSession();
   if (!session?.operatorId || session.role !== 'ADMIN') {
-    return { message: 'Gagal: Anda tidak memiliki hak akses.' };
+    return { error: 'Gagal: Anda tidak memiliki hak akses.' };
   }
 
   try {
@@ -217,12 +212,12 @@ export async function restoreSurat(suratId: string) {
       data: { deletedAt: null }, // Set deletedAt kembali ke NULL
     });
   } catch (error) {
-    return { message: 'Gagal memulihkan surat.' };
+    return { error: 'Gagal memulihkan surat.' };
   }
 
   revalidatePath('/arsip');
   revalidatePath('/admin/trash'); // Revalidasi halaman arsip dan tempat sampah
-  return { message: 'Surat berhasil dipulihkan.' };
+  return { success: 'Surat berhasil dipulihkan.' };
 }
 
 /**
@@ -231,19 +226,21 @@ export async function restoreSurat(suratId: string) {
 export async function deleteSuratPermanently(suratId: string) {
   const session = await getSession();
   if (!session?.operatorId || session.role !== 'ADMIN') {
-    return { message: 'Gagal: Anda tidak memiliki hak akses.' };
+    return { error: 'Gagal: Anda tidak memiliki hak akses.' };
   }
 
   try {
-    // Aksi ini menghapus data selamanya.
+    // TODO: Tambahkan logika untuk menghapus file fisik dari public/uploads
+    // (Aksi ini saat ini hanya menghapus data DB, bukan file fisiknya)
+    
     await prisma.surat.delete({
       where: { id: suratId },
     });
-    // Kita juga perlu menghapus file fisiknya dari server (opsional tapi disarankan)
   } catch (error) {
-    return { message: 'Gagal menghapus surat secara permanen.' };
+    return { error: 'Gagal menghapus surat secara permanen.' };
   }
 
   revalidatePath('/admin/trash');
-  return { message: 'Surat berhasil dihapus permanen.' };
+  revalidatePath('/dashboard'); // Update statistik
+  return { success: 'Surat berhasil dihapus permanen.' };
 }

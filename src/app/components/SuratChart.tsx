@@ -1,6 +1,7 @@
-// file: app/admin/components/SuratChart.tsx
+// file: app/components/SuratChart.tsx
 'use client';
 
+import { useTheme } from 'next-themes';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 type ChartData = {
@@ -14,29 +15,39 @@ type Props = {
 };
 
 export default function SuratChart({ data }: Props) {
+  const { theme } = useTheme();
+  const tickColor = theme === 'dark' ? '#9ca3af' : '#6b7280'; // gray-400 for dark, gray-500 for light
+  const gridColor = theme === 'dark' ? '#4b5563' : '#e5e7eb'; // gray-600 for dark, gray-200 for light
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md h-96">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">Statistik Surat 12 Bulan Terakhir</h3>
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md h-96">
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Statistik Surat 12 Bulan Terakhir</h3>
+      <ResponsiveContainer width="100%" height="90%">
         <BarChart
           data={data}
           margin={{ top: 5, right: 20, left: -10, bottom: 20 }}
         >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={false} />
           <XAxis 
             dataKey="month" 
-            tick={{ fontSize: 12 }} 
+            tick={{ fontSize: 12, fill: tickColor }} 
             angle={-45}
             textAnchor="end"
             height={60}
+            stroke={gridColor}
           />
-          <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+          <YAxis 
+            allowDecimals={false} 
+            tick={{ fontSize: 12, fill: tickColor }} 
+            stroke={gridColor}
+          />
           <Tooltip 
-            cursor={{ fill: 'rgba(239, 246, 255, 0.5)' }} 
+            cursor={{ fill: 'rgba(129, 140, 248, 0.1)' }} 
             contentStyle={{
-              background: 'white',
+              background: theme === 'dark' ? '#1f2937' : '#ffffff',
               borderRadius: '0.5rem',
-              border: '1px solid #e2e8f0',
+              border: `1px solid ${gridColor}`,
+              color: theme === 'dark' ? '#f9fafb' : '#111827',
             }}
           />
           <Legend wrapperStyle={{ fontSize: '14px', paddingTop: '20px' }} />

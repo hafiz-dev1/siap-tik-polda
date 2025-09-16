@@ -1,7 +1,7 @@
 // file: app/components/TrashActionButtons.tsx
 'use client';
 
-import { useState, useTransition, Fragment, MouseEvent } from 'react';
+import { useState, useTransition, Fragment, ReactNode } from 'react';
 import { deleteSuratPermanently, restoreSurat } from '@/app/(app)/admin/actions';
 import toast from 'react-hot-toast';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
@@ -15,20 +15,32 @@ export default function TrashActionButtons({ suratId }: Props) {
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   let [isPending, startTransition] = useTransition();
 
+  // Handler untuk memulihkan surat
   const handleRestore = () => {
     startTransition(async () => {
       const result = await restoreSurat(suratId);
-      if (result.message.includes('Gagal')) toast.error(result.message);
-      else toast.success(result.message);
+
+      if ("error" in result) {
+        toast.error(result.error ?? "Terjadi kesalahan saat memulihkan surat.");
+      } else {
+        toast.success(result.success ?? "Surat berhasil dipulihkan.");
+      }
+
       setIsRestoreModalOpen(false);
     });
   };
 
+  // Handler untuk menghapus surat secara permanen
   const handleDelete = () => {
     startTransition(async () => {
       const result = await deleteSuratPermanently(suratId);
-      if (result.message.includes('Gagal')) toast.error(result.message);
-      else toast.success(result.message);
+
+      if ("error" in result) {
+        toast.error(result.error ?? "Terjadi kesalahan saat menghapus surat.");
+      } else {
+        toast.success(result.success ?? "Surat berhasil dihapus permanen.");
+      }
+
       setIsDeleteModalOpen(false);
     });
   };
@@ -36,38 +48,69 @@ export default function TrashActionButtons({ suratId }: Props) {
   return (
     <div className="flex space-x-4">
       {/* Tombol Pulihkan */}
-      <button 
+      <button
         onClick={() => setIsRestoreModalOpen(true)}
-        className="text-green-600 hover:text-green-900 text-sm font-medium"
+        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 text-sm font-medium"
       >
         Pulihkan
       </button>
 
       {/* Tombol Hapus Permanen */}
-      <button 
+      <button
         onClick={() => setIsDeleteModalOpen(true)}
-        className="text-red-600 hover:text-red-900 text-sm font-medium"
+        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
       >
         Hapus Permanen
       </button>
 
-      {/* Modal Konfirmasi Pulihkan */}
-      <ModalTemplate isOpen={isRestoreModalOpen} closeModal={() => setIsRestoreModalOpen(false)} title="Konfirmasi Pemulihan">
-        <p className="text-sm text-gray-500">Apakah Anda yakin ingin memulihkan surat ini ke arsip utama?</p>
+      {/* Modal Konfirmasi untuk Aksi Pulihkan */}
+      <ModalTemplate
+        isOpen={isRestoreModalOpen}
+        closeModal={() => setIsRestoreModalOpen(false)}
+        title="Konfirmasi Pemulihan"
+      >
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Apakah Anda yakin ingin memulihkan surat ini ke arsip utama?
+        </p>
         <div className="mt-4 flex justify-end gap-4">
-          <button onClick={() => setIsRestoreModalOpen(false)} className="px-4 py-2 text-sm bg-gray-100 rounded-md">Batal</button>
-          <button onClick={handleRestore} disabled={isPending} className="px-4 py-2 text-sm text-white bg-green-600 rounded-md disabled:bg-green-300">
+          <button
+            onClick={() => setIsRestoreModalOpen(false)}
+            className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-md"
+          >
+            Batal
+          </button>
+          <button
+            onClick={handleRestore}
+            disabled={isPending}
+            className="px-4 py-2 text-sm text-white bg-green-600 rounded-md disabled:bg-green-300"
+          >
             {isPending ? 'Memulihkan...' : 'Ya, Pulihkan'}
           </button>
         </div>
       </ModalTemplate>
 
-      {/* Modal Konfirmasi Hapus Permanen */}
-      <ModalTemplate isOpen={isDeleteModalOpen} closeModal={() => setIsDeleteModalOpen(false)} title="Konfirmasi Hapus Permanen">
-        <p className="text-sm text-gray-500">PERINGATAN: Aksi ini tidak dapat dibatalkan. Data surat dan file yang terlampir akan hilang selamanya. Apakah Anda benar-benar yakin?</p>
+      {/* Modal Konfirmasi untuk Aksi Hapus Permanen */}
+      <ModalTemplate
+        isOpen={isDeleteModalOpen}
+        closeModal={() => setIsDeleteModalOpen(false)}
+        title="Konfirmasi Hapus Permanen"
+      >
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="font-bold text-red-600 dark:text-red-400">PERINGATAN:</span>
+          Aksi ini tidak dapat dibatalkan. Data surat akan hilang selamanya. Apakah Anda benar-benar yakin?
+        </p>
         <div className="mt-4 flex justify-end gap-4">
-          <button onClick={() => setIsDeleteModalOpen(false)} className="px-4 py-2 text-sm bg-gray-100 rounded-md">Batal</button>
-          <button onClick={handleDelete} disabled={isPending} className="px-4 py-2 text-sm text-white bg-red-600 rounded-md disabled:bg-red-300">
+          <button
+            onClick={() => setIsDeleteModalOpen(false)}
+            className="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-md"
+          >
+            Batal
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={isPending}
+            className="px-4 py-2 text-sm text-white bg-red-600 rounded-md disabled:bg-red-300"
+          >
             {isPending ? 'Menghapus...' : 'Ya, Hapus Permanen'}
           </button>
         </div>
@@ -76,17 +119,40 @@ export default function TrashActionButtons({ suratId }: Props) {
   );
 }
 
-// Komponen helper internal untuk Modal
-function ModalTemplate({ isOpen, closeModal, title, children }: { isOpen: boolean, closeModal: () => void, title: string, children: React.ReactNode }) {
+// Komponen helper internal untuk struktur Modal
+function ModalTemplate({
+  isOpen,
+  closeModal,
+  title,
+  children
+}: {
+  isOpen: boolean;
+  closeModal: () => void;
+  title: string;
+  children: ReactNode;
+}) {
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={closeModal}>
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      <Dialog as="div" className="relative z-10 focus:outline-none" onClose={closeModal}>
+        <div className="fixed inset-0 bg-black/30 dark:bg-black/50" aria-hidden="true" />
         <div className="fixed inset-0 w-screen overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4">
-            <TransitionChild as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
-              <DialogPanel className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-                <DialogTitle as="h3" className="text-lg font-medium text-gray-900">{title}</DialogTitle>
+            <TransitionChild
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <DialogPanel className="w-full max-w-md rounded-xl bg-white dark:bg-gray-800 p-6 shadow-xl">
+                <DialogTitle
+                  as="h3"
+                  className="text-lg font-medium text-gray-900 dark:text-white"
+                >
+                  {title}
+                </DialogTitle>
                 <div className="mt-2">{children}</div>
               </DialogPanel>
             </TransitionChild>
