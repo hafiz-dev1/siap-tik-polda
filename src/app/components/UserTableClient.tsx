@@ -1,20 +1,22 @@
-// file: app/admin/components/UserTableClient.tsx
+// file: app/components/UserTableClient.tsx
 'use client';
 
 import { Pengguna } from '@prisma/client';
 import Image from 'next/image';
-import UserFormModal from './UserFormModal'; // Import the modal for adding/editing users
+import UserFormModal from './UserFormModal';
+import DeleteUserButton from './DeleteUserButton';
 
 type Props = {
   users: Pengguna[];
+  currentAdminId: string; // ID admin yang sedang login
 };
 
-export default function UserTableClient({ users }: Props) {
+export default function UserTableClient({ users, currentAdminId }: Props) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-6 border-b pb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Daftar Pengguna</h2>
-        {/* The UserFormModal component in "add" mode */}
+        <h2 className="text-xl font-semibold text-gray-800">Daftar Pengguna Aktif</h2>
+        {/* Tombol untuk memicu modal 'Tambah Pengguna' */}
         <UserFormModal />
       </div>
       <div className="overflow-x-auto">
@@ -48,10 +50,9 @@ export default function UserTableClient({ users }: Props) {
                   <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 w-10 h-10">
-                        {/* Use Next.js Image for optimized profile pictures */}
                         <Image
                           className="w-full h-full rounded-full object-cover"
-                          src={user.profilePictureUrl || '/default-profile.png'} // Provide a fallback default image
+                          src={user.profilePictureUrl || '/default-profile.png'}
                           alt="Foto profil"
                           width={40}
                           height={40}
@@ -66,7 +67,6 @@ export default function UserTableClient({ users }: Props) {
                     <p className="text-gray-900 whitespace-no-wrap">{user.username}</p>
                   </td>
                   <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    {/* Dynamically style the user role */}
                     <span className={`relative inline-block px-3 py-1 font-semibold leading-tight ${
                       user.role === 'ADMIN' ? 'text-green-900' : 'text-blue-900'
                     }`}>
@@ -77,8 +77,20 @@ export default function UserTableClient({ users }: Props) {
                     </span>
                   </td>
                   <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    {/* Action buttons will be added here later */}
-                    <span className="text-gray-400">--</span>
+                    <div className="flex space-x-4">
+                      {/* Logika Keamanan UI:
+                        Tombol 'Ubah' dan 'Hapus' hanya muncul jika ID pengguna di baris ini
+                        TIDAK SAMA DENGAN ID admin yang sedang login.
+                      */}
+                      {user.id === currentAdminId ? (
+                        <span className="text-xs text-gray-400 italic">Ini Akun Anda</span>
+                      ) : (
+                        <>
+                          <UserFormModal userToEdit={user} />
+                          <DeleteUserButton userId={user.id} />
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))

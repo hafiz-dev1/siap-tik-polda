@@ -1,32 +1,31 @@
-// file: app/admin/users/actions.ts
+// file: app/(app)/admin/users/actions.ts
 'use server';
 
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient, Role, Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
 import fs from 'fs/promises';
 import path from 'path';
-import { getSession } from '@/lib/session'; // Import our session helper
+import { getSession } from '@/lib/session';
 
 const prisma = new PrismaClient();
 
 /**
- * Fetches all users. Only an ADMIN can perform this action.
- * @returns {Promise<Pengguna[]>} A list of all users.
+ * Mengambil semua pengguna yang aktif (belum di-soft-delete).
+ * Hanya bisa diakses oleh ADMIN.
  */
 export async function getUsers() {
   // --- ROLE GUARD ---
   const session = await getSession();
   if (!session?.operatorId || session.role !== 'ADMIN') {
-    return []; // Return an empty array if not authorized
+    return []; // Jika bukan admin, kembalikan array kosong (tidak berhak melihat)
   }
-  // --- END ROLE GUARD ---
+  // --- AKHIR ROLE GUARD ---
   
   try {
     const users = await prisma.pengguna.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
+      where: { deletedAt: null }, // Hanya ambil pengguna yang aktif
+      orderBy: { createdAt: 'desc' },
     });
     return users;
   } catch (error) {
@@ -36,17 +35,15 @@ export async function getUsers() {
 }
 
 /**
- * Creates a new user. Only an ADMIN can perform this action.
- * @param {FormData} formData - Data from the "Tambah Pengguna" form.
- * @returns {Promise<{message: string}>} A success or failure message.
+ * Membuat pengguna baru. Hanya bisa dilakukan oleh ADMIN.
  */
 export async function createUser(formData: FormData) {
   // --- ROLE GUARD ---
   const session = await getSession();
   if (!session?.operatorId || session.role !== 'ADMIN') {
-    return { message: 'Gagal: Anda tidak memiliki hak akses.' };
+    return { error: 'Gagal: Anda tidak memiliki hak akses.' };
   }
-  // --- END ROLE GUARD ---
+  // --- AKHIR ROLE GUARD ---
 
   try {
     const nama = formData.get('nama') as string;
@@ -56,13 +53,13 @@ export async function createUser(formData: FormData) {
     const profilePicture = formData.get('profilePicture') as File | null;
 
     if (!nama || !username || !password || !role) {
-      return { message: 'Gagal: Semua field wajib diisi.' };
+      return { error: 'Gagal: Semua field wajib diisi.' };
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     let profilePictureUrl: string | undefined = undefined;
 
-    // Handle profile picture upload
+    // Logika upload foto profil (hanya saat membuat baru)
     if (profilePicture && profilePicture.size > 0) {
       const buffer = Buffer.from(await profilePicture.arrayBuffer());
       const filename = `${Date.now()}-${profilePicture.name.replace(/\s/g, '_')}`;
@@ -84,64 +81,48 @@ export async function createUser(formData: FormData) {
     });
 
   } catch (error) {
-    console.error('Gagal membuat pengguna:', error);
-    if (error instanceof Error && error.message.includes('Unique constraint failed')) {
-      return { message: 'Gagal: Username sudah digunakan.' };
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      return { error: 'Gagal: Username sudah digunakan.' };
     }
-    return { message: 'Gagal membuat pengguna.' };
+    console.error('Gagal membuat pengguna:', error);
+    return { error: 'Gagal membuat pengguna.' };
   }
 
   revalidatePath('/admin/users');
-  return { message: 'Pengguna baru berhasil ditambahkan.' };
+  return { success: 'Pengguna baru berhasil ditambahkan.' };
 }
 
 /**
- * Updates an existing user's information. Only an ADMIN can perform this action.
- * @param {string} userId - The ID of the user to update.
- * @param {FormData} formData - The new data from the "Ubah Pengguna" form.
- * @returns {Promise<{message: string}>} A success or failure message.
+ * Memperbarui data pengguna. Hanya Admin.
+ * (Tidak bisa mengubah username atau foto profil, sesuai aturan kita sebelumnya)
  */
 export async function updateUser(userId: string, formData: FormData) {
   // --- ROLE GUARD ---
   const session = await getSession();
   if (!session?.operatorId || session.role !== 'ADMIN') {
-    return { message: 'Gagal: Anda tidak memiliki hak akses.' };
+    return { error: 'Gagal: Anda tidak memiliki hak akses.' };
   }
-  // --- END ROLE GUARD ---
+  // --- AKHIR ROLE GUARD ---
 
   try {
     if (!userId) {
-      return { message: 'Gagal: ID Pengguna tidak valid.' };
+      return { error: 'Gagal: ID Pengguna tidak valid.' };
     }
     
     const nama = formData.get('nama') as string;
-    const username = formData.get('username') as string;
-    const password = formData.get('password') as string;
     const role = formData.get('role') as Role;
-    const profilePicture = formData.get('profilePicture') as File | null;
+    const password = formData.get('password') as string;
 
     const dataToUpdate: any = {
       nama,
-      username,
       role,
     };
 
-    // Only hash and update the password if a new one is provided
+    // Admin bisa me-reset password pengguna jika diisi
     if (password) {
       dataToUpdate.password = await bcrypt.hash(password, 10);
     }
-
-    // Only update the profile picture if a new file is uploaded
-    if (profilePicture && profilePicture.size > 0) {
-      const buffer = Buffer.from(await profilePicture.arrayBuffer());
-      const filename = `${Date.now()}-${profilePicture.name.replace(/\s/g, '_')}`;
-      const uploadPath = path.join(process.cwd(), 'public/uploads/profiles', filename);
-      
-      await fs.mkdir(path.dirname(uploadPath), { recursive: true });
-      await fs.writeFile(uploadPath, buffer);
-      dataToUpdate.profilePictureUrl = `/uploads/profiles/${filename}`;
-    }
-
+    
     await prisma.pengguna.update({
       where: { id: userId },
       data: dataToUpdate,
@@ -149,12 +130,37 @@ export async function updateUser(userId: string, formData: FormData) {
 
   } catch (error) {
     console.error('Gagal memperbarui pengguna:', error);
-    if (error instanceof Error && error.message.includes('Unique constraint failed')) {
-      return { message: 'Gagal: Username sudah digunakan.' };
-    }
-    return { message: 'Gagal memperbarui pengguna.' };
+    return { error: 'Gagal memperbarui pengguna.' };
   }
   
   revalidatePath('/admin/users');
-  return { message: 'Data pengguna berhasil diperbarui.' };
+  return { success: 'Data pengguna berhasil diperbarui.' };
+}
+
+/**
+ * Melakukan soft delete pada pengguna. Hanya Admin dan tidak bisa hapus diri sendiri.
+ */
+export async function deleteUser(userId: string) {
+  // 1. Role Guard
+  const session = await getSession();
+  if (!session?.operatorId || session.role !== 'ADMIN') {
+    return { error: 'Anda tidak memiliki hak akses.' };
+  }
+
+  // 2. Self-Deletion Guard
+  if (session.operatorId === userId) {
+    return { error: 'Gagal: Anda tidak dapat menghapus akun Anda sendiri.' };
+  }
+
+  try {
+    await prisma.pengguna.update({
+      where: { id: userId },
+      data: { deletedAt: new Date() }, // Lakukan soft delete
+    });
+  } catch (error) {
+    return { error: 'Gagal menghapus pengguna.' };
+  }
+
+  revalidatePath('/admin/users');
+  return { success: 'Pengguna berhasil dihapus.' };
 }
