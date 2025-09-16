@@ -34,6 +34,7 @@ model Pengguna {
   id                String    @id @default(uuid())
   nama              String    // Nama lengkap pengguna
   username          String    @unique
+  nrp_nip           String?  
   password          String
   role              Role      @default(USER) // Peran pengguna (Admin/User Biasa)
   profilePictureUrl String?   // URL foto profil (opsional)
