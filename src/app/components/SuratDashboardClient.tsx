@@ -135,13 +135,13 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
     text.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 
   const thStyle =
-    'px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider';
+    'px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider backdrop-blur-sm';
   const tdStyle =
     'px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-transparent text-sm text-gray-900 dark:text-gray-300 whitespace-normal break-words';
 
   return (
     <div className="flex flex-col gap-6 max-w-6xl mx-auto w-full">
-      {/* Search Bar and Add Button - Minimalist Design */}
+      {/* Search Bar - Minimalist Design */}
       <div className="flex flex-col sm:flex-row gap-3 items-center">
         <div className="relative flex-grow">
           <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
@@ -167,19 +167,6 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
             </button>
           )}
         </div>
-        {role === 'ADMIN' && (
-          <SuratFormModal>
-            <button
-              type="button"
-              className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all whitespace-nowrap flex items-center gap-1.5 text-sm"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Tambah Surat
-            </button>
-          </SuratFormModal>
-        )}
       </div>
 
       {/* Main Filter Area - Redesigned */}
@@ -266,11 +253,10 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
         </div>
       </div>
 
-      {/* Document Type & Direction Filters - Combined */}
-      <div className="flex flex-col">
-        {/* Tipe Dokumen Filter - Redesigned */}
-        <div className="bg-white dark:bg-gray-800 rounded-t-lg px-5 py-3.5 border border-gray-200 dark:border-gray-700 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+      {/* Document Type Filter - Separate Section */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg px-5 py-4 border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center flex-wrap gap-3">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center gap-1.5">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -303,62 +289,81 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
               ))}
             </div>
           </div>
+          {role === 'ADMIN' && (
+            <SuratFormModal>
+              <button
+                type="button"
+                className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all whitespace-nowrap flex items-center gap-1.5 text-sm"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Tambah Surat
+              </button>
+            </SuratFormModal>
+          )}
         </div>
+      </div>
 
-        {/* Tabs (Surat Masuk / Keluar) - Full width alignment */}
-        <div className="flex w-full">
-          <button
-            onClick={() => setActiveArah('MASUK')}
-            className={`flex-1 py-3.5 text-sm font-medium transition-all duration-150 flex items-center justify-center gap-2 ${
-              activeArah === 'MASUK'
-                ? 'bg-white dark:bg-gray-800 -mb-px z-10 shadow-sm text-indigo-600 dark:text-indigo-400 border border-gray-200 dark:border-gray-700 border-b-0'
-                : 'bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-650'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414a1 1 0 01.707-.293H20" />
-            </svg>
-            <span>Surat Masuk</span>
-            <span className="bg-gray-200 dark:bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">
-              {tabCounts.MASUK}
-            </span>
-          </button>
-          <button
-            onClick={() => setActiveArah('KELUAR')}
-            className={`flex-1 py-3.5 text-sm font-medium transition-all duration-150 flex items-center justify-center gap-2 ${
-              activeArah === 'KELUAR'
-                ? 'bg-white dark:bg-gray-800 -mb-px z-10 shadow-sm text-indigo-600 dark:text-indigo-400 border border-gray-200 dark:border-gray-700 border-b-0'
-                : 'bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-650'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-            <span>Surat Keluar</span>
-            <span className="bg-gray-200 dark:bg-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">
-              {tabCounts.KELUAR}
-            </span>
-          </button>
-        </div>
+      {/* Tabs (Surat Masuk / Keluar) - Highlighted Design */}
+      <div className="flex bg-gray-50 dark:bg-gray-800/50 p-1 rounded-lg">
+        <button
+          onClick={() => setActiveArah('MASUK')}
+          className={`flex-1 py-2.5 px-4 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 rounded-md ${
+            activeArah === 'MASUK'
+              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 ring-1 ring-indigo-500'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-gray-700/60'
+          }`}
+        >
+          <span>Surat Masuk</span>
+          <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+            activeArah === 'MASUK'
+              ? 'bg-white/20 text-white font-semibold'
+              : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+          }`}>
+            {tabCounts.MASUK}
+          </span>
+        </button>
+        
+        <button
+          onClick={() => setActiveArah('KELUAR')}
+          className={`flex-1 py-2.5 px-4 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 rounded-md ${
+            activeArah === 'KELUAR'
+              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/25 ring-1 ring-emerald-500'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-gray-700/60'
+          }`}
+        >
+          <span>Surat Keluar</span>
+          <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+            activeArah === 'KELUAR'
+              ? 'bg-white/20 text-white font-semibold'
+              : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+          }`}>
+            {tabCounts.KELUAR}
+          </span>
+        </button>
+      </div>
 
+      {/* Table Section */}
+      <div className="flex flex-col">
         {/* Table - Enhanced */}
         <div
-          className={`bg-white dark:bg-gray-800 rounded-b-lg rounded-tr-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-out will-change-transform transform-gpu ${
+          className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-out will-change-transform transform-gpu ${
             isAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
           }`}
         >
-          <div className="overflow-x-auto max-h-[65vh] overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+          <div className="overflow-x-auto max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
             <table className="min-w-full leading-normal">
-              <thead className="bg-gray-50 dark:bg-gray-700">
+              <thead className="sticky top-0 z-20 bg-white dark:bg-gray-800 shadow-sm">
                 <tr>
-                  <th className={`${thStyle} w-12 text-center sticky top-0 z-20 bg-gray-50 dark:bg-gray-700`}>No.</th>
-                  <th className={`${thStyle} sticky top-0 z-20 bg-gray-50 dark:bg-gray-700`}>Perihal</th>
-                  <th className={`${thStyle} sticky top-0 z-20 bg-gray-50 dark:bg-gray-700`}>Dari</th>
-                  <th className={`${thStyle} sticky top-0 z-20 bg-gray-50 dark:bg-gray-700`}>Kepada</th>
-                  <th className={`${thStyle} sticky top-0 z-20 bg-gray-50 dark:bg-gray-700 whitespace-nowrap`}>Diterima</th>
-                  <th className={`${thStyle} sticky top-0 z-20 bg-gray-50 dark:bg-gray-700`}>Tujuan Disposisi</th>
-                  <th className={`${thStyle} sticky top-0 z-20 bg-gray-50 dark:bg-gray-700`}>Isi Disposisi</th>
-                  <th className={`${thStyle} w-28 text-center sticky top-0 z-20 bg-gray-50 dark:bg-gray-700`}>Aksi</th>
+                  <th className={`${thStyle} w-12 text-center`}>No.</th>
+                  <th className={`${thStyle} min-w-[200px]`}>Perihal</th>
+                  <th className={`${thStyle} min-w-[120px]`}>Dari</th>
+                  <th className={`${thStyle} min-w-[120px]`}>Kepada</th>
+                  <th className={`${thStyle} min-w-[120px] whitespace-nowrap`}>Diterima</th>
+                  <th className={`${thStyle} min-w-[160px]`}>Tujuan Disposisi</th>
+                  <th className={`${thStyle} min-w-[180px]`}>Isi Disposisi</th>
+                  <th className={`${thStyle} w-28 text-center`}>Aksi</th>
                 </tr>
               </thead>
               <tbody
@@ -381,10 +386,10 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                   currentPageSurat.map((surat, index) => (
                     <SuratDetailModal surat={surat} key={surat.id}>
                       <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
-                        <td className={`${tdStyle} text-center text-gray-500 dark:text-gray-400`}>
+                        <td className={`${tdStyle} w-12 text-center text-gray-500 dark:text-gray-400`}>
                           {firstItemIndex + index}
                         </td>
-                        <td className={`${tdStyle} max-w-sm`}>
+                        <td className={`${tdStyle} min-w-[200px]`}>
                           <p className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 break-words transition-colors">
                             {surat.perihal}
                           </p>
@@ -392,15 +397,26 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                             {surat.nomor_surat}
                           </p>
                         </td>
-                        <td className={tdStyle}>{surat.asal_surat}</td>
-                        <td className={tdStyle}>{surat.tujuan_surat}</td>
-                        <td className={`${tdStyle} text-xs whitespace-nowrap`}>
-                          {new Date(surat.tanggal_diterima_dibuat).toLocaleString('id-ID', {
-                            dateStyle: 'short',
-                            timeStyle: 'short',
-                          })}
+                        <td className={`${tdStyle} min-w-[120px]`}>{surat.asal_surat}</td>
+                        <td className={`${tdStyle} min-w-[120px]`}>{surat.tujuan_surat}</td>
+                        <td className={`${tdStyle} min-w-[120px] text-xs`}>
+                          <div className="flex flex-col">
+                            <span className="whitespace-nowrap">
+                              {new Date(surat.tanggal_diterima_dibuat)
+                              .toLocaleDateString('id-ID', { dateStyle: 'short' })
+                              .replace(/\//g, ' / ')}
+                            </span>
+                            <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                              {(() => {
+                              const date = new Date(surat.tanggal_diterima_dibuat);
+                              const hours = date.getHours().toString().padStart(2, '0');
+                              const minutes = date.getMinutes().toString().padStart(2, '0');
+                              return `${hours}:${minutes} WIB`;
+                              })()}
+                            </span>
+                          </div>
                         </td>
-                        <td className={`${tdStyle} max-w-xs`}>
+                        <td className={`${tdStyle} min-w-[160px]`}>
                           <div className="flex flex-wrap gap-1">
                             {surat.tujuan_disposisi.map((tujuan) => (
                               <span
@@ -417,12 +433,12 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                             ))}
                           </div>
                         </td>
-                        <td className={`${tdStyle} max-w-md`}>
+                        <td className={`${tdStyle} min-w-[180px]`}>
                           <p className="truncate whitespace-normal break-words dark:text-gray-300">
                             {surat.isi_disposisi}
                           </p>
                         </td>
-                        <td className={`${tdStyle} text-center`}>
+                        <td className={`${tdStyle} w-28 text-center`}>
                           <div className="flex items-center justify-center space-x-3">
                             {surat.lampiran[0] && (
                               <a
