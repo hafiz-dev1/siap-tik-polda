@@ -22,13 +22,13 @@ export default async function ArsipPage() {
 
   return (
     <div>
-      <div className="border-b pb-4 mb-8">
+      <div className="border-b pb-4 mb-8 text-center">
         <h1 className="text-3xl font-bold text-gray-900">Arsip Surat</h1>
         <p className="text-gray-500 mt-1">Kelola atau lihat semua arsip surat masuk dan keluar.</p>
       </div>
       
       {/* 3. Kirim 'role' dinamis ke komponen klien, bukan "ADMIN" hardcode */}
-      <SuratDashboardClient suratList={suratList} role={userRole} />
+      <SuratDashboardClient suratList={suratList} role={userRole} suratId={''} />
     </div>
   );
 }
