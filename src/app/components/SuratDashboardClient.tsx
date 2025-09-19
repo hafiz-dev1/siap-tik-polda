@@ -6,7 +6,7 @@ import { Surat, Lampiran, Role, TipeDokumen } from '@prisma/client';
 
 import SuratFormModal from './SuratFormModal';
 import DeleteSuratButton from './DeleteSuratButton';
-import SuratDetailModal from './SuratDetailModal';
+  import SuratDetailModal from './SuratDetailModal';
 
 // --- Icons ---
 const DownloadIcon = () => (
@@ -345,230 +345,225 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
       </div>
 
       {/* Table Section */}
-      <div className="flex flex-col">
-        {/* Table - Enhanced */}
-        <div
-          className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-out will-change-transform transform-gpu ${
-            isAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
-          }`}
-        >
-          <div className="overflow-x-auto max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
-            <table className="min-w-full leading-normal">
-              <thead className="sticky top-0 z-20 bg-white dark:bg-gray-800 shadow-sm">
+      <div
+        className={`flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-out will-change-transform transform-gpu ${
+          isAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
+        }`}
+      >
+        {/* Scrollable Container */}
+        <div className="overflow-auto max-h-[60vh] scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+          <table className="min-w-full leading-normal">
+            <thead className="sticky top-0 bg-white dark:bg-gray-800 z-10">
+              <tr>
+                <th className={`${thStyle} w-12 text-center`}>No.</th>
+                <th className={`${thStyle} min-w-[200px]`}>Perihal</th>
+                <th className={`${thStyle} min-w-[120px]`}>Dari</th>
+                <th className={`${thStyle} min-w-[120px]`}>Kepada</th>
+                <th className={`${thStyle} min-w-[120px] whitespace-nowrap`}>Diterima</th>
+                <th className={`${thStyle} min-w-[160px]`}>Tujuan Disposisi</th>
+                <th className={`${thStyle} min-w-[180px]`}>Isi Disposisi</th>
+                <th className={`${thStyle} w-28 text-center`}>Aksi</th>
+              </tr>
+            </thead>
+            <tbody
+              className={`transition-opacity duration-300 ease-out ${
+                isAnimating ? 'opacity-0' : 'opacity-100'
+              }`}
+            >
+              {currentPageSurat.length === 0 ? (
                 <tr>
-                  <th className={`${thStyle} w-12 text-center`}>No.</th>
-                  <th className={`${thStyle} min-w-[200px]`}>Perihal</th>
-                  <th className={`${thStyle} min-w-[120px]`}>Dari</th>
-                  <th className={`${thStyle} min-w-[120px]`}>Kepada</th>
-                  <th className={`${thStyle} min-w-[120px] whitespace-nowrap`}>Diterima</th>
-                  <th className={`${thStyle} min-w-[160px]`}>Tujuan Disposisi</th>
-                  <th className={`${thStyle} min-w-[180px]`}>Isi Disposisi</th>
-                  <th className={`${thStyle} w-28 text-center`}>Aksi</th>
+                  <td colSpan={8} className="text-center py-16 text-gray-500 dark:text-gray-400">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span>Tidak ada data yang cocok dengan filter.</span>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody
-                className={`transition-opacity duration-300 ease-out ${
-                  isAnimating ? 'opacity-0' : 'opacity-100'
-                }`}
+              ) : (
+                currentPageSurat.map((surat, index) => (
+                  <SuratDetailModal surat={surat} key={surat.id}>
+                    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
+                      <td className={`${tdStyle} w-12 text-center text-gray-500 dark:text-gray-400`}>
+                        {firstItemIndex + index}
+                      </td>
+                      <td className={`${tdStyle} min-w-[200px]`}>
+                        <p className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 break-words transition-colors">
+                          {surat.perihal}
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 break-words mt-0.5">
+                          {surat.nomor_surat}
+                        </p>
+                      </td>
+                      <td className={`${tdStyle} min-w-[120px]`}>{surat.asal_surat}</td>
+                      <td className={`${tdStyle} min-w-[120px]`}>{surat.tujuan_surat}</td>
+                      <td className={`${tdStyle} min-w-[120px] text-xs`}>
+                        <div className="flex flex-col">
+                          <span className="whitespace-nowrap">
+                            {new Date(surat.tanggal_diterima_dibuat).toLocaleDateString('id-ID', {
+                              dateStyle: 'short',
+                            })}
+                          </span>
+                          <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                            pukul {new Date(surat.tanggal_diterima_dibuat).toLocaleTimeString('id-ID', {
+                              timeStyle: 'short',
+                            })}
+                          </span>
+                        </div>
+                      </td>
+                      <td className={`${tdStyle} min-w-[160px]`}>
+                        <div className="flex flex-wrap gap-1">
+                          {surat.tujuan_disposisi.map((tujuan) => (
+                            <span
+                              key={tujuan}
+                              className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full"
+                            >
+                              {formatEnumText(
+                                tujuan
+                                  .replace('KASUBBID_', '')
+                                  .replace('KASUBBAG_', '')
+                                  .replace('KAUR_', '')
+                              )}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className={`${tdStyle} min-w-[180px]`}>
+                        <p className="truncate whitespace-normal break-words dark:text-gray-300">
+                          {surat.isi_disposisi}
+                        </p>
+                      </td>
+                      <td className={`${tdStyle} w-28 text-center`}>
+                        <div className="flex items-center justify-center space-x-3">
+                          {surat.lampiran[0] && (
+                            <a
+                              href={surat.lampiran[0].path_file}
+                              download
+                              title="Download Scan"
+                              className="p-1.5 rounded-full text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-gray-600 transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <DownloadIcon />
+                            </a>
+                          )}
+                          {role === 'ADMIN' && (
+                            <>
+                              {/* Wrap SuratFormModal in a div that stops propagation */}
+                              <div onClick={(e) => e.stopPropagation()}>
+                                <SuratFormModal suratToEdit={surat}>
+                                  <button
+                                    title="Ubah"
+                                    className="p-1.5 rounded-full text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-gray-600 transition-colors"
+                                    type="button"
+                                  >
+                                    <EditIcon />
+                                  </button>
+                                </SuratFormModal>
+                              </div>
+                              
+                              {/* Wrap DeleteSuratButton in a div that stops propagation */}
+                              <div onClick={(e) => e.stopPropagation()}>
+                                <DeleteSuratButton suratId={surat.id}>
+                                  <button
+                                    title="Hapus"
+                                    type="button"
+                                    className="p-1.5 rounded-full text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-600 transition-colors"
+                                  >
+                                    <DeleteIcon />
+                                  </button>
+                                </DeleteSuratButton>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  </SuratDetailModal>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Pagination - Redesigned */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-gray-200 dark:border-gray-700 text-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-600 dark:text-gray-400">Tampilkan:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                className="px-2.5 py-1.5 border rounded-md bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
               >
-                {currentPageSurat.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="text-center py-16 text-gray-500 dark:text-gray-400">
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span>Tidak ada data yang cocok dengan filter.</span>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  currentPageSurat.map((surat, index) => (
-                    <SuratDetailModal surat={surat} key={surat.id}>
-                      <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
-                        <td className={`${tdStyle} w-12 text-center text-gray-500 dark:text-gray-400`}>
-                          {firstItemIndex + index}
-                        </td>
-                        <td className={`${tdStyle} min-w-[200px]`}>
-                          <p className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 break-words transition-colors">
-                            {surat.perihal}
-                          </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 break-words mt-0.5">
-                            {surat.nomor_surat}
-                          </p>
-                        </td>
-                        <td className={`${tdStyle} min-w-[120px]`}>{surat.asal_surat}</td>
-                        <td className={`${tdStyle} min-w-[120px]`}>{surat.tujuan_surat}</td>
-                        <td className={`${tdStyle} min-w-[120px] text-xs`}>
-                          <div className="flex flex-col">
-                            <span className="whitespace-nowrap">
-                              {new Date(surat.tanggal_diterima_dibuat)
-                              .toLocaleDateString('id-ID', { dateStyle: 'short' })
-                              .replace(/\//g, ' / ')}
-                            </span>
-                            <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                              {(() => {
-                              const date = new Date(surat.tanggal_diterima_dibuat);
-                              const hours = date.getHours().toString().padStart(2, '0');
-                              const minutes = date.getMinutes().toString().padStart(2, '0');
-                              return `${hours}:${minutes} WIB`;
-                              })()}
-                            </span>
-                          </div>
-                        </td>
-                        <td className={`${tdStyle} min-w-[160px]`}>
-                          <div className="flex flex-wrap gap-1">
-                            {surat.tujuan_disposisi.map((tujuan) => (
-                              <span
-                                key={tujuan}
-                                className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full"
-                              >
-                                {formatEnumText(
-                                  tujuan
-                                    .replace('KASUBBID_', '')
-                                    .replace('KASUBBAG_', '')
-                                    .replace('KAUR_', '')
-                                )}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className={`${tdStyle} min-w-[180px]`}>
-                          <p className="truncate whitespace-normal break-words dark:text-gray-300">
-                            {surat.isi_disposisi}
-                          </p>
-                        </td>
-                        <td className={`${tdStyle} w-28 text-center`}>
-                          <div className="flex items-center justify-center space-x-3">
-                            {surat.lampiran[0] && (
-                              <a
-                                href={surat.lampiran[0].path_file}
-                                download
-                                title="Download Scan"
-                                className="p-1.5 rounded-full text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-gray-600 transition-colors"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <DownloadIcon />
-                              </a>
-                            )}
-                            {role === 'ADMIN' && (
-                              <>
-                                {/* Wrap SuratFormModal in a div that stops propagation */}
-                                <div onClick={(e) => e.stopPropagation()}>
-                                  <SuratFormModal suratToEdit={surat}>
-                                    <button
-                                      title="Ubah"
-                                      className="p-1.5 rounded-full text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-gray-600 transition-colors"
-                                      type="button"
-                                    >
-                                      <EditIcon />
-                                    </button>
-                                  </SuratFormModal>
-                                </div>
-                                
-                                {/* Wrap DeleteSuratButton in a div that stops propagation */}
-                                <div onClick={(e) => e.stopPropagation()}>
-                                  <DeleteSuratButton suratId={surat.id}>
-                                    <button
-                                      title="Hapus"
-                                      type="button"
-                                      className="p-1.5 rounded-full text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-600 transition-colors"
-                                    >
-                                      <DeleteIcon />
-                                    </button>
-                                  </DeleteSuratButton>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    </SuratDetailModal>
-                  ))
-                )}
-              </tbody>
-            </table>
+                {[10, 20, 30, 50].map((n) => (
+                  <option key={n} value={n}>
+                    {n} / halaman
+                  </option>
+                ))}
+              </select>
+            </div>
+            <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
+              {firstItemIndex}-{lastItemIndex} dari {totalItems} item
+            </span>
           </div>
-          
-          {/* Pagination - Redesigned */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-gray-200 dark:border-gray-700 text-sm">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600 dark:text-gray-400">Tampilkan:</span>
-                <select
-                  value={pageSize}
-                  onChange={(e) => setPageSize(Number(e.target.value))}
-                  className="px-2.5 py-1.5 border rounded-md bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                  {[10, 20, 30, 50].map((n) => (
-                    <option key={n} value={n}>
-                      {n} / halaman
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                {firstItemIndex}-{lastItemIndex} dari {totalItems} item
-              </span>
-            </div>
 
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => setPage(1)}
-                disabled={safePage === 1}
-                className={`w-9 h-9 flex items-center justify-center rounded border text-sm ${
-                  safePage === 1
-                    ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
-                    : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
-                }`}
-                aria-label="First Page"
-              >
-                «
-              </button>
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={safePage === 1}
-                className={`px-3 h-9 rounded border text-sm flex items-center ${
-                  safePage === 1
-                    ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
-                    : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
-                }`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Prev
-              </button>
-              <span className="px-4 h-9 inline-flex items-center justify-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">
-                {safePage} / {totalPages}
-              </span>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={safePage === totalPages}
-                className={`px-3 h-9 rounded border text-sm flex items-center ${
-                  safePage === totalPages
-                    ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
-                    : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
-                }`}
-              >
-                Next
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-              <button
-                onClick={() => setPage(totalPages)}
-                disabled={safePage === totalPages}
-                className={`w-9 h-9 flex items-center justify-center rounded border text-sm ${
-                  safePage === totalPages
-                    ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
-                    : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
-                }`}
-                aria-label="Last Page"
-              >
-                »
-              </button>
-            </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setPage(1)}
+              disabled={safePage === 1}
+              className={`w-9 h-9 flex items-center justify-center rounded border text-sm ${
+                safePage === 1
+                  ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
+                  : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+              }`}
+              aria-label="First Page"
+            >
+              «
+            </button>
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              className={`px-3 h-9 rounded border text-sm flex items-center ${
+                safePage === 1
+                  ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
+                  : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Prev
+            </button>
+            <span className="px-4 h-9 inline-flex items-center justify-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">
+              {safePage} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              className={`px-3 h-9 rounded border text-sm flex items-center ${
+                safePage === totalPages
+                  ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
+                  : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+              }`}
+            >
+              Next
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setPage(totalPages)}
+              disabled={safePage === totalPages}
+              className={`w-9 h-9 flex items-center justify-center rounded border text-sm ${
+                safePage === totalPages
+                  ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
+                  : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+              }`}
+              aria-label="Last Page"
+            >
+              »
+            </button>
           </div>
         </div>
       </div>

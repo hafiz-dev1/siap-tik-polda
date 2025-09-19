@@ -82,74 +82,74 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                   
                   <form ref={formRef} onSubmit={handleSubmit} className="mt-4 max-h-[70vh] overflow-y-auto pr-2 space-y-4">
                     {/* Semua input diisi dengan defaultValue untuk mode Ubah */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="nomor_agenda" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Agenda</label>
-                            <input type="text" name="nomor_agenda" id="nomor_agenda" required defaultValue={suratToEdit?.nomor_agenda} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
-                        </div>
-                        <div>
-                            <label htmlFor="nomor_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Surat</label>
-                            <input type="text" name="nomor_surat" id="nomor_surat" required defaultValue={suratToEdit?.nomor_surat} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="tanggal_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Surat</label>
-                            <input type="date" name="tanggal_surat" id="tanggal_surat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_surat) : ''} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
-                        </div>
-                        <div>
-                            <label htmlFor="tanggal_diterima_dibuat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal & Pukul Diterima</label>
-                            <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
-                        </div>
-                    </div>
                     <div>
-                        <label htmlFor="perihal" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Perihal</label>
-                        <textarea name="perihal" id="perihal" rows={2} required defaultValue={suratToEdit?.perihal} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"></textarea>
+                      <label htmlFor="perihal" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Perihal</label>
+                      <textarea name="perihal" id="perihal" rows={2} required defaultValue={suratToEdit?.perihal} className="pl-2 mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"></textarea>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="asal_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Asal Surat</label>
-                            <input type="text" name="asal_surat" id="asal_surat" required defaultValue={suratToEdit?.asal_surat} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
-                        </div>
-                        <div>
-                            <label htmlFor="tujuan_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tujuan Surat</label>
-                            <input type="text" name="tujuan_surat" id="tujuan_surat" required defaultValue={suratToEdit?.tujuan_surat} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
-                        </div>
+                      <div>
+                        <label htmlFor="nomor_agenda" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Agenda</label>
+                        <input type="text" name="nomor_agenda" id="nomor_agenda" required defaultValue={suratToEdit?.nomor_agenda} className="pl-2 mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm "/>
+                      </div>
+                      <div>
+                        <label htmlFor="nomor_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Surat</label>
+                        <input type="text" name="nomor_surat" id="nomor_surat" required defaultValue={suratToEdit?.nomor_surat} className="pl-2 mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="tanggal_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Surat</label>
+                        <input type="date" name="tanggal_surat" id="tanggal_surat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_surat) : ''} className="pl-2 mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                      </div>
+                      <div>
+                        <label htmlFor="tanggal_diterima_dibuat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal & Pukul Diterima</label>
+                        <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="pl-2 mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="asal_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Asal Surat</label>
+                        <input type="text" name="asal_surat" id="asal_surat" required defaultValue={suratToEdit?.asal_surat} className="pl-2 mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                      </div>
+                      <div>
+                        <label htmlFor="tujuan_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tujuan Surat</label>
+                        <input type="text" name="tujuan_surat" id="tujuan_surat" required defaultValue={suratToEdit?.tujuan_surat} className="pl-2 mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                      </div>
                     </div>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="arah_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Arah Surat</label>
-                            <select name="arah_surat" id="arah_surat" required defaultValue={suratToEdit?.arah_surat} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
-                                {ARAH_SURAT.map(arah => <option key={arah} value={arah}>{formatEnumText(arah)}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label htmlFor="tipe_dokumen" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipe Dokumen</label>
-                            <select name="tipe_dokumen" id="tipe_dokumen" required defaultValue={suratToEdit?.tipe_dokumen} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
-                                {TIPE_DOKUMEN.map(tipe => <option key={tipe} value={tipe}>{formatEnumText(tipe)}</option>)}
-                            </select>
-                        </div>
+                      <div>
+                        <label htmlFor="arah_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Arah Surat</label>
+                        <select name="arah_surat" id="arah_surat" required defaultValue={suratToEdit?.arah_surat} className="pl-2 py-1 mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
+                          {ARAH_SURAT.map(arah => <option key={arah} value={arah}>{formatEnumText(arah)}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="tipe_dokumen" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipe Dokumen</label>
+                        <select name="tipe_dokumen" id="tipe_dokumen" required defaultValue={suratToEdit?.tipe_dokumen} className="pl-2 py-1 mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
+                          {TIPE_DOKUMEN.map(tipe => <option key={tipe} value={tipe}>{formatEnumText(tipe)}</option>)}
+                        </select>
+                      </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tujuan Disposisi</label>
-                        <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
-                          {TUJUAN_DISPOSISI.map((tujuan) => (
-                            <label key={tujuan} className="flex items-center space-x-3 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                name="tujuan_disposisi"
-                                value={tujuan}
-                                defaultChecked={suratToEdit?.tujuan_disposisi.includes(tujuan)}
-                                className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                              />
-                              <span className="text-sm text-gray-800 dark:text-gray-300">{formatEnumText(tujuan.replace('KASUBBID_', '').replace('KASUBBAG_', '').replace('KAUR_', ''))}</span>
-                            </label>
-                          ))}
-                        </div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tujuan Disposisi</label>
+                      <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
+                        {TUJUAN_DISPOSISI.map((tujuan) => (
+                        <label key={tujuan} className="flex items-center space-x-3 cursor-pointer">
+                          <input
+                          type="checkbox"
+                          name="tujuan_disposisi"
+                          value={tujuan}
+                          defaultChecked={suratToEdit?.tujuan_disposisi.includes(tujuan)}
+                          className="pl-2 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                          />
+                          <span className="text-sm text-gray-800 dark:text-gray-300">{formatEnumText(tujuan.replace('KASUBBID_', '').replace('KASUBBAG_', '').replace('KAUR_', ''))}</span>
+                        </label>
+                        ))}
+                      </div>
                     </div>
-                     <div>
-                        <label htmlFor="isi_disposisi" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Isi Disposisi</label>
-                        <textarea name="isi_disposisi" id="isi_disposisi" rows={2} required defaultValue={suratToEdit?.isi_disposisi} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"></textarea>
+                    <div>
+                      <label htmlFor="isi_disposisi" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Isi Disposisi</label>
+                      <textarea name="isi_disposisi" id="isi_disposisi" rows={2} required defaultValue={suratToEdit?.isi_disposisi} className="pl-2 mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"></textarea>
                     </div>
                     <div className={isEditMode ? 'hidden' : 'block'}>
                         <label htmlFor="scan_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Upload Scan Surat (PDF, JPG, PNG)</label>
