@@ -77,46 +77,41 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
         <div className="flex justify-between items-center h-16">
           
           {/* Logo and Brand */}
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-4 md:space-x-6 lg:space-x-8">
             <Link href="/dashboard" className="flex items-center space-x-3 group">
               <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg group-hover:scale-105 transition-transform duration-200">
                 <Shield className="w-5 h-5 text-white" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                   SIAD POLDA
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-1 hidden lg:block">
                   Sistem Informasi Arsip Digital
                 </p>
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex lg:space-x-1">
+            {/* Desktop Navigation - Show on medium screens and up */}
+            <div className="hidden md:flex md:space-x-1">
               {filteredNavItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
+                  data-tooltip={item.label}
                   className={`nav-item flex items-center space-x-2 ${
                     isActiveLink(item.href) ? 'active' : ''
                   }`}
                 >
                   {item.icon}
-                  <span>{item.label}</span>
+                  <span className="hidden lg:inline">{item.label}</span>
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* Right Side - Desktop */}
-          <div className="hidden lg:flex lg:items-center lg:space-x-4">
-            <ThemeSwitcher />
-            <UserDropdown user={user} onLogout={onLogout} />
-          </div>
-
-          {/* Medium Screen Right Side */}
-          <div className="hidden md:flex lg:hidden md:items-center md:space-x-3">
+          {/* Right Side - Desktop and Medium screens */}
+          <div className="hidden md:flex md:items-center md:space-x-3 lg:space-x-4">
             <ThemeSwitcher />
             <UserDropdown user={user} onLogout={onLogout} />
           </div>
