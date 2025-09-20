@@ -114,7 +114,7 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-8 max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-b border-gray-200 dark:border-gray-700 pb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-800 dark:text-white tracking-tight">Dashboard</h1>
@@ -191,7 +191,7 @@ export default async function DashboardPage() {
         
         {recentSurat.length > 0 ? (
           <div className="relative">
-            <div className="overflow-auto max-h-80 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+            <div className="overflow-auto max-h-80 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 rounded-b-xl">
               <table className="min-w-full table-fixed">
                 <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0 z-20">
                   <tr>
@@ -205,7 +205,7 @@ export default async function DashboardPage() {
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
                   {recentSurat.map((surat, index) => (
                     <SuratDetailModal key={surat.id} surat={surat}>
-                      <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 cursor-pointer">
+                      <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
                         <td className="w-16 px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                           {index + 1}
                         </td>

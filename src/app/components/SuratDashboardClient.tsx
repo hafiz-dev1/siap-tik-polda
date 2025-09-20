@@ -1,12 +1,13 @@
 // file: app/components/SuratDashboardClient.tsx
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Fragment } from 'react';
 import { Surat, Lampiran, Role, TipeDokumen } from '@prisma/client';
+import * as XLSX from 'xlsx';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 
 import SuratFormModal from './SuratFormModal';
 import DeleteSuratButton from './DeleteSuratButton';
-  import SuratDetailModal from './SuratDetailModal';
 
 // --- Icons ---
 const DownloadIcon = () => (
@@ -39,10 +40,13 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
   const [activeTipe, setActiveTipe] = useState('ALL');
   const [activeArah, setActiveArah] = useState<'MASUK' | 'KELUAR'>('MASUK');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTujuan, setSelectedTujuan] = useState<string[]>([]);
   const [fromDate, setFromDate] = useState<string>('');
   const [toDate, setToDate] = useState<string>('');
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSurat, setSelectedSurat] = useState<(Surat & { lampiran: Lampiran[] }) | null>(null);
 
   // Pagination state
   const [pageSize, setPageSize] = useState<number>(25);
@@ -53,12 +57,12 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
     setIsAnimating(true);
     const id = setTimeout(() => setIsAnimating(false), 220);
     return () => clearTimeout(id);
-  }, [activeArah, activeTipe, selectedTujuan, fromDate, toDate, searchQuery]); // Removed page, pageSize
+  }, [activeArah, activeTipe, fromDate, toDate, searchQuery]); // Removed selectedTujuan
 
   // Reset page when filters (excluding page/pageSize) change
   useEffect(() => {
     setPage(1);
-  }, [activeArah, activeTipe, selectedTujuan, fromDate, toDate, searchQuery]);
+  }, [activeArah, activeTipe, fromDate, toDate, searchQuery]);
 
   // Reset page when pageSize changes
   useEffect(() => {
@@ -83,32 +87,95 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
     };
   }, [suratList, activeTipe]);
 
+  // Helper function to format enum text - moved before filteredSurat to avoid temporal dead zone
+  const formatEnumText = (text: string) =>
+    text.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+
   const filteredSurat = useMemo(() => {
     return suratList.filter((surat) => {
+      // Type and direction filters
       const tipeMatch = activeTipe === 'ALL' || surat.tipe_dokumen === activeTipe;
       const arahMatch = surat.arah_surat === activeArah;
-      const searchMatch =
-        searchQuery === '' ||
-        surat.perihal.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        surat.nomor_surat.toLowerCase().includes(searchQuery.toLowerCase());
-      const tujuanMatch =
-        selectedTujuan.length === 0 ||
-        selectedTujuan.some((tujuan) => surat.tujuan_disposisi.includes(tujuan));
-      const suratDate = new Date(surat.tanggal_diterima_dibuat);
-      let from: Date | null = null;
-      let to: Date | null = null;
-      if (fromDate) {
-        from = new Date(fromDate);
-        from.setHours(0, 0, 0, 0);
+      
+      // Search filter with null safety and trimming
+      const trimmedQuery = searchQuery.trim();
+      const searchMatch = trimmedQuery === '' || (() => {
+        const lowerQuery = trimmedQuery.toLowerCase();
+        
+        // Helper function to safely check string fields
+        const safeStringMatch = (field: string | null | undefined) => 
+          field ? field.toLowerCase().includes(lowerQuery) : false;
+        
+        // Check basic string fields
+        if (safeStringMatch(surat.perihal) ||
+            safeStringMatch(surat.nomor_surat) ||
+            safeStringMatch(surat.asal_surat) ||
+            safeStringMatch(surat.tujuan_surat) ||
+            safeStringMatch(surat.isi_disposisi) ||
+            safeStringMatch(surat.nomor_agenda)) {
+          return true;
+        }
+        
+        // Check formatted tipe dokumen
+        if (surat.tipe_dokumen && 
+            formatEnumText(surat.tipe_dokumen).toLowerCase().includes(lowerQuery)) {
+          return true;
+        }
+        
+        // Check tujuan disposisi array
+        if (Array.isArray(surat.tujuan_disposisi) && surat.tujuan_disposisi.length > 0) {
+          const disposisiMatch = surat.tujuan_disposisi.some(tujuan => {
+            if (!tujuan) return false;
+            const formattedTujuan = formatEnumText(
+              tujuan.replace('KASUBBID_', '').replace('KASUBBAG_', '').replace('KAUR_', '')
+            );
+            return formattedTujuan.toLowerCase().includes(lowerQuery);
+          });
+          if (disposisiMatch) return true;
+        }
+        
+        // Check lampiran files
+        if (Array.isArray(surat.lampiran) && surat.lampiran.length > 0) {
+          const lampiranMatch = surat.lampiran.some(lampiran => 
+            lampiran && lampiran.nama_file && 
+            lampiran.nama_file.toLowerCase().includes(lowerQuery)
+          );
+          if (lampiranMatch) return true;
+        }
+        
+        return false;
+      })();
+      
+      // Date filter with validation
+      let dateMatch = true;
+      if (fromDate || toDate) {
+        const suratDate = new Date(surat.tanggal_diterima_dibuat);
+        
+        // Validate surat date
+        if (isNaN(suratDate.getTime())) {
+          dateMatch = false;
+        } else {
+          if (fromDate) {
+            const from = new Date(fromDate);
+            if (!isNaN(from.getTime())) {
+              from.setHours(0, 0, 0, 0);
+              if (suratDate < from) dateMatch = false;
+            }
+          }
+          
+          if (toDate && dateMatch) {
+            const to = new Date(toDate);
+            if (!isNaN(to.getTime())) {
+              to.setHours(23, 59, 59, 999);
+              if (suratDate > to) dateMatch = false;
+            }
+          }
+        }
       }
-      if (toDate) {
-        to = new Date(toDate);
-        to.setHours(23, 59, 59, 999);
-      }
-      const dateMatch = (!from || suratDate >= from) && (!to || suratDate <= to);
-      return tipeMatch && arahMatch && searchMatch && tujuanMatch && dateMatch;
+      
+      return tipeMatch && arahMatch && searchMatch && dateMatch;
     });
-  }, [suratList, activeTipe, activeArah, searchQuery, selectedTujuan, fromDate, toDate]);
+  }, [suratList, activeTipe, activeArah, searchQuery, fromDate, toDate]);
 
   // Pagination calculations
   const totalItems = filteredSurat.length;
@@ -126,13 +193,89 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
   const firstItemIndex = totalItems === 0 ? 0 : (safePage - 1) * pageSize + 1;
   const lastItemIndex = totalItems === 0 ? 0 : Math.min(safePage * pageSize, totalItems);
 
-  const handleTujuanChange = (tujuan: string) =>
-    setSelectedTujuan((prev) =>
-      prev.includes(tujuan) ? prev.filter((t) => t !== tujuan) : [...prev, tujuan]
-    );
+  // Modal functions
+  const openModal = (surat: Surat & { lampiran: Lampiran[] }) => {
+    setSelectedSurat(surat);
+    setIsModalOpen(true);
+  };
 
-  const formatEnumText = (text: string) =>
-    text.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedSurat(null);
+  };
+
+  // Excel export function
+  const exportToExcel = () => {
+    // Separate data by direction
+    const suratMasuk = suratList.filter(surat => surat.arah_surat === 'MASUK');
+    const suratKeluar = suratList.filter(surat => surat.arah_surat === 'KELUAR');
+
+    // Helper function to prepare data for Excel
+    const prepareDataForExcel = (data: (Surat & { lampiran: Lampiran[] })[]) => {
+      return data.map((surat, index) => ({
+        'No': index + 1,
+        'Nomor Agenda': surat.nomor_agenda,
+        'Nomor Surat': surat.nomor_surat,
+        'Tanggal Surat': new Date(surat.tanggal_surat).toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: '2-digit', 
+          year: 'numeric'
+        }),
+        'Tanggal Diterima/Dibuat': new Date(surat.tanggal_diterima_dibuat).toLocaleString('id-ID', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        'Asal Surat': surat.asal_surat,
+        'Tujuan Surat': surat.tujuan_surat,
+        'Perihal': surat.perihal,
+        'Tipe Dokumen': formatEnumText(surat.tipe_dokumen),
+        'Tujuan Disposisi': surat.tujuan_disposisi.map(tujuan => 
+          formatEnumText(
+            tujuan
+              .replace('KASUBBID_', '')
+              .replace('KASUBBAG_', '')
+              .replace('KAUR_', '')
+          )
+        ).join(', '),
+        'Isi Disposisi': surat.isi_disposisi,
+        'Lampiran': surat.lampiran[0]?.nama_file || 'Tidak ada lampiran'
+      }));
+    };
+
+    // Create workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Create Surat Masuk sheet
+    const suratMasukData = prepareDataForExcel(suratMasuk);
+    const wsMasuk = XLSX.utils.json_to_sheet(suratMasukData);
+    XLSX.utils.book_append_sheet(workbook, wsMasuk, 'Surat Masuk');
+
+    // Create Surat Keluar sheet  
+    const suratKeluarData = prepareDataForExcel(suratKeluar);
+    const wsKeluar = XLSX.utils.json_to_sheet(suratKeluarData);
+    XLSX.utils.book_append_sheet(workbook, wsKeluar, 'Surat Keluar');
+
+    // Generate filename with current date and time
+    const now = new Date();
+    const currentDate = now.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).replace(/\//g, '-');
+    const currentTime = now.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).replace(/:/g, '-');
+    const filename = `Data Surat Disposisi_${currentDate}_${currentTime}.xlsx`;
+
+    // Save file
+    XLSX.writeFile(workbook, filename);
+  };
 
   const thStyle =
     'px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider backdrop-blur-sm align-middle';
@@ -141,115 +284,70 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
 
   return (
     <div className="flex flex-col gap-6 max-w-6xl mx-auto w-full">
-      {/* Search Bar - Minimalist Design */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center">
-        <div className="relative flex-grow">
-          <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+      {/* Search and Filter Section */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+        <div className="flex flex-col md:flex-row gap-3">
+          {/* Search Input */}
+          <div className="flex-1 relative">
+            <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
+            <input
+              type="text"
+              placeholder="Cari surat (perihal, nomor, asal, tujuan, disposisi, agenda, lampiran...)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-10 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 transition-all text-sm placeholder-gray-400"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
-          <input
-            type="text"
-            placeholder="Cari perihal atau nomor surat..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-8 py-2 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm"
-          />
-          {searchQuery && (
+
+          {/* Date Range Filter */}
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 cursor-pointer"
+              title="Tanggal Mulai"
+            />
+            <span className="text-gray-400 text-xs">—</span>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              className="px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 cursor-pointer"
+              title="Tanggal Akhir"
+            />
+          </div>
+
+          {/* Reset Button */}
+          {(fromDate || toDate || searchQuery) && (
             <button
-              onClick={() => setSearchQuery('')}
-              className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+              onClick={() => {
+                setFromDate('');
+                setToDate('');
+                setSearchQuery('');
+              }}
+              className="px-3 py-2.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600 flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              title="Reset Filter"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
+              Reset
             </button>
           )}
-        </div>
-      </div>
-
-      {/* Main Filter Area - Redesigned */}
-      <div className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
-        <div className="flex flex-col gap-5">
-          {/* Filter Groups */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {/* Tujuan Disposisi Filter */}
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-                Filter Tujuan Disposisi:
-              </h3>
-              <div className="flex flex-wrap gap-x-5 gap-y-2 mt-1.5 pl-1">
-                {TUJUAN_DISPOSISI.map((tujuan) => (
-                  <label
-                    key={tujuan}
-                    className="flex items-center space-x-2 text-sm cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedTujuan.includes(tujuan)}
-                      onChange={() => handleTujuanChange(tujuan)}
-                      className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0 bg-gray-100 dark:bg-gray-700 transition cursor-pointer"
-                    />
-                    <span className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                      {formatEnumText(
-                        tujuan
-                          .replace('KASUBBID_', '')
-                          .replace('KASUBBAG_', '')
-                          .replace('KAUR_', '')
-                      )}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            
-            {/* Date Range Filter */}
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                Rentang Tanggal:
-              </h3>
-              <div className="flex flex-wrap items-center gap-3 mt-1.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Dari:</span>
-                  <input
-                    type="date"
-                    value={fromDate}
-                    onChange={(e) => setFromDate(e.target.value)}
-                    className="px-2.5 py-1.5 border rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Sampai:</span>
-                  <input
-                    type="date"
-                    value={toDate}
-                    onChange={(e) => setToDate(e.target.value)}
-                    className="px-2.5 py-1.5 border rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFromDate('');
-                    setToDate('');
-                  }}
-                  className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600 flex items-center gap-1 cursor-pointer"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Reset
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -289,19 +387,34 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
               ))}
             </div>
           </div>
-          {role === 'ADMIN' && (
-            <SuratFormModal>
-              <button
-                type="button"
-                className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all whitespace-nowrap flex items-center gap-1.5 text-sm cursor-pointer"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Tambah Surat
-              </button>
-            </SuratFormModal>
-          )}
+          <div className="flex items-center gap-3">
+            {/* Download Excel Button */}
+            <button
+              onClick={exportToExcel}
+              type="button"
+              className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-1 focus:ring-green-500 transition-all whitespace-nowrap flex items-center gap-1.5 text-sm cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Download Excel
+            </button>
+            
+            {/* Tambah Surat Button - Only for Admin */}
+            {role === 'ADMIN' && (
+              <SuratFormModal>
+                <button
+                  type="button"
+                  className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all whitespace-nowrap flex items-center gap-1.5 text-sm cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Tambah Surat
+                </button>
+              </SuratFormModal>
+            )}
+          </div>
         </div>
       </div>
 
@@ -383,103 +496,106 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                 </tr>
               ) : (
                 currentPageSurat.map((surat, index) => (
-                  <SuratDetailModal surat={surat} key={surat.id}>
-                    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
-                      <td className={`${tdStyle} w-12 text-center text-gray-500 dark:text-gray-400 align-middle`}>
-                        {firstItemIndex + index}
-                      </td>
-                      <td className={`${tdStyle} min-w-[200px] align-middle`}>
-                        <p className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 break-words transition-colors">
-                          {surat.perihal}
-                        </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 break-words mt-0.5">
-                          {surat.nomor_surat}
-                        </p>
-                      </td>
-                      <td className={`${tdStyle} min-w-[120px] align-middle`}>{surat.asal_surat}</td>
-                      <td className={`${tdStyle} min-w-[120px] align-middle`}>{surat.tujuan_surat}</td>
-                      <td className={`${tdStyle} min-w-[120px] text-xs align-middle`}>
-                        <div className="flex flex-col">
-                          <span className="whitespace-nowrap">
-                            {new Date(surat.tanggal_diterima_dibuat).toLocaleDateString('id-ID', {
-                              dateStyle: 'short',
-                            })}
+                  <tr 
+                    key={surat.id}
+                    onClick={() => openModal(surat)}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                  >
+                    <td className={`${tdStyle} w-12 text-center text-gray-500 dark:text-gray-400 align-middle`}>
+                      {firstItemIndex + index}
+                    </td>
+                    <td className={`${tdStyle} min-w-[200px] align-middle`}>
+                      <p className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 break-words transition-colors">
+                        {surat.perihal}
+                      </p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 break-words mt-0.5">
+                        {surat.nomor_surat}
+                      </p>
+                    </td>
+                    <td className={`${tdStyle} min-w-[120px] align-middle`}>{surat.asal_surat}</td>
+                    <td className={`${tdStyle} min-w-[120px] align-middle`}>{surat.tujuan_surat}</td>
+                    <td className={`${tdStyle} min-w-[120px] text-xs align-middle`}>
+                      <div className="flex flex-col">
+                        <span className="whitespace-nowrap">
+                          {new Date(surat.tanggal_diterima_dibuat).toLocaleDateString('id-ID', {
+                            dateStyle: 'short',
+                          })}
+                        </span>
+                        <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                          pukul {new Date(surat.tanggal_diterima_dibuat).toLocaleTimeString('id-ID', {
+                            timeStyle: 'short',
+                          })}
+                        </span>
+                      </div>
+                    </td>
+                    <td className={`${tdStyle} min-w-[160px] align-middle`}>
+                      <div className="flex flex-wrap gap-1">
+                        {surat.tujuan_disposisi.map((tujuan) => (
+                          <span
+                            key={tujuan}
+                            className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full"
+                          >
+                            {formatEnumText(
+                              tujuan
+                                .replace('KASUBBID_', '')
+                                .replace('KASUBBAG_', '')
+                                .replace('KAUR_', '')
+                            )}
                           </span>
-                          <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                            pukul {new Date(surat.tanggal_diterima_dibuat).toLocaleTimeString('id-ID', {
-                              timeStyle: 'short',
-                            })}
-                          </span>
-                        </div>
-                      </td>
-                      <td className={`${tdStyle} min-w-[160px] align-middle`}>
-                        <div className="flex flex-wrap gap-1">
-                          {surat.tujuan_disposisi.map((tujuan) => (
-                            <span
-                              key={tujuan}
-                              className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full"
-                            >
-                              {formatEnumText(
-                                tujuan
-                                  .replace('KASUBBID_', '')
-                                  .replace('KASUBBAG_', '')
-                                  .replace('KAUR_', '')
-                              )}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className={`${tdStyle} min-w-[180px] align-middle`}>
-                        <p className="truncate whitespace-normal break-words dark:text-gray-300">
-                          {surat.isi_disposisi}
-                        </p>
-                      </td>
-                      <td className={`${tdStyle} w-28 text-center align-middle`}>
-                        <div className="flex items-center justify-center space-x-3">
-                          {surat.lampiran[0] && (
-                            <a
-                              href={surat.lampiran[0].path_file}
-                              download
-                              title="Download Scan"
-                              className="p-1.5 rounded-full text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-gray-600 transition-colors"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <DownloadIcon />
-                            </a>
-                          )}
-                          {role === 'ADMIN' && (
-                            <>
-                              {/* Wrap SuratFormModal in a div that stops propagation */}
-                              <div onClick={(e) => e.stopPropagation()}>
-                                <SuratFormModal suratToEdit={surat}>
-                                  <button
-                                    title="Ubah"
-                                    className="p-1.5 rounded-full text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-                                    type="button"
-                                  >
-                                    <EditIcon />
-                                  </button>
-                                </SuratFormModal>
-                              </div>
-                              
-                              {/* Wrap DeleteSuratButton in a div that stops propagation */}
-                              <div onClick={(e) => e.stopPropagation()}>
-                                <DeleteSuratButton suratId={surat.id}>
-                                  <button
-                                    title="Hapus"
-                                    type="button"
-                                    className="p-1.5 rounded-full text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-                                  >
-                                    <DeleteIcon />
-                                  </button>
-                                </DeleteSuratButton>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  </SuratDetailModal>
+                        ))}
+                      </div>
+                    </td>
+                    <td className={`${tdStyle} min-w-[180px] align-middle`}>
+                      <p className="truncate whitespace-normal break-words dark:text-gray-300">
+                        {surat.isi_disposisi}
+                      </p>
+                    </td>
+                    <td className={`${tdStyle} w-28 text-center align-middle`}>
+                      <div className="flex items-center justify-center space-x-3">
+                        {surat.lampiran[0] && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(surat.lampiran[0].path_file, '_blank');
+                            }}
+                            title="Lihat Dokumen"
+                            className="p-1.5 rounded-full text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                          >
+                            <DownloadIcon />
+                          </button>
+                        )}
+                        {role === 'ADMIN' && (
+                          <>
+                            {/* Wrap SuratFormModal in a div that stops propagation */}
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <SuratFormModal suratToEdit={surat}>
+                                <button
+                                  title="Ubah"
+                                  className="p-1.5 rounded-full text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                                  type="button"
+                                >
+                                  <EditIcon />
+                                </button>
+                              </SuratFormModal>
+                            </div>
+                            
+                            {/* Wrap DeleteSuratButton in a div that stops propagation */}
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <DeleteSuratButton suratId={surat.id}>
+                                <button
+                                  title="Hapus"
+                                  type="button"
+                                  className="p-1.5 rounded-full text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                                >
+                                  <DeleteIcon />
+                                </button>
+                              </DeleteSuratButton>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
                 ))
               )}
             </tbody>
@@ -567,6 +683,174 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
           </div>
         </div>
       </div>
+
+      {/* Surat Detail Modal */}
+      <Transition appear show={isModalOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50 focus:outline-none" onClose={closeModal}>
+          <div className="fixed inset-0 bg-black/30 dark:bg-black/50" aria-hidden="true" />
+          
+          <div className="fixed inset-0 w-screen overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <TransitionChild
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <DialogPanel className="w-full max-w-2xl rounded-xl bg-white dark:bg-gray-800 p-6 shadow-xl">
+                  {selectedSurat && (
+                    <>
+                      <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+                        Detail Surat {selectedSurat.arah_surat === 'MASUK' ? 'Masuk' : 'Keluar'}
+                      </DialogTitle>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        {/* Nomor Agenda */}
+                        <div>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">Nomor Agenda:</span>
+                          <p className="text-gray-900 dark:text-gray-100">{selectedSurat.nomor_agenda}</p>
+                        </div>
+
+                        {/* Nomor Surat */}
+                        <div>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">Nomor Surat:</span>
+                          <p className="text-gray-900 dark:text-gray-100">{selectedSurat.nomor_surat}</p>
+                        </div>
+
+                        {/* Tanggal Surat */}
+                        <div>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">Tanggal Surat:</span>
+                          <p className="text-gray-900 dark:text-gray-100">
+                            {new Date(selectedSurat.tanggal_surat).toLocaleDateString('id-ID', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </p>
+                        </div>
+
+                        {/* Tanggal Diterima/Dibuat */}
+                        <div>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">
+                            Tanggal {selectedSurat.arah_surat === 'MASUK' ? 'Diterima' : 'Dibuat'}:
+                          </span>
+                          <p className="text-gray-900 dark:text-gray-100">
+                            {new Date(selectedSurat.tanggal_diterima_dibuat).toLocaleDateString('id-ID', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })} pukul {new Date(selectedSurat.tanggal_diterima_dibuat).toLocaleTimeString('id-ID', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+
+                        {/* Asal Surat */}
+                        <div>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">
+                            {selectedSurat.arah_surat === 'MASUK' ? 'Asal Surat' : 'Dari'}:
+                          </span>
+                          <p className="text-gray-900 dark:text-gray-100">{selectedSurat.asal_surat}</p>
+                        </div>
+
+                        {/* Tujuan Surat */}
+                        <div>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">
+                            {selectedSurat.arah_surat === 'MASUK' ? 'Kepada' : 'Tujuan Surat'}:
+                          </span>
+                          <p className="text-gray-900 dark:text-gray-100">{selectedSurat.tujuan_surat}</p>
+                        </div>
+
+                        {/* Tipe Dokumen */}
+                        <div>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">Tipe Dokumen:</span>
+                          <p className="text-gray-900 dark:text-gray-100">{formatEnumText(selectedSurat.tipe_dokumen)}</p>
+                        </div>
+
+                        {/* Tujuan Disposisi */}
+                        <div>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">Tujuan Disposisi:</span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {selectedSurat.tujuan_disposisi.map((tujuan) => (
+                              <span
+                                key={tujuan}
+                                className="px-2 py-1 text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full"
+                              >
+                                {formatEnumText(
+                                  tujuan
+                                    .replace('KASUBBID_', '')
+                                    .replace('KASUBBAG_', '')
+                                    .replace('KAUR_', '')
+                                )}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Perihal */}
+                      <div className="mt-4">
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">Perihal:</span>
+                        <p className="text-gray-900 dark:text-gray-100 mt-1">{selectedSurat.perihal}</p>
+                      </div>
+
+                      {/* Isi Disposisi */}
+                      <div className="mt-4">
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">Isi Disposisi:</span>
+                        <p className="text-gray-900 dark:text-gray-100 mt-1 whitespace-pre-wrap">{selectedSurat.isi_disposisi}</p>
+                      </div>
+
+                      {/* Lampiran */}
+                      {selectedSurat.lampiran.length > 0 && (
+                        <div className="mt-4">
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">Lampiran:</span>
+                          <div className="mt-2 space-y-2">
+                            {selectedSurat.lampiran.map((lampiran) => (
+                              <div
+                                key={lampiran.id}
+                                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                  <span className="text-sm text-gray-900 dark:text-gray-100">{lampiran.nama_file}</span>
+                                </div>
+                                <button
+                                  onClick={() => window.open(lampiran.path_file, '_blank')}
+                                  className="px-3 py-1 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+                                >
+                                  Buka
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div className="mt-6 flex justify-end space-x-3">
+                        <button
+                          onClick={closeModal}
+                          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        >
+                          Tutup
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </DialogPanel>
+              </TransitionChild>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 }

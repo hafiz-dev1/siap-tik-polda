@@ -1,7 +1,7 @@
 // file: app/components/SuratDetailModal.tsx
 'use client';
 
-import { useState, Fragment, ReactNode } from 'react';
+import { useState, Fragment, ReactNode, cloneElement, MouseEvent } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { Surat, Lampiran } from '@prisma/client';
 
@@ -20,19 +20,23 @@ export default function SuratDetailModal({ surat, children }: Props) {
   // Fungsi helper untuk memformat teks enum agar mudah dibaca
   const formatEnumText = (text: string) => text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
+  // Clone the children and add onClick handler directly to the <tr> element
+  const clonedChildren = cloneElement(children as React.ReactElement<any>, {
+    onClick: (e: MouseEvent<HTMLTableRowElement>) => {
+      e.preventDefault();
+      openModal();
+    },
+    style: { cursor: 'pointer' }
+  });
+
   return (
     <>
-      {/* Kita bungkus children (yaitu <tr>) dengan 'div' ber-className "contents".
-        Ini adalah trik agar div tidak merusak layout tabel HTML, 
-        sambil tetap memungkinkan kita memasang event handler onClick.
-      */}
-      <div onClick={openModal} className="contents cursor-pointer">
-        {children}
-      </div>
+      {/* Return the cloned children with click handler directly attached */}
+      {clonedChildren}
 
       {/* Modal Dialog */}
       <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-10 focus:outline-none" onClose={closeModal}>
+        <Dialog as="div" className="relative z-50 focus:outline-none" onClose={closeModal}>
           {/* Latar belakang overlay */}
           <div className="fixed inset-0 bg-black/30 dark:bg-black/50" aria-hidden="true" />
           
@@ -116,9 +120,12 @@ export default function SuratDetailModal({ surat, children }: Props) {
                         <strong className="text-gray-500 dark:text-gray-400">Lampiran:</strong>
                         <div className="mt-1">
                            {surat.lampiran[0] ? (
-                            <a href={surat.lampiran[0].path_file} download className="text-indigo-600 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300 text-sm">
+                            <button 
+                              onClick={() => window.open(surat.lampiran[0].path_file, '_blank')}
+                              className="text-indigo-600 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300 text-sm cursor-pointer bg-transparent border-none p-0"
+                            >
                               {surat.lampiran[0].nama_file}
-                            </a>
+                            </button>
                           ) : (
                             <p className="text-gray-500 dark:text-gray-400">Tidak ada file terlampir.</p>
                           )}
