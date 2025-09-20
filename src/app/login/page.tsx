@@ -4,6 +4,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import ConstellationBackground from "../components/ConstellationBackground";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -47,22 +48,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-30 dark:opacity-10">
-        <svg className="w-full h-full" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e5e7eb" strokeWidth="1"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
+    <div className="min-h-screen relative flex items-center justify-center p-4">
+      {/* Constellation Background */}
+      <ConstellationBackground />
+      
+      {/* Background overlay for better contrast */}
+      <div className="absolute inset-0 bg-white/5 dark:bg-black/10"></div>
 
       {/* Login Card */}
-      <div className="relative w-full max-w-md">
-        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/30 p-8 space-y-8">
+      <div className="relative w-full max-w-md z-10">
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30 dark:border-gray-700/50 p-8 space-y-8">
           
           {/* Header */}
           <div className="text-center space-y-4">
@@ -175,9 +170,10 @@ export default function LoginPage() {
           </div>
         </div>
         
-        {/* Decorative Elements */}
-        <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-2xl opacity-20"></div>
-        <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-full blur-2xl opacity-20"></div>
+        {/* Decorative Elements - Enhanced for constellation theme */}
+        <div className="absolute -top-6 -right-6 w-32 h-32 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-6 -left-6 w-40 h-40 bg-gradient-to-br from-blue-400/30 to-indigo-400/30 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-indigo-400 rounded-full shadow-lg shadow-indigo-400/50"></div>
       </div>
     </div>
   );
