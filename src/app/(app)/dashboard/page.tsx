@@ -86,7 +86,7 @@ export default async function DashboardPage() {
       where: { deletedAt: null },
       include: { lampiran: true },
       orderBy: { createdAt: 'desc' },
-      take: 5,
+      take: 10,
     }),
     prisma.surat.findMany({
       where: { deletedAt: null },
@@ -190,53 +190,55 @@ export default async function DashboardPage() {
         </div>
         
         {recentSurat.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700/50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">No.</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Perihal</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Arah</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tanggal</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
-                {recentSurat.map((surat, index) => (
-                  <SuratDetailModal key={surat.id} surat={surat}>
-                    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 cursor-pointer">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {index + 1}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-800 dark:text-white">
-                          <div className="max-w-xs truncate" title={surat.perihal}>{surat.perihal}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{surat.nomor_surat}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${
-                          surat.arah_surat === 'MASUK' 
-                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300' 
-                            : 'bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300'
-                        }`}>
-                          {surat.arah_surat === 'MASUK' ? 'Masuk' : 'Keluar'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(surat.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300">
-                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                          Aktif
-                        </span>
-                      </td>
-                    </tr>
-                  </SuratDetailModal>
-                ))}
-              </tbody>
-            </table>
+          <div className="relative">
+            <div className="overflow-auto max-h-80 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+              <table className="min-w-full table-fixed">
+                <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0 z-20">
+                  <tr>
+                    <th className="w-16 px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">No.</th>
+                    <th className="w-2/5 px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Perihal</th>
+                    <th className="w-24 px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Arah</th>
+                    <th className="w-32 px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tanggal</th>
+                    <th className="w-24 px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+                  {recentSurat.map((surat, index) => (
+                    <SuratDetailModal key={surat.id} surat={surat}>
+                      <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 cursor-pointer">
+                        <td className="w-16 px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                          {index + 1}
+                        </td>
+                        <td className="w-2/5 px-6 py-4">
+                          <div className="text-sm font-medium text-gray-800 dark:text-white">
+                            <div className="truncate" title={surat.perihal}>{surat.perihal}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{surat.nomor_surat}</div>
+                          </div>
+                        </td>
+                        <td className="w-24 px-6 py-4">
+                          <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${
+                            surat.arah_surat === 'MASUK' 
+                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300' 
+                              : 'bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300'
+                          }`}>
+                            {surat.arah_surat === 'MASUK' ? 'Masuk' : 'Keluar'}
+                          </span>
+                        </td>
+                        <td className="w-32 px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(surat.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </td>
+                        <td className="w-24 px-6 py-4">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300">
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                            Aktif
+                          </span>
+                        </td>
+                      </tr>
+                    </SuratDetailModal>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
           <div className="text-center py-16">

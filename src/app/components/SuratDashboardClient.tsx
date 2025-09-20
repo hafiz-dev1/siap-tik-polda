@@ -45,7 +45,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Pagination state
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(25);
   const [page, setPage] = useState<number>(1);
 
   // Animate on changes (but exclude pagination changes)
@@ -159,7 +159,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -192,7 +192,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                       type="checkbox"
                       checked={selectedTujuan.includes(tujuan)}
                       onChange={() => handleTujuanChange(tujuan)}
-                      className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0 bg-gray-100 dark:bg-gray-700 transition"
+                      className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0 bg-gray-100 dark:bg-gray-700 transition cursor-pointer"
                     />
                     <span className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                       {formatEnumText(
@@ -240,7 +240,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                     setFromDate('');
                     setToDate('');
                   }}
-                  className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600 flex items-center gap-1"
+                  className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600 flex items-center gap-1 cursor-pointer"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -266,7 +266,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setActiveTipe('ALL')}
-                className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
                   activeTipe === 'ALL'
                     ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-500'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -278,7 +278,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                 <button
                   key={tipe}
                   onClick={() => setActiveTipe(tipe)}
-                  className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
                     activeTipe === tipe
                       ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-500'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -293,7 +293,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
             <SuratFormModal>
               <button
                 type="button"
-                className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all whitespace-nowrap flex items-center gap-1.5 text-sm"
+                className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all whitespace-nowrap flex items-center gap-1.5 text-sm cursor-pointer"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -309,7 +309,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
       <div className="flex bg-gray-50 dark:bg-gray-800/50 p-1 rounded-lg">
         <button
           onClick={() => setActiveArah('MASUK')}
-          className={`flex-1 py-2.5 px-4 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 rounded-md ${
+          className={`flex-1 py-2.5 px-4 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 rounded-md cursor-pointer ${
             activeArah === 'MASUK'
               ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 ring-1 ring-indigo-500'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-gray-700/60'
@@ -327,7 +327,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
         
         <button
           onClick={() => setActiveArah('KELUAR')}
-          className={`flex-1 py-2.5 px-4 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 rounded-md ${
+          className={`flex-1 py-2.5 px-4 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 rounded-md cursor-pointer ${
             activeArah === 'KELUAR'
               ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/25 ring-1 ring-emerald-500'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-gray-700/60'
@@ -346,7 +346,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
 
       {/* Table Section */}
       <div
-        className={`flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-out will-change-transform transform-gpu ${
+        className={`flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-out will-change-transform transform-gpu overflow-hidden ${
           isAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
         }`}
       >
@@ -355,14 +355,14 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
           <table className="min-w-full leading-normal">
             <thead className="sticky top-0 bg-white dark:bg-gray-800 z-10">
               <tr>
-                <th className={`${thStyle} w-12 text-center`}>No.</th>
+                <th className={`${thStyle} w-12 text-center rounded-tl-lg`}>No.</th>
                 <th className={`${thStyle} min-w-[200px]`}>Perihal</th>
                 <th className={`${thStyle} min-w-[120px]`}>Dari</th>
                 <th className={`${thStyle} min-w-[120px]`}>Kepada</th>
                 <th className={`${thStyle} min-w-[120px] whitespace-nowrap`}>Diterima</th>
                 <th className={`${thStyle} min-w-[160px]`}>Tujuan Disposisi</th>
                 <th className={`${thStyle} min-w-[180px]`}>Isi Disposisi</th>
-                <th className={`${thStyle} w-28 text-center`}>Aksi</th>
+                <th className={`${thStyle} w-28 text-center rounded-tr-lg`}>Aksi</th>
               </tr>
             </thead>
             <tbody
@@ -454,7 +454,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                                 <SuratFormModal suratToEdit={surat}>
                                   <button
                                     title="Ubah"
-                                    className="p-1.5 rounded-full text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-gray-600 transition-colors"
+                                    className="p-1.5 rounded-full text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                                     type="button"
                                   >
                                     <EditIcon />
@@ -468,7 +468,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                                   <button
                                     title="Hapus"
                                     type="button"
-                                    className="p-1.5 rounded-full text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-600 transition-colors"
+                                    className="p-1.5 rounded-full text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                                   >
                                     <DeleteIcon />
                                   </button>
@@ -494,9 +494,9 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
               <select
                 value={pageSize}
                 onChange={(e) => setPageSize(Number(e.target.value))}
-                className="px-2.5 py-1.5 border rounded-md bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                className="px-2.5 py-1.5 border rounded-md bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
               >
-                {[10, 20, 30, 50].map((n) => (
+                {[25, 50, 100].map((n) => (
                   <option key={n} value={n}>
                     {n} / halaman
                   </option>
@@ -515,7 +515,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
               className={`w-9 h-9 flex items-center justify-center rounded border text-sm ${
                 safePage === 1
                   ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
-                  : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+                  : 'cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
               }`}
               aria-label="First Page"
             >
@@ -527,7 +527,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
               className={`px-3 h-9 rounded border text-sm flex items-center ${
                 safePage === 1
                   ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
-                  : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+                  : 'cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
               }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -544,7 +544,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
               className={`px-3 h-9 rounded border text-sm flex items-center ${
                 safePage === totalPages
                   ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
-                  : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+                  : 'cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
               }`}
             >
               Next
@@ -558,7 +558,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
               className={`w-9 h-9 flex items-center justify-center rounded border text-sm ${
                 safePage === totalPages
                   ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
-                  : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+                  : 'cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
               }`}
               aria-label="Last Page"
             >
