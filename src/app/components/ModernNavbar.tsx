@@ -1,0 +1,206 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Menu, X, Shield, FileText, Users, Trash2, LayoutDashboard } from 'lucide-react';
+import UserDropdown from './UserDropdown';
+import ThemeSwitcher from './ThemeSwitcher';
+
+interface User {
+  nama: string;
+  role: string;
+  profilePictureUrl?: string;
+}
+
+interface ModernNavbarProps {
+  user: User;
+  onLogout: () => void;
+}
+
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  adminOnly?: boolean;
+}
+
+export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const navItems: NavItem[] = [
+    {
+      href: '/dashboard',
+      label: 'Dashboard',
+      icon: <LayoutDashboard className="w-4 h-4" />,
+    },
+    {
+      href: '/arsip',
+      label: 'Arsip Surat',
+      icon: <FileText className="w-4 h-4" />,
+    },
+    {
+      href: '/admin/users',
+      label: 'Manajemen Pengguna',
+      icon: <Users className="w-4 h-4" />,
+      adminOnly: true,
+    },
+    {
+      href: '/admin/trash',
+      label: 'Tempat Sampah',
+      icon: <Trash2 className="w-4 h-4" />,
+      adminOnly: true,
+    },
+  ];
+
+  const filteredNavItems = navItems.filter(item => 
+    !item.adminOnly || user.role === 'ADMIN'
+  );
+
+  const isActiveLink = (href: string) => {
+    if (href === '/dashboard') {
+      return pathname === '/dashboard';
+    }
+    return pathname.startsWith(href);
+  };
+
+  return (
+    <nav className="sticky top-0 z-50 border-b navbar-blur" 
+         style={{ 
+           backgroundColor: 'var(--navbar-bg)',
+           borderColor: 'var(--navbar-border)',
+           boxShadow: 'var(--navbar-shadow)',
+           height: 'var(--navbar-height)'
+         }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          
+          {/* Logo and Brand */}
+          <div className="flex items-center space-x-8">
+            <Link href="/dashboard" className="flex items-center space-x-3 group">
+              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg group-hover:scale-105 transition-transform duration-200">
+                <Shield className="w-5 h-5 text-white" />
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                  SIAD POLDA
+                </h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-1">
+                  Sistem Informasi Arsip Digital
+                </p>
+              </div>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex lg:space-x-1">
+              {filteredNavItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`nav-item flex items-center space-x-2 ${
+                    isActiveLink(item.href) ? 'active' : ''
+                  }`}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Side - Desktop */}
+          <div className="hidden md:flex md:items-center md:space-x-4">
+            <ThemeSwitcher />
+            <UserDropdown user={user} onLogout={onLogout} />
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center space-x-2">
+            <ThemeSwitcher />
+            <button
+              type="button"
+              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors duration-200"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-expanded="false"
+            >
+              <span className="sr-only">Buka menu utama</span>
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Navigation Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-gray-200 dark:border-gray-700 navbar-blur"
+             style={{ backgroundColor: 'var(--navbar-bg)' }}>
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            {/* User info section for mobile */}
+            <div className="px-3 py-3 border-b border-gray-200 dark:border-gray-700 mb-2">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">
+                    {user.nama.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    {user.nama}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {user.role === 'ADMIN' ? 'Administrator' : 'Pengguna'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation items */}
+            {filteredNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  isActiveLink(item.href)
+                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </Link>
+            ))}
+
+            {/* Mobile logout */}
+            <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+              <Link
+                href="/profile"
+                className="flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Shield className="w-4 h-4" />
+                <span>Profile Saya</span>
+              </Link>
+              
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onLogout();
+                }}
+                className="flex items-center space-x-3 w-full px-3 py-3 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
+              >
+                <X className="w-4 h-4" />
+                <span>Keluar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </nav>
+  );
+}
