@@ -5,6 +5,7 @@ import Link from 'next/link';
 import StatsCard from '@/app/components/StatsCard';
 import SuratChart from '@/app/components/SuratChart';
 import SuratDetailModal from '@/app/components/SuratDetailModal';
+import LiveDateTime from '@/app/components/LiveDateTime';
 import { Suspense } from 'react';
 import { prisma } from '@/lib/prisma';
 
@@ -120,12 +121,7 @@ export default async function DashboardPage() {
           <h1 className="text-3xl font-bold text-gray-800 dark:text-white tracking-tight">Dashboard</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Selamat datang! Pantau statistik dan aktivitas surat.</p>
         </div>
-        <Link href="/arsip" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-           <span>Buka Arsip Surat</span>
-           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-           </svg>
-         </Link>
+        <LiveDateTime />
        </div>
 
        {/* Kartu Statistik Utama */}

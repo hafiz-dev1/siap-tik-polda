@@ -2,6 +2,7 @@
 
 import { Role } from '@prisma/client';
 import SuratDashboardClient from '@/app/components/SuratDashboardClient'; // Path impor ke komponen klien
+import LiveDateTime from '@/app/components/LiveDateTime';
 import { getSession } from '@/lib/session'; // Impor helper sesi
 import { prisma } from '@/lib/prisma';
 
@@ -20,10 +21,13 @@ export default async function ArsipPage() {
   });
 
   return (
-    <div>
-      <div className="border-b pb-4 mb-8 text-center">
-        <h1 className="text-3xl font-bold text-gray-900">Arsip Surat</h1>
-        <p className="text-gray-500 mt-1">Kelola atau lihat semua arsip surat masuk dan keluar.</p>
+    <div className="space-y-8 max-w-6xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-b border-gray-200 dark:border-gray-700 pb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white tracking-tight">Arsip Surat</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola atau lihat semua arsip surat masuk dan keluar.</p>
+        </div>
+        <LiveDateTime />
       </div>
       
       {/* 3. Kirim 'role' dinamis ke komponen klien, bukan "ADMIN" hardcode */}

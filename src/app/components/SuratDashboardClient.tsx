@@ -11,8 +11,8 @@ import DeleteSuratButton from './DeleteSuratButton';
 
 // --- Icons ---
 const DownloadIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 21h-15A1.5 1.5 0 0 1 3 19.5v-15A1.5 1.5 0 0 1 4.5 3h9.379a1.5 1.5 0 0 1 1.06.44l4.621 4.621a1.5 1.5 0 0 1 .44 1.06V19.5A1.5 1.5 0 0 1 19.5 21zM15 3.75V7.5a.75.75 0 0 0 .75.75h3.75" />
   </svg>
 );
 const EditIcon = () => (
@@ -517,14 +517,21 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                     <td className={`${tdStyle} min-w-[120px] text-xs align-middle`}>
                       <div className="flex flex-col">
                         <span className="whitespace-nowrap">
-                          {new Date(surat.tanggal_diterima_dibuat).toLocaleDateString('id-ID', {
-                            dateStyle: 'short',
-                          })}
+                          {(() => {
+                          const d = new Date(surat.tanggal_diterima_dibuat);
+                          const day = String(d.getDate()).padStart(2, '0');
+                          const month = String(d.getMonth() + 1).padStart(2, '0');
+                          const year = String(d.getFullYear()).slice(-2);
+                          return `${day} / ${month} / ${year}`;
+                          })()}
                         </span>
                         <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                          pukul {new Date(surat.tanggal_diterima_dibuat).toLocaleTimeString('id-ID', {
-                            timeStyle: 'short',
-                          })}
+                          {new Date(surat.tanggal_diterima_dibuat)
+                          .toLocaleTimeString('id-ID', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false,
+                          })} WIB
                         </span>
                       </div>
                     </td>
