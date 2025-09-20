@@ -135,9 +135,9 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
     text.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 
   const thStyle =
-    'px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider backdrop-blur-sm';
+    'px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider backdrop-blur-sm align-middle';
   const tdStyle =
-    'px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-transparent text-sm text-gray-900 dark:text-gray-300 whitespace-normal break-words';
+    'px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-transparent text-sm text-gray-900 dark:text-gray-300 whitespace-normal break-words align-middle';
 
   return (
     <div className="flex flex-col gap-6 max-w-6xl mx-auto w-full">
@@ -385,10 +385,10 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                 currentPageSurat.map((surat, index) => (
                   <SuratDetailModal surat={surat} key={surat.id}>
                     <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
-                      <td className={`${tdStyle} w-12 text-center text-gray-500 dark:text-gray-400`}>
+                      <td className={`${tdStyle} w-12 text-center text-gray-500 dark:text-gray-400 align-middle`}>
                         {firstItemIndex + index}
                       </td>
-                      <td className={`${tdStyle} min-w-[200px]`}>
+                      <td className={`${tdStyle} min-w-[200px] align-middle`}>
                         <p className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 break-words transition-colors">
                           {surat.perihal}
                         </p>
@@ -396,9 +396,9 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                           {surat.nomor_surat}
                         </p>
                       </td>
-                      <td className={`${tdStyle} min-w-[120px]`}>{surat.asal_surat}</td>
-                      <td className={`${tdStyle} min-w-[120px]`}>{surat.tujuan_surat}</td>
-                      <td className={`${tdStyle} min-w-[120px] text-xs`}>
+                      <td className={`${tdStyle} min-w-[120px] align-middle`}>{surat.asal_surat}</td>
+                      <td className={`${tdStyle} min-w-[120px] align-middle`}>{surat.tujuan_surat}</td>
+                      <td className={`${tdStyle} min-w-[120px] text-xs align-middle`}>
                         <div className="flex flex-col">
                           <span className="whitespace-nowrap">
                             {new Date(surat.tanggal_diterima_dibuat).toLocaleDateString('id-ID', {
@@ -412,7 +412,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                           </span>
                         </div>
                       </td>
-                      <td className={`${tdStyle} min-w-[160px]`}>
+                      <td className={`${tdStyle} min-w-[160px] align-middle`}>
                         <div className="flex flex-wrap gap-1">
                           {surat.tujuan_disposisi.map((tujuan) => (
                             <span
@@ -429,12 +429,12 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                           ))}
                         </div>
                       </td>
-                      <td className={`${tdStyle} min-w-[180px]`}>
+                      <td className={`${tdStyle} min-w-[180px] align-middle`}>
                         <p className="truncate whitespace-normal break-words dark:text-gray-300">
                           {surat.isi_disposisi}
                         </p>
                       </td>
-                      <td className={`${tdStyle} w-28 text-center`}>
+                      <td className={`${tdStyle} w-28 text-center align-middle`}>
                         <div className="flex items-center justify-center space-x-3">
                           {surat.lampiran[0] && (
                             <a
