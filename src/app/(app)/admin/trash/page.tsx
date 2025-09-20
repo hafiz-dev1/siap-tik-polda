@@ -1,9 +1,7 @@
 // file: app/(app)/admin/trash/page.tsx
 
-import { PrismaClient } from '@prisma/client';
 import TrashActionButtons from '@/app/components/TrashActionButtons'; // Impor komponen aksi
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export default async function TrashPage() {
   // Ambil data surat yang hanya sudah di-soft-delete

@@ -1,14 +1,12 @@
 // file: app/(app)/profile/actions.ts
 'use server';
 
-import { PrismaClient } from '@prisma/client';
 import { getSession } from '@/lib/session';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
 import fs from 'fs/promises';
 import path from 'path';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 /**
  * Memperbarui informasi dasar pengguna (nama, username, nrp_nip, foto profil)

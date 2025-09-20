@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // Helper to build a 12‑month skeleton (including months with zero data)
 function buildLast12MonthsMap() {
@@ -17,18 +15,19 @@ function buildLast12MonthsMap() {
 }
 
 export async function GET() {
-  // Raw SQL for month aggregation on tanggal_surat
+  // Raw SQL for month aggregation on tanggal_diterima_dibuat (consistent with dashboard)
   const rows: Array<{
     month_start: Date;
     masuk: string;   // comes as string (count) from PG
     keluar: string;
   }> = await prisma.$queryRawUnsafe(`
     SELECT
-      date_trunc('month', "tanggal_surat") AS month_start,
+      date_trunc('month', "tanggal_diterima_dibuat") AS month_start,
       COUNT(*) FILTER (WHERE "arah_surat" = 'MASUK')  AS masuk,
       COUNT(*) FILTER (WHERE "arah_surat" = 'KELUAR') AS keluar
-    FROM surat
-    WHERE "tanggal_surat" >= date_trunc('month', CURRENT_DATE) - INTERVAL '11 months'
+    FROM "surat"
+    WHERE "deletedAt" IS NULL 
+      AND "tanggal_diterima_dibuat" >= date_trunc('month', CURRENT_DATE) - INTERVAL '11 months'
     GROUP BY month_start
     ORDER BY month_start ASC;
   `);

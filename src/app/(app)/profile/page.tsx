@@ -1,13 +1,11 @@
 // file: app/(app)/profile/page.tsx
 
 import { getSession } from "@/lib/session";
-import { PrismaClient } from "@prisma/client";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import UpdateProfileForm from "@/app/components/UpdateProfileForm";
 import ChangePasswordForm from "@/app/components/ChangePasswordForm";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export default async function ProfilePage() {
   const session = await getSession();

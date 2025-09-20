@@ -1,10 +1,9 @@
 // file: app/(app)/arsip/page.tsx
 
-import { PrismaClient, Role } from '@prisma/client';
+import { Role } from '@prisma/client';
 import SuratDashboardClient from '@/app/components/SuratDashboardClient'; // Path impor ke komponen klien
 import { getSession } from '@/lib/session'; // Impor helper sesi
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export default async function ArsipPage() {
   // 1. Ambil sesi pengguna yang sedang aktif

@@ -1,14 +1,13 @@
 // file: app/(app)/admin/users/actions.ts
 'use server';
 
-import { PrismaClient, Role, Prisma } from '@prisma/client';
+import { Role, Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
 import fs from 'fs/promises';
 import path from 'path';
 import { getSession } from '@/lib/session';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 /**
  * Mengambil semua pengguna yang aktif (belum di-soft-delete).

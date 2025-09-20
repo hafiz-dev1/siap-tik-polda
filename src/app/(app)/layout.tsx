@@ -5,10 +5,9 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getSession } from '@/lib/session';
-import { PrismaClient } from '@prisma/client';
 import ThemeSwitcher from '@/app/components/ThemeSwitcher'; // Impor tombol dark mode
-
-const prisma = new PrismaClient();
+import AnimatedLogoutButton from '@/app/components/AnimatedLogoutButton';
+import { prisma } from '@/lib/prisma';
 
 export default async function AppLayout({
   children,
@@ -83,14 +82,7 @@ export default async function AppLayout({
               </Link>
               
               {/* Tombol Logout */}
-              <form action={handleLogout}>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none"
-                >
-                  Logout
-                </button>
-              </form>
+              <AnimatedLogoutButton onLogout={handleLogout} />
 
               {/* Tombol Dark Mode */}
               <ThemeSwitcher />

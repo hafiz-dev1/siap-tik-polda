@@ -1,15 +1,14 @@
 // file: app/(app)/admin/actions.ts
 'use server';
 
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import fs from 'fs/promises';
 import path from 'path';
 import { getSession } from '@/lib/session';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 /**
  * Menangani proses logout pengguna (Admin dan User).
