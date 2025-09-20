@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Shield, FileText, Users, Trash2, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Shield, FileText, Users, Trash2, LayoutDashboard, Info } from 'lucide-react';
 import UserDropdown from './UserDropdown';
 import ThemeSwitcher from './ThemeSwitcher';
 
@@ -39,6 +39,11 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
       href: '/arsip',
       label: 'Arsip Surat',
       icon: <FileText className="w-4 h-4" />,
+    },
+    {
+      href: '/about',
+      label: 'Tentang',
+      icon: <Info className="w-4 h-4" />,
     },
     {
       href: '/admin/users',
