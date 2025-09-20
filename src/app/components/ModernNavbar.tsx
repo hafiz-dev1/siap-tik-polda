@@ -110,7 +110,13 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
           </div>
 
           {/* Right Side - Desktop */}
-          <div className="hidden md:flex md:items-center md:space-x-4">
+          <div className="hidden lg:flex lg:items-center lg:space-x-4">
+            <ThemeSwitcher />
+            <UserDropdown user={user} onLogout={onLogout} />
+          </div>
+
+          {/* Medium Screen Right Side */}
+          <div className="hidden md:flex lg:hidden md:items-center md:space-x-3">
             <ThemeSwitcher />
             <UserDropdown user={user} onLogout={onLogout} />
           </div>
@@ -120,7 +126,7 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
             <ThemeSwitcher />
             <button
               type="button"
-              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors duration-200"
+              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100/80 dark:text-gray-400 dark:hover:bg-gray-800/80 transition-all duration-200 backdrop-blur-sm hover:backdrop-blur-md"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-expanded="false"
             >
@@ -137,11 +143,16 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
 
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 dark:border-gray-700 navbar-blur"
-             style={{ backgroundColor: 'var(--navbar-bg)' }}>
+        <div className="md:hidden border-t border-gray-200 dark:border-gray-700 navbar-blur animate-in slide-in-from-top-2 duration-200"
+             style={{ 
+               backgroundColor: 'var(--navbar-bg)',
+               borderColor: 'var(--navbar-border)',
+               backdropFilter: 'blur(var(--navbar-backdrop-blur))',
+               WebkitBackdropFilter: 'blur(var(--navbar-backdrop-blur))'
+             }}>
           <div className="px-2 pt-2 pb-3 space-y-1">
             {/* User info section for mobile */}
-            <div className="px-3 py-3 border-b border-gray-200 dark:border-gray-700 mb-2">
+            <div className="px-3 py-3 border-b border-gray-200 dark:border-gray-700 mb-2 backdrop-blur-sm bg-white/5 dark:bg-gray-800/5 rounded-lg">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
                   <span className="text-white text-sm font-bold">
@@ -164,10 +175,10 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                className={`flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 backdrop-blur-sm ${
                   isActiveLink(item.href)
-                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    ? 'bg-blue-50/80 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 hover:backdrop-blur-md'
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -177,10 +188,10 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
             ))}
 
             {/* Mobile logout */}
-            <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+            <div className="pt-2 border-t border-gray-200 dark:border-gray-700 mt-2">
               <Link
                 href="/profile"
-                className="flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+                className="flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-200 backdrop-blur-sm hover:backdrop-blur-md"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Shield className="w-4 h-4" />
@@ -192,7 +203,7 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
                   setIsMobileMenuOpen(false);
                   onLogout();
                 }}
-                className="flex items-center space-x-3 w-full px-3 py-3 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
+                className="flex items-center space-x-3 w-full px-3 py-3 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50/80 dark:hover:bg-red-900/30 transition-all duration-200 backdrop-blur-sm hover:backdrop-blur-md"
               >
                 <X className="w-4 h-4" />
                 <span>Keluar</span>

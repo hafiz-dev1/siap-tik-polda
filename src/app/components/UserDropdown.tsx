@@ -18,6 +18,7 @@ interface UserDropdownProps {
 
 export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,8 +28,20 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
       }
     }
 
+    function handleResize() {
+      setIsMobile(window.innerWidth < 640);
+    }
+
+    // Initial check
+    handleResize();
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   const getRoleDisplayName = (role: string) => {
@@ -93,7 +106,11 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-50 navbar-blur">
+        <div className={`absolute mt-2 dropdown-menu rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-50 fade-in ${
+          isMobile 
+            ? 'right-0 left-0 mx-4 w-auto' 
+            : 'right-0 w-64'
+        }`}>
           <div className="p-4 border-b border-gray-100 dark:border-gray-700">
             <div className="flex items-center space-x-3">
               <Image

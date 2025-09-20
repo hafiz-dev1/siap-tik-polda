@@ -6,11 +6,12 @@
   --background: #ffffff;
   --foreground: #171717;
   
-  /* Modern navbar design tokens */
+  /* Modern navbar design tokens with enhanced transparency */
   --navbar-height: 4rem;
-  --navbar-bg: rgba(255, 255, 255, 0.95);
-  --navbar-border: rgba(0, 0, 0, 0.08);
-  --navbar-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --navbar-bg: rgba(255, 255, 255, 0.8);
+  --navbar-border: rgba(0, 0, 0, 0.12);
+  --navbar-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --navbar-backdrop-blur: 16px;
   
   /* Brand colors */
   --brand-primary: #3b82f6;
@@ -45,10 +46,11 @@
     --background: #0a0a0a;
     --foreground: #ededed;
     
-    /* Dark mode navbar tokens */
-    --navbar-bg: rgba(15, 23, 42, 0.95);
-    --navbar-border: rgba(255, 255, 255, 0.1);
-    --navbar-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    /* Dark mode navbar tokens with enhanced transparency */
+    --navbar-bg: rgba(15, 23, 42, 0.8);
+    --navbar-border: rgba(255, 255, 255, 0.15);
+    --navbar-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.25);
+    --navbar-backdrop-blur: 16px;
     
     /* Dark mode interactive elements */
     --nav-item-hover: rgba(59, 130, 246, 0.15);
@@ -63,12 +65,17 @@ body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* Utility classes for navbar */
+/* Enhanced utility classes for navbar */
 .navbar-blur {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--navbar-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--navbar-backdrop-blur));
+  /* Additional glassmorphism effects */
+  background: var(--navbar-bg);
+  border: 1px solid var(--navbar-border);
+  box-shadow: var(--navbar-shadow);
 }
 
+/* Enhanced navbar navigation items */
 .nav-item {
   position: relative;
   padding: var(--nav-padding-y) var(--nav-padding-x);
@@ -77,16 +84,24 @@ body {
   font-weight: 500;
   font-size: 0.875rem;
   transition: all var(--transition-fast);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .nav-item:hover {
   background-color: var(--nav-item-hover);
   color: var(--nav-item-text-hover);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .nav-item.active {
   color: var(--nav-item-active);
   background-color: var(--nav-item-hover);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .nav-item.active::after {
@@ -173,4 +188,73 @@ body {
   opacity: 0;
   transform: translateY(-10px);
   transition: all var(--transition-normal);
+}
+
+/* Enhanced dropdown positioning and styling */
+.dropdown-menu {
+  background: var(--navbar-bg);
+  backdrop-filter: blur(var(--navbar-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--navbar-backdrop-blur));
+  border: 1px solid var(--navbar-border);
+  box-shadow: var(--navbar-shadow);
+}
+
+/* Responsive dropdown positioning */
+@media (max-width: 640px) {
+  .dropdown-menu {
+    left: 1rem !important;
+    right: 1rem !important;
+    width: auto !important;
+    transform: none !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .dropdown-menu {
+    right: 0;
+    left: auto;
+    min-width: 240px;
+  }
+}
+
+/* Improved navbar responsiveness and animations */
+@media (max-width: 1024px) {
+  .navbar-desktop-nav {
+    display: none;
+  }
+}
+
+@media (min-width: 1025px) {
+  .navbar-mobile-menu {
+    display: none;
+  }
+}
+
+/* Smooth animations */
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-in {
+  animation: slideInFromTop 0.2s ease-out;
+}
+
+.fade-in {
+  animation: fadeIn 0.15s ease-out;
 }
