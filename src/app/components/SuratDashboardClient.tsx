@@ -1,7 +1,7 @@
 // file: app/components/SuratDashboardClient.tsx
 'use client';
 
-import { useState, useMemo, useEffect, Fragment } from 'react';
+import { useState, useMemo, useEffect, Fragment, useCallback } from 'react';
 import { Surat, Lampiran, Role, TipeDokumen } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
@@ -40,6 +40,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
   const [activeTipe, setActiveTipe] = useState('ALL');
   const [activeArah, setActiveArah] = useState<'MASUK' | 'KELUAR'>('MASUK');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [fromDate, setFromDate] = useState<string>('');
   const [toDate, setToDate] = useState<string>('');
   const [isAnimating, setIsAnimating] = useState(false);
@@ -52,44 +53,142 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
   const [pageSize, setPageSize] = useState<number>(25);
   const [page, setPage] = useState<number>(1);
 
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // Animate on changes (but exclude pagination changes)
   useEffect(() => {
     setIsAnimating(true);
     const id = setTimeout(() => setIsAnimating(false), 220);
     return () => clearTimeout(id);
-  }, [activeArah, activeTipe, fromDate, toDate, searchQuery]); // Removed selectedTujuan
+  }, [activeArah, activeTipe, fromDate, toDate, debouncedSearchQuery]); // Use debounced search query
 
   // Reset page when filters (excluding page/pageSize) change
   useEffect(() => {
     setPage(1);
-  }, [activeArah, activeTipe, fromDate, toDate, searchQuery]);
+  }, [activeArah, activeTipe, fromDate, toDate, debouncedSearchQuery]);
 
   // Reset page when pageSize changes
   useEffect(() => {
     setPage(1);
   }, [pageSize]);
 
+  // Memoized helper function to format enum text
+  const formatEnumText = useCallback((text: string) =>
+    text.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()), []);
+
+  // Memoized search function for better performance
+  const searchInSurat = useCallback((surat: Surat & { lampiran: Lampiran[] }, query: string) => {
+    if (!query.trim()) return true;
+    
+    const lowerQuery = query.toLowerCase();
+    
+    // Helper function to safely check string fields
+    const safeStringMatch = (field: string | null | undefined) => 
+      field ? field.toLowerCase().includes(lowerQuery) : false;
+    
+    // Check basic string fields
+    if (safeStringMatch(surat.perihal) ||
+        safeStringMatch(surat.nomor_surat) ||
+        safeStringMatch(surat.asal_surat) ||
+        safeStringMatch(surat.tujuan_surat) ||
+        safeStringMatch(surat.isi_disposisi) ||
+        safeStringMatch(surat.nomor_agenda)) {
+      return true;
+    }
+    
+    // Check formatted tipe dokumen
+    if (surat.tipe_dokumen && 
+        formatEnumText(surat.tipe_dokumen).toLowerCase().includes(lowerQuery)) {
+      return true;
+    }
+    
+    // Check tujuan disposisi array
+    if (Array.isArray(surat.tujuan_disposisi) && surat.tujuan_disposisi.length > 0) {
+      const disposisiMatch = surat.tujuan_disposisi.some(tujuan => {
+        if (!tujuan) return false;
+        const formattedTujuan = formatEnumText(
+          tujuan.replace('KASUBBID_', '').replace('KASUBBAG_', '').replace('KAUR_', '')
+        );
+        return formattedTujuan.toLowerCase().includes(lowerQuery);
+      });
+      if (disposisiMatch) return true;
+    }
+    
+    // Check lampiran files
+    if (Array.isArray(surat.lampiran) && surat.lampiran.length > 0) {
+      const lampiranMatch = surat.lampiran.some(lampiran => 
+        lampiran && lampiran.nama_file && 
+        lampiran.nama_file.toLowerCase().includes(lowerQuery)
+      );
+      if (lampiranMatch) return true;
+    }
+    
+    return false;
+  }, [formatEnumText]);
+
+  // Memoized date filter function
+  const isDateInRange = useCallback((suratDateInput: string | Date, fromDate: string, toDate: string) => {
+    if (!fromDate && !toDate) return true;
+    
+    const surat = suratDateInput instanceof Date ? suratDateInput : new Date(suratDateInput);
+    if (isNaN(surat.getTime())) return false;
+    
+    if (fromDate) {
+      const from = new Date(fromDate);
+      if (!isNaN(from.getTime())) {
+        from.setHours(0, 0, 0, 0);
+        if (surat < from) return false;
+      }
+    }
+    
+    if (toDate) {
+      const to = new Date(toDate);
+      if (!isNaN(to.getTime())) {
+        to.setHours(23, 59, 59, 999);
+        if (surat > to) return false;
+      }
+    }
+    
+    return true;
+  }, []);
+
   const tipeCounts = useMemo(() => {
     const counts: Record<string, number> = { ALL: suratList.length };
-    TIPE_DOKUMEN_ORDER.forEach(
-      (tipe) => (counts[tipe] = suratList.filter((s) => s.tipe_dokumen === tipe).length)
-    );
+    
+    // Use reduce for better performance
+    TIPE_DOKUMEN_ORDER.forEach(tipe => {
+      counts[tipe] = 0;
+    });
+    
+    suratList.forEach(surat => {
+      if (TIPE_DOKUMEN_ORDER.includes(surat.tipe_dokumen)) {
+        counts[surat.tipe_dokumen]++;
+      }
+    });
+    
     return counts;
   }, [suratList]);
 
   const tabCounts = useMemo(() => {
-    const listFilteredByType = suratList.filter(
-      (surat) => activeTipe === 'ALL' || surat.tipe_dokumen === activeTipe
-    );
-    return {
-      MASUK: listFilteredByType.filter((s) => s.arah_surat === 'MASUK').length,
-      KELUAR: listFilteredByType.filter((s) => s.arah_surat === 'KELUAR').length,
-    };
+    let masukCount = 0;
+    let keluarCount = 0;
+    
+    suratList.forEach(surat => {
+      if (activeTipe === 'ALL' || surat.tipe_dokumen === activeTipe) {
+        if (surat.arah_surat === 'MASUK') masukCount++;
+        else if (surat.arah_surat === 'KELUAR') keluarCount++;
+      }
+    });
+    
+    return { MASUK: masukCount, KELUAR: keluarCount };
   }, [suratList, activeTipe]);
-
-  // Helper function to format enum text - moved before filteredSurat to avoid temporal dead zone
-  const formatEnumText = (text: string) =>
-    text.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 
   const filteredSurat = useMemo(() => {
     return suratList.filter((surat) => {
@@ -97,85 +196,18 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
       const tipeMatch = activeTipe === 'ALL' || surat.tipe_dokumen === activeTipe;
       const arahMatch = surat.arah_surat === activeArah;
       
-      // Search filter with null safety and trimming
-      const trimmedQuery = searchQuery.trim();
-      const searchMatch = trimmedQuery === '' || (() => {
-        const lowerQuery = trimmedQuery.toLowerCase();
-        
-        // Helper function to safely check string fields
-        const safeStringMatch = (field: string | null | undefined) => 
-          field ? field.toLowerCase().includes(lowerQuery) : false;
-        
-        // Check basic string fields
-        if (safeStringMatch(surat.perihal) ||
-            safeStringMatch(surat.nomor_surat) ||
-            safeStringMatch(surat.asal_surat) ||
-            safeStringMatch(surat.tujuan_surat) ||
-            safeStringMatch(surat.isi_disposisi) ||
-            safeStringMatch(surat.nomor_agenda)) {
-          return true;
-        }
-        
-        // Check formatted tipe dokumen
-        if (surat.tipe_dokumen && 
-            formatEnumText(surat.tipe_dokumen).toLowerCase().includes(lowerQuery)) {
-          return true;
-        }
-        
-        // Check tujuan disposisi array
-        if (Array.isArray(surat.tujuan_disposisi) && surat.tujuan_disposisi.length > 0) {
-          const disposisiMatch = surat.tujuan_disposisi.some(tujuan => {
-            if (!tujuan) return false;
-            const formattedTujuan = formatEnumText(
-              tujuan.replace('KASUBBID_', '').replace('KASUBBAG_', '').replace('KAUR_', '')
-            );
-            return formattedTujuan.toLowerCase().includes(lowerQuery);
-          });
-          if (disposisiMatch) return true;
-        }
-        
-        // Check lampiran files
-        if (Array.isArray(surat.lampiran) && surat.lampiran.length > 0) {
-          const lampiranMatch = surat.lampiran.some(lampiran => 
-            lampiran && lampiran.nama_file && 
-            lampiran.nama_file.toLowerCase().includes(lowerQuery)
-          );
-          if (lampiranMatch) return true;
-        }
-        
-        return false;
-      })();
+      if (!tipeMatch || !arahMatch) return false;
       
-      // Date filter with validation
-      let dateMatch = true;
-      if (fromDate || toDate) {
-        const suratDate = new Date(surat.tanggal_diterima_dibuat);
-        
-        // Validate surat date
-        if (isNaN(suratDate.getTime())) {
-          dateMatch = false;
-        } else {
-          if (fromDate) {
-            const from = new Date(fromDate);
-            if (!isNaN(from.getTime())) {
-              from.setHours(0, 0, 0, 0);
-              if (suratDate < from) dateMatch = false;
-            }
-          }
-          
-          if (toDate && dateMatch) {
-            const to = new Date(toDate);
-            if (!isNaN(to.getTime())) {
-              to.setHours(23, 59, 59, 999);
-              if (suratDate > to) dateMatch = false;
-            }
-          }
-        }
-      }
+      // Search filter
+      const searchMatch = searchInSurat(surat, debouncedSearchQuery);
+      if (!searchMatch) return false;
       
-      return tipeMatch && arahMatch && searchMatch && dateMatch;
+      // Date filter
+      const dateMatch = isDateInRange(surat.tanggal_diterima_dibuat, fromDate, toDate);
+      
+      return dateMatch;
     });
-  }, [suratList, activeTipe, activeArah, searchQuery, fromDate, toDate]);
+  }, [suratList, activeTipe, activeArah, debouncedSearchQuery, fromDate, toDate, searchInSurat, isDateInRange]);
 
   // Pagination calculations
   const totalItems = filteredSurat.length;
@@ -193,19 +225,52 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
   const firstItemIndex = totalItems === 0 ? 0 : (safePage - 1) * pageSize + 1;
   const lastItemIndex = totalItems === 0 ? 0 : Math.min(safePage * pageSize, totalItems);
 
-  // Modal functions
-  const openModal = (surat: Surat & { lampiran: Lampiran[] }) => {
+  // Modal functions with useCallback for optimization
+  const openModal = useCallback((surat: Surat & { lampiran: Lampiran[] }) => {
     setSelectedSurat(surat);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setIsModalOpen(false);
     // Add a small delay before clearing selectedSurat to ensure smooth animation
     setTimeout(() => {
       setSelectedSurat(null);
     }, 200);
-  };
+  }, []);
+
+  // Event handlers with useCallback
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
+
+  const handleSearchClear = useCallback(() => {
+    setSearchQuery('');
+  }, []);
+
+  const handleFromDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFromDate(e.target.value);
+  }, []);
+
+  const handleToDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setToDate(e.target.value);
+  }, []);
+
+  const handleResetFilters = useCallback(() => {
+    setFromDate('');
+    setToDate('');
+    setSearchQuery('');
+  }, []);
+
+  const handlePageSizeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setPageSize(Number(e.target.value));
+  }, []);
+
+  // Pagination handlers
+  const goToFirstPage = useCallback(() => setPage(1), []);
+  const goToLastPage = useCallback(() => setPage(totalPages), [totalPages]);
+  const goToPrevPage = useCallback(() => setPage(p => Math.max(1, p - 1)), []);
+  const goToNextPage = useCallback(() => setPage(p => Math.min(totalPages, p + 1)), [totalPages]);
 
   // Cleanup effect to handle component unmount
   useEffect(() => {
@@ -215,14 +280,10 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
     };
   }, []);
 
-  // Excel export function
-  const exportToExcel = () => {
-    // Separate data by direction
-    const suratMasuk = suratList.filter(surat => surat.arah_surat === 'MASUK');
-    const suratKeluar = suratList.filter(surat => surat.arah_surat === 'KELUAR');
-
+  // Excel export function with useCallback for optimization
+  const exportToExcel = useCallback(() => {
     // Helper function to prepare data for Excel
-    const prepareDataForExcel = (data: (Surat & { lampiran: Lampiran[] })[]) => {
+    const prepareDataForExcel = (data: (Surat & { lampiran: Lampiran[] })[], isOutgoing = false) => {
       return data.map((surat, index) => ({
         'No': index + 1,
         'Nomor Agenda': surat.nomor_agenda,
@@ -256,6 +317,18 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
       }));
     };
 
+    // Separate data by direction for better performance
+    const suratMasuk: (Surat & { lampiran: Lampiran[] })[] = [];
+    const suratKeluar: (Surat & { lampiran: Lampiran[] })[] = [];
+    
+    suratList.forEach(surat => {
+      if (surat.arah_surat === 'MASUK') {
+        suratMasuk.push(surat);
+      } else {
+        suratKeluar.push(surat);
+      }
+    });
+
     // Create workbook
     const workbook = XLSX.utils.book_new();
 
@@ -265,7 +338,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
     XLSX.utils.book_append_sheet(workbook, wsMasuk, 'Surat Masuk');
 
     // Create Surat Keluar sheet  
-    const suratKeluarData = prepareDataForExcel(suratKeluar);
+    const suratKeluarData = prepareDataForExcel(suratKeluar, true);
     const wsKeluar = XLSX.utils.json_to_sheet(suratKeluarData);
     XLSX.utils.book_append_sheet(workbook, wsKeluar, 'Surat Keluar');
 
@@ -286,12 +359,47 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
 
     // Save file
     XLSX.writeFile(workbook, filename);
-  };
+  }, [suratList, formatEnumText]);
 
-  const thStyle =
-    'px-4 py-2.5 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider backdrop-blur-sm align-middle';
-  const tdStyle =
-    'px-4 py-3.5 border-b border-gray-200 dark:border-gray-700 bg-transparent text-sm text-gray-900 dark:text-gray-300 align-top h-20';
+  // Memoized constants for better performance
+  const thStyle = useMemo(() =>
+    'px-4 py-2.5 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider backdrop-blur-sm align-middle',
+    []
+  );
+  
+  const tdStyle = useMemo(() =>
+    'px-4 py-3.5 border-b border-gray-200 dark:border-gray-700 bg-transparent text-sm text-gray-900 dark:text-gray-300 align-top h-20',
+    []
+  );
+
+  // Memoized tag color function
+  const getTagColor = useCallback((target: string) => {
+    const colorMap: Record<string, string> = {
+      'KASUBBID_TEKKOM': 'bg-blue-25 dark:bg-blue-900/15 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/30',
+      'KASUBBID_TEKINFO': 'bg-emerald-25 dark:bg-emerald-900/15 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30',
+      'KASUBBAG_RENMIN': 'bg-purple-25 dark:bg-purple-900/15 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/30',
+      'KAUR_KEU': 'bg-rose-25 dark:bg-rose-900/15 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800/30'
+    };
+    return colorMap[target] || 'bg-indigo-25 dark:bg-indigo-900/15 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/30';
+  }, []);
+
+  // Memoized date formatter
+  const formatDate = useCallback((dateInput: string | Date) => {
+    const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = String(d.getFullYear()).slice(-2);
+    return `${day} / ${month} / ${year}`;
+  }, []);
+
+  const formatTime = useCallback((dateInput: string | Date) => {
+    const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    return d.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }) + ' WIB';
+  }, []);
 
   return (
     <div className="flex flex-col gap-6 max-w-6xl mx-auto w-full">
@@ -308,12 +416,12 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
               type="text"
               placeholder="Cari surat (perihal, nomor, asal, tujuan, disposisi, agenda, lampiran...)"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
               className="w-full pl-10 pr-10 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 focus:border-gray-300 dark:focus:border-gray-600 transition-all text-sm placeholder-gray-400"
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery('')}
+                onClick={handleSearchClear}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -328,7 +436,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
             <input
               type="date"
               value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
+              onChange={handleFromDateChange}
               className="px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 cursor-pointer"
               title="Tanggal Mulai"
             />
@@ -336,7 +444,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
             <input
               type="date"
               value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
+              onChange={handleToDateChange}
               className="px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 cursor-pointer"
               title="Tanggal Akhir"
             />
@@ -345,11 +453,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
           {/* Reset Button */}
           {(fromDate || toDate || searchQuery) && (
             <button
-              onClick={() => {
-                setFromDate('');
-                setToDate('');
-                setSearchQuery('');
-              }}
+              onClick={handleResetFilters}
               className="px-3 py-2.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600 flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
               title="Reset Filter"
             >
@@ -546,63 +650,34 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                     <td className={`${tdStyle} min-w-[130px] text-xs`}>
                       <div className="h-full flex flex-col justify-center">
                         <span className="whitespace-nowrap">
-                          {(() => {
-                          const d = new Date(surat.tanggal_diterima_dibuat);
-                          const day = String(d.getDate()).padStart(2, '0');
-                          const month = String(d.getMonth() + 1).padStart(2, '0');
-                          const year = String(d.getFullYear()).slice(-2);
-                          return `${day} / ${month} / ${year}`;
-                          })()}
+                          {formatDate(surat.tanggal_diterima_dibuat)}
                         </span>
                         <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                          {new Date(surat.tanggal_diterima_dibuat)
-                          .toLocaleTimeString('id-ID', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: false,
-                          })} WIB
+                          {formatTime(surat.tanggal_diterima_dibuat)}
                         </span>
                       </div>
                     </td>
                     <td className={`${tdStyle} min-w-[140px]`}>
                       <div className="h-full flex flex-wrap content-center gap-0.5 overflow-hidden items-center">
-                        {surat.tujuan_disposisi.map((tujuan, index) => {
-                          // Define soft colors for different disposition targets
-                          const getTagColor = (target: string) => {
-                            switch (target) {
-                              case 'KASUBBID_TEKKOM':
-                                return 'bg-blue-25 dark:bg-blue-900/15 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/30';
-                              case 'KASUBBID_TEKINFO':
-                                return 'bg-emerald-25 dark:bg-emerald-900/15 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30';
-                              case 'KASUBBAG_RENMIN':
-                                return 'bg-purple-25 dark:bg-purple-900/15 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/30';
-                              case 'KAUR_KEU':
-                                return 'bg-rose-25 dark:bg-rose-900/15 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800/30';
-                              default:
-                                return 'bg-indigo-25 dark:bg-indigo-900/15 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/30';
-                            }
-                          };
-
-                          return (
-                            <span
-                              key={tujuan}
-                              className={`px-1.5 py-0.5 text-xs rounded-full text-[10px] leading-tight ${getTagColor(tujuan)}`}
-                              title={formatEnumText(
-                                tujuan
-                                  .replace('KASUBBID_', '')
-                                  .replace('KASUBBAG_', '')
-                                  .replace('KAUR_', '')
-                              )}
-                            >
-                              {formatEnumText(
-                                tujuan
-                                  .replace('KASUBBID_', '')
-                                  .replace('KASUBBAG_', '')
-                                  .replace('KAUR_', '')
-                              )}
-                            </span>
-                          );
-                        })}
+                        {surat.tujuan_disposisi.map((tujuan) => (
+                          <span
+                            key={tujuan}
+                            className={`px-1.5 py-0.5 text-xs rounded-full text-[10px] leading-tight ${getTagColor(tujuan)}`}
+                            title={formatEnumText(
+                              tujuan
+                                .replace('KASUBBID_', '')
+                                .replace('KASUBBAG_', '')
+                                .replace('KAUR_', '')
+                            )}
+                          >
+                            {formatEnumText(
+                              tujuan
+                                .replace('KASUBBID_', '')
+                                .replace('KASUBBAG_', '')
+                                .replace('KAUR_', '')
+                            )}
+                          </span>
+                        ))}
                       </div>
                     </td>
                     <td className={`${tdStyle} min-w-[200px]`}>
@@ -679,7 +754,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
               <span className="text-gray-600 dark:text-gray-400">Tampilkan:</span>
               <select
                 value={pageSize}
-                onChange={(e) => setPageSize(Number(e.target.value))}
+                onChange={handlePageSizeChange}
                 className="px-2.5 py-1.5 border rounded-md bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
               >
                 {[25, 50, 100].map((n) => (
@@ -696,7 +771,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
 
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => setPage(1)}
+              onClick={goToFirstPage}
               disabled={safePage === 1}
               className={`w-9 h-9 flex items-center justify-center rounded border text-sm ${
                 safePage === 1
@@ -708,7 +783,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
               «
             </button>
             <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={goToPrevPage}
               disabled={safePage === 1}
               className={`px-3 h-9 rounded border text-sm flex items-center ${
                 safePage === 1
@@ -725,7 +800,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
               {safePage} / {totalPages}
             </span>
             <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              onClick={goToNextPage}
               disabled={safePage === totalPages}
               className={`px-3 h-9 rounded border text-sm flex items-center ${
                 safePage === totalPages
@@ -739,7 +814,7 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
               </svg>
             </button>
             <button
-              onClick={() => setPage(totalPages)}
+              onClick={goToLastPage}
               disabled={safePage === totalPages}
               className={`w-9 h-9 flex items-center justify-center rounded border text-sm ${
                 safePage === totalPages
@@ -858,43 +933,25 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                         <div>
                           <span className="font-semibold text-gray-700 dark:text-gray-300">Tujuan Disposisi:</span>
                           <div className="flex flex-wrap gap-1 mt-1">
-                            {selectedSurat.tujuan_disposisi.map((tujuan) => {
-                              // Define soft colors for different disposition targets
-                              const getTagColor = (target: string) => {
-                                switch (target) {
-                                  case 'KASUBBID_TEKKOM':
-                                    return 'bg-blue-25 dark:bg-blue-900/15 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/30';
-                                  case 'KASUBBID_TEKINFO':
-                                    return 'bg-emerald-25 dark:bg-emerald-900/15 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30';
-                                  case 'KASUBBAG_RENMIN':
-                                    return 'bg-purple-25 dark:bg-purple-900/15 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/30';
-                                  case 'KAUR_KEU':
-                                    return 'bg-rose-25 dark:bg-rose-900/15 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800/30';
-                                  default:
-                                    return 'bg-indigo-25 dark:bg-indigo-900/15 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/30';
-                                }
-                              };
-
-                              return (
-                                <span
-                                  key={tujuan}
-                                  className={`px-2 py-1 text-xs rounded-full ${getTagColor(tujuan)}`}
-                                  title={formatEnumText(
-                                    tujuan
-                                      .replace('KASUBBID_', '')
-                                      .replace('KASUBBAG_', '')
-                                      .replace('KAUR_', '')
-                                  )}
-                                >
-                                  {formatEnumText(
-                                    tujuan
-                                      .replace('KASUBBID_', '')
-                                      .replace('KASUBBAG_', '')
-                                      .replace('KAUR_', '')
-                                  )}
-                                </span>
-                              );
-                            })}
+                            {selectedSurat.tujuan_disposisi.map((tujuan) => (
+                              <span
+                                key={tujuan}
+                                className={`px-2 py-1 text-xs rounded-full ${getTagColor(tujuan)}`}
+                                title={formatEnumText(
+                                  tujuan
+                                    .replace('KASUBBID_', '')
+                                    .replace('KASUBBAG_', '')
+                                    .replace('KAUR_', '')
+                                )}
+                              >
+                                {formatEnumText(
+                                  tujuan
+                                    .replace('KASUBBID_', '')
+                                    .replace('KASUBBAG_', '')
+                                    .replace('KAUR_', '')
+                                )}
+                              </span>
+                            ))}
                           </div>
                         </div>
                       </div>
