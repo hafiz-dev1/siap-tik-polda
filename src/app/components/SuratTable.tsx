@@ -12,6 +12,7 @@ interface SuratTableProps {
   role?: Role | null;
   isAnimating: boolean;
   firstItemIndex: number;
+  activeTipe?: string;
   onSuratClick: (surat: SuratWithLampiran) => void;
   formatEnumText: (text: string) => string;
   formatDate: (date: string | Date) => string;
@@ -44,6 +45,7 @@ const SuratTableRow = memo(function SuratTableRow({
   index,
   firstItemIndex,
   role,
+  activeTipe,
   onSuratClick,
   formatEnumText,
   formatDate,
@@ -55,6 +57,7 @@ const SuratTableRow = memo(function SuratTableRow({
   index: number;
   firstItemIndex: number;
   role?: Role | null;
+  activeTipe?: string;
   onSuratClick: (surat: SuratWithLampiran) => void;
   formatEnumText: (text: string) => string;
   formatDate: (date: string | Date) => string;
@@ -88,29 +91,66 @@ const SuratTableRow = memo(function SuratTableRow({
           <p className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors overflow-hidden" 
              style={{ 
                display: '-webkit-box', 
-               WebkitLineClamp: 2, 
+               WebkitLineClamp: 3, 
                WebkitBoxOrient: 'vertical' as const,
                lineHeight: '1.2em',
-               maxHeight: '2.4em'
+               maxHeight: '3.6em'
              }} 
              title={surat.perihal}>
             {surat.perihal}
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 truncate" title={surat.nomor_surat}>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 overflow-hidden" 
+             style={{ 
+               display: '-webkit-box', 
+               WebkitLineClamp: 2, 
+               WebkitBoxOrient: 'vertical' as const,
+               lineHeight: '1em',
+               maxHeight: '2em'
+             }} 
+             title={surat.nomor_surat}>
             {surat.nomor_surat}
           </p>
         </div>
       </td>
       <td className={`${tdStyle} min-w-[130px]`}>
         <div className="h-full flex items-center overflow-hidden">
-          <p className="truncate" title={surat.asal_surat}>{surat.asal_surat}</p>
+          <p className="overflow-hidden" 
+             style={{ 
+               display: '-webkit-box', 
+               WebkitLineClamp: 3, 
+               WebkitBoxOrient: 'vertical' as const,
+               lineHeight: '1.2em',
+               maxHeight: '3.6em'
+             }} 
+             title={surat.asal_surat}>
+            {surat.asal_surat}
+          </p>
         </div>
       </td>
       <td className={`${tdStyle} min-w-[130px]`}>
         <div className="h-full flex items-center overflow-hidden">
-          <p className="truncate" title={surat.tujuan_surat}>{surat.tujuan_surat}</p>
+          <p className="overflow-hidden" 
+             style={{ 
+               display: '-webkit-box', 
+               WebkitLineClamp: 3, 
+               WebkitBoxOrient: 'vertical' as const,
+               lineHeight: '1.2em',
+               maxHeight: '3.6em'
+             }} 
+             title={surat.tujuan_surat}>
+            {surat.tujuan_surat}
+          </p>
         </div>
       </td>
+      {activeTipe === 'ALL' && (
+        <td className={`${tdStyle} min-w-[120px]`}>
+          <div className="h-full flex items-center overflow-hidden">
+            <span className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-md text-xs font-medium">
+              {formatEnumText(surat.tipe_dokumen)}
+            </span>
+          </div>
+        </td>
+      )}
       <td className={`${tdStyle} min-w-[130px] text-xs`}>
         <div className="h-full flex flex-col justify-center">
           <span className="whitespace-nowrap">
@@ -208,6 +248,7 @@ const SuratTable = memo(function SuratTable({
   role,
   isAnimating,
   firstItemIndex,
+  activeTipe,
   onSuratClick,
   formatEnumText,
   formatDate,
@@ -232,6 +273,9 @@ const SuratTable = memo(function SuratTable({
               <th className={`${thStyle} min-w-[180px]`}>Perihal</th>
               <th className={`${thStyle} min-w-[130px]`}>Dari</th>
               <th className={`${thStyle} min-w-[130px]`}>Kepada</th>
+              {activeTipe === 'ALL' && (
+                <th className={`${thStyle} min-w-[120px]`}>Jenis Dokumen</th>
+              )}
               <th className={`${thStyle} min-w-[130px] whitespace-nowrap`}>Diterima</th>
               <th className={`${thStyle} min-w-[140px]`}>Disposisi</th>
               <th className={`${thStyle} min-w-[200px]`}>Isi Disposisi</th>
@@ -245,7 +289,7 @@ const SuratTable = memo(function SuratTable({
           >
             {suratData.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center py-16 text-gray-500 dark:text-gray-400">
+                <td colSpan={activeTipe === 'ALL' ? 9 : 8} className="text-center py-16 text-gray-500 dark:text-gray-400">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -262,6 +306,7 @@ const SuratTable = memo(function SuratTable({
                   index={index}
                   firstItemIndex={firstItemIndex}
                   role={role}
+                  activeTipe={activeTipe}
                   onSuratClick={onSuratClick}
                   formatEnumText={formatEnumText}
                   formatDate={formatDate}

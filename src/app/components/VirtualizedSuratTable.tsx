@@ -13,6 +13,7 @@ interface VirtualizedSuratTableProps {
   role?: Role | null;
   isAnimating: boolean;
   firstItemIndex: number;
+  activeTipe?: string;
   onSuratClick: (surat: SuratWithLampiran) => void;
   formatEnumText: (text: string) => string;
   formatDate: (date: string | Date) => string;
@@ -51,6 +52,7 @@ const VirtualRow = memo(function VirtualRow({
     suratData: SuratWithLampiran[];
     role?: Role | null;
     firstItemIndex: number;
+    activeTipe?: string;
     onSuratClick: (surat: SuratWithLampiran) => void;
     formatEnumText: (text: string) => string;
     formatDate: (date: string | Date) => string;
@@ -63,6 +65,7 @@ const VirtualRow = memo(function VirtualRow({
     suratData, 
     role, 
     firstItemIndex, 
+    activeTipe,
     onSuratClick, 
     formatEnumText, 
     formatDate, 
@@ -102,15 +105,23 @@ const VirtualRow = memo(function VirtualRow({
             <p className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors overflow-hidden" 
                style={{ 
                  display: '-webkit-box', 
-                 WebkitLineClamp: 2, 
+                 WebkitLineClamp: 3, 
                  WebkitBoxOrient: 'vertical' as const,
                  lineHeight: '1.2em',
-                 maxHeight: '2.4em'
+                 maxHeight: '3.6em'
                }} 
                title={surat.perihal}>
               {surat.perihal}
             </p>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 truncate" title={surat.nomor_surat}>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 overflow-hidden" 
+               style={{ 
+                 display: '-webkit-box', 
+                 WebkitLineClamp: 2, 
+                 WebkitBoxOrient: 'vertical' as const,
+                 lineHeight: '1em',
+                 maxHeight: '2em'
+               }} 
+               title={surat.nomor_surat}>
               {surat.nomor_surat}
             </p>
           </div>
@@ -119,16 +130,47 @@ const VirtualRow = memo(function VirtualRow({
         {/* Dari column */}
         <div className={`${tdStyle} min-w-[130px] flex-1`}>
           <div className="h-full flex items-center overflow-hidden">
-            <p className="truncate" title={surat.asal_surat}>{surat.asal_surat}</p>
+            <p className="overflow-hidden" 
+               style={{ 
+                 display: '-webkit-box', 
+                 WebkitLineClamp: 3, 
+                 WebkitBoxOrient: 'vertical' as const,
+                 lineHeight: '1.2em',
+                 maxHeight: '3.6em'
+               }} 
+               title={surat.asal_surat}>
+              {surat.asal_surat}
+            </p>
           </div>
         </div>
         
         {/* Kepada column */}
         <div className={`${tdStyle} min-w-[130px] flex-1`}>
           <div className="h-full flex items-center overflow-hidden">
-            <p className="truncate" title={surat.tujuan_surat}>{surat.tujuan_surat}</p>
+            <p className="overflow-hidden" 
+               style={{ 
+                 display: '-webkit-box', 
+                 WebkitLineClamp: 3, 
+                 WebkitBoxOrient: 'vertical' as const,
+                 lineHeight: '1.2em',
+                 maxHeight: '3.6em'
+               }} 
+               title={surat.tujuan_surat}>
+              {surat.tujuan_surat}
+            </p>
           </div>
         </div>
+        
+        {/* Document Type column - only show when activeTipe is 'ALL' */}
+        {activeTipe === 'ALL' && (
+          <div className={`${tdStyle} min-w-[120px] flex-1`}>
+            <div className="h-full flex items-center overflow-hidden">
+              <span className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-md text-xs font-medium">
+                {formatEnumText(surat.tipe_dokumen)}
+              </span>
+            </div>
+          </div>
+        )}
         
         {/* Date column */}
         <div className={`${tdStyle} min-w-[130px] text-xs flex-1`}>
@@ -235,6 +277,7 @@ const VirtualizedSuratTable = memo(function VirtualizedSuratTable({
   role,
   isAnimating,
   firstItemIndex,
+  activeTipe,
   onSuratClick,
   formatEnumText,
   formatDate,
@@ -250,13 +293,14 @@ const VirtualizedSuratTable = memo(function VirtualizedSuratTable({
     suratData,
     role,
     firstItemIndex,
+    activeTipe,
     onSuratClick,
     formatEnumText,
     formatDate,
     formatTime,
     getTagColor,
     tdStyle,
-  }), [suratData, role, firstItemIndex, onSuratClick, formatEnumText, formatDate, formatTime, getTagColor, tdStyle]);
+  }), [suratData, role, firstItemIndex, activeTipe, onSuratClick, formatEnumText, formatDate, formatTime, getTagColor, tdStyle]);
 
   const ROW_HEIGHT = 80; // Height of each row
   const CONTAINER_HEIGHT = Math.min(600, (suratData.length + 1) * ROW_HEIGHT); // Max 600px height
@@ -291,6 +335,9 @@ const VirtualizedSuratTable = memo(function VirtualizedSuratTable({
           <div className={`${thStyle} min-w-[180px] flex-1`}>Perihal</div>
           <div className={`${thStyle} min-w-[130px] flex-1`}>Dari</div>
           <div className={`${thStyle} min-w-[130px] flex-1`}>Kepada</div>
+          {activeTipe === 'ALL' && (
+            <div className={`${thStyle} min-w-[120px] flex-1`}>Tipe</div>
+          )}
           <div className={`${thStyle} min-w-[130px] whitespace-nowrap flex-1`}>Diterima</div>
           <div className={`${thStyle} min-w-[140px] flex-1`}>Disposisi</div>
           <div className={`${thStyle} min-w-[200px] flex-1`}>Isi Disposisi</div>
