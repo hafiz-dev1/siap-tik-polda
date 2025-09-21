@@ -76,6 +76,13 @@ const SuratTableRow = memo(function SuratTableRow({
     }
   }, [surat.lampiran]);
 
+  // Helper function to truncate text safely
+  const truncateText = useCallback((text: string, maxLength: number = 150) => {
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength).trim() + '...';
+  }, []);
+
   return (
     <tr 
       onClick={handleRowClick}
@@ -97,7 +104,7 @@ const SuratTableRow = memo(function SuratTableRow({
                maxHeight: '3.6em'
              }} 
              title={surat.perihal}>
-            {surat.perihal}
+            {truncateText(surat.perihal, 120)}
           </p>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 overflow-hidden" 
              style={{ 
@@ -108,7 +115,7 @@ const SuratTableRow = memo(function SuratTableRow({
                maxHeight: '2em'
              }} 
              title={surat.nomor_surat}>
-            {surat.nomor_surat}
+            {truncateText(surat.nomor_surat, 60)}
           </p>
         </div>
       </td>
@@ -123,7 +130,7 @@ const SuratTableRow = memo(function SuratTableRow({
                maxHeight: '3.6em'
              }} 
              title={surat.asal_surat}>
-            {surat.asal_surat}
+            {truncateText(surat.asal_surat, 80)}
           </p>
         </div>
       </td>
@@ -138,7 +145,7 @@ const SuratTableRow = memo(function SuratTableRow({
                maxHeight: '3.6em'
              }} 
              title={surat.tujuan_surat}>
-            {surat.tujuan_surat}
+            {truncateText(surat.tujuan_surat, 80)}
           </p>
         </div>
       </td>
@@ -184,18 +191,21 @@ const SuratTableRow = memo(function SuratTableRow({
           ))}
         </div>
       </td>
-      <td className={`${tdStyle} min-w-[200px]`}>
+      <td className={`${tdStyle} w-[200px] max-w-[200px]`}>
         <div className="h-full flex items-center overflow-hidden">
-          <p className="dark:text-gray-300 overflow-hidden" 
+          <p className="dark:text-gray-300 overflow-hidden break-words text-ellipsis" 
              style={{ 
                display: '-webkit-box', 
                WebkitLineClamp: 3, 
                WebkitBoxOrient: 'vertical' as const,
                lineHeight: '1.2em',
-               maxHeight: '3.6em'
+               maxHeight: '3.6em',
+               wordBreak: 'break-word',
+               overflowWrap: 'break-word',
+               whiteSpace: 'normal'
              }} 
              title={surat.isi_disposisi}>
-            {surat.isi_disposisi}
+            {truncateText(surat.isi_disposisi, 100)}
           </p>
         </div>
       </td>
@@ -278,7 +288,7 @@ const SuratTable = memo(function SuratTable({
               )}
               <th className={`${thStyle} min-w-[130px] whitespace-nowrap`}>Diterima</th>
               <th className={`${thStyle} min-w-[140px]`}>Disposisi</th>
-              <th className={`${thStyle} min-w-[200px]`}>Isi Disposisi</th>
+              <th className={`${thStyle} w-[200px] max-w-[200px]`}>Isi Disposisi</th>
               <th className={`${thStyle} w-28 text-center rounded-tr-lg`}>Aksi</th>
             </tr>
           </thead>

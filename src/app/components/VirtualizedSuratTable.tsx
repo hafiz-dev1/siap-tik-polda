@@ -88,6 +88,13 @@ const VirtualRow = memo(function VirtualRow({
     }
   }, [surat.lampiran]);
 
+  // Helper function to truncate text safely
+  const truncateText = useCallback((text: string, maxLength: number = 150) => {
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength).trim() + '...';
+  }, []);
+
   return (
     <div style={style} className="flex w-full">
       <div 
@@ -111,7 +118,7 @@ const VirtualRow = memo(function VirtualRow({
                  maxHeight: '3.6em'
                }} 
                title={surat.perihal}>
-              {surat.perihal}
+              {truncateText(surat.perihal, 120)}
             </p>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 overflow-hidden" 
                style={{ 
@@ -122,7 +129,7 @@ const VirtualRow = memo(function VirtualRow({
                  maxHeight: '2em'
                }} 
                title={surat.nomor_surat}>
-              {surat.nomor_surat}
+              {truncateText(surat.nomor_surat, 60)}
             </p>
           </div>
         </div>
@@ -139,7 +146,7 @@ const VirtualRow = memo(function VirtualRow({
                  maxHeight: '3.6em'
                }} 
                title={surat.asal_surat}>
-              {surat.asal_surat}
+              {truncateText(surat.asal_surat, 80)}
             </p>
           </div>
         </div>
@@ -156,7 +163,7 @@ const VirtualRow = memo(function VirtualRow({
                  maxHeight: '3.6em'
                }} 
                title={surat.tujuan_surat}>
-              {surat.tujuan_surat}
+              {truncateText(surat.tujuan_surat, 80)}
             </p>
           </div>
         </div>
@@ -210,18 +217,21 @@ const VirtualRow = memo(function VirtualRow({
         </div>
         
         {/* Isi Disposisi column */}
-        <div className={`${tdStyle} min-w-[200px] flex-1`}>
+        <div className={`${tdStyle} w-[200px] max-w-[200px]`}>
           <div className="h-full flex items-center overflow-hidden">
-            <p className="dark:text-gray-300 overflow-hidden" 
+            <p className="dark:text-gray-300 overflow-hidden break-words text-ellipsis" 
                style={{ 
                  display: '-webkit-box', 
                  WebkitLineClamp: 3, 
                  WebkitBoxOrient: 'vertical' as const,
                  lineHeight: '1.2em',
-                 maxHeight: '3.6em'
+                 maxHeight: '3.6em',
+                 wordBreak: 'break-word',
+                 overflowWrap: 'break-word',
+                 whiteSpace: 'normal'
                }} 
                title={surat.isi_disposisi}>
-              {surat.isi_disposisi}
+              {truncateText(surat.isi_disposisi, 100)}
             </p>
           </div>
         </div>
@@ -286,7 +296,7 @@ const VirtualizedSuratTable = memo(function VirtualizedSuratTable({
 }: VirtualizedSuratTableProps) {
   // Memoized styles
   const thStyle = 'px-4 py-2.5 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider backdrop-blur-sm align-middle';
-  const tdStyle = 'px-4 py-3.5 text-sm text-gray-900 dark:text-gray-300';
+  const tdStyle = 'px-4 py-3.5 text-sm text-gray-900 dark:text-gray-300 align-top';
 
   // Memoized data for virtual list
   const itemData = useMemo(() => ({
@@ -340,7 +350,7 @@ const VirtualizedSuratTable = memo(function VirtualizedSuratTable({
           )}
           <div className={`${thStyle} min-w-[130px] whitespace-nowrap flex-1`}>Diterima</div>
           <div className={`${thStyle} min-w-[140px] flex-1`}>Disposisi</div>
-          <div className={`${thStyle} min-w-[200px] flex-1`}>Isi Disposisi</div>
+          <div className={`${thStyle} w-[200px] max-w-[200px]`}>Isi Disposisi</div>
           <div className={`${thStyle} w-28 text-center rounded-tr-lg`}>Aksi</div>
         </div>
       </div>
