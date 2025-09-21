@@ -201,8 +201,19 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setSelectedSurat(null);
+    // Add a small delay before clearing selectedSurat to ensure smooth animation
+    setTimeout(() => {
+      setSelectedSurat(null);
+    }, 200);
   };
+
+  // Cleanup effect to handle component unmount
+  useEffect(() => {
+    return () => {
+      setIsModalOpen(false);
+      setSelectedSurat(null);
+    };
+  }, []);
 
   // Excel export function
   const exportToExcel = () => {
@@ -278,9 +289,9 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
   };
 
   const thStyle =
-    'px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider backdrop-blur-sm align-middle';
+    'px-4 py-2.5 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider backdrop-blur-sm align-middle';
   const tdStyle =
-    'px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-transparent text-sm text-gray-900 dark:text-gray-300 whitespace-normal break-words align-middle';
+    'px-4 py-3.5 border-b border-gray-200 dark:border-gray-700 bg-transparent text-sm text-gray-900 dark:text-gray-300 align-top h-20';
 
   return (
     <div className="flex flex-col gap-6 max-w-6xl mx-auto w-full">
@@ -469,12 +480,12 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
             <thead className="sticky top-0 bg-white dark:bg-gray-800 z-10">
               <tr>
                 <th className={`${thStyle} w-12 text-center rounded-tl-lg`}>No.</th>
-                <th className={`${thStyle} min-w-[200px]`}>Perihal</th>
-                <th className={`${thStyle} min-w-[120px]`}>Dari</th>
-                <th className={`${thStyle} min-w-[120px]`}>Kepada</th>
-                <th className={`${thStyle} min-w-[120px] whitespace-nowrap`}>Diterima</th>
-                <th className={`${thStyle} min-w-[160px]`}>Tujuan Disposisi</th>
-                <th className={`${thStyle} min-w-[180px]`}>Isi Disposisi</th>
+                <th className={`${thStyle} min-w-[180px]`}>Perihal</th>
+                <th className={`${thStyle} min-w-[130px]`}>Dari</th>
+                <th className={`${thStyle} min-w-[130px]`}>Kepada</th>
+                <th className={`${thStyle} min-w-[130px] whitespace-nowrap`}>Diterima</th>
+                <th className={`${thStyle} min-w-[140px]`}>Disposisi</th>
+                <th className={`${thStyle} min-w-[200px]`}>Isi Disposisi</th>
                 <th className={`${thStyle} w-28 text-center rounded-tr-lg`}>Aksi</th>
               </tr>
             </thead>
@@ -501,21 +512,39 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                     onClick={() => openModal(surat)}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
                   >
-                    <td className={`${tdStyle} w-12 text-center text-gray-500 dark:text-gray-400 align-middle`}>
+                    <td className={`${tdStyle} w-12 text-center text-gray-500 dark:text-gray-400`}>
                       {firstItemIndex + index}
                     </td>
-                    <td className={`${tdStyle} min-w-[200px] align-middle`}>
-                      <p className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 break-words transition-colors">
-                        {surat.perihal}
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 break-words mt-0.5">
-                        {surat.nomor_surat}
-                      </p>
+                    <td className={`${tdStyle} min-w-[180px]`}>
+                      <div className="h-full flex flex-col justify-center overflow-hidden">
+                        <p className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors overflow-hidden" 
+                           style={{ 
+                             display: '-webkit-box', 
+                             WebkitLineClamp: 2, 
+                             WebkitBoxOrient: 'vertical' as const,
+                             lineHeight: '1.2em',
+                             maxHeight: '2.4em'
+                           }} 
+                           title={surat.perihal}>
+                          {surat.perihal}
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 truncate" title={surat.nomor_surat}>
+                          {surat.nomor_surat}
+                        </p>
+                      </div>
                     </td>
-                    <td className={`${tdStyle} min-w-[120px] align-middle`}>{surat.asal_surat}</td>
-                    <td className={`${tdStyle} min-w-[120px] align-middle`}>{surat.tujuan_surat}</td>
-                    <td className={`${tdStyle} min-w-[120px] text-xs align-middle`}>
-                      <div className="flex flex-col">
+                    <td className={`${tdStyle} min-w-[130px]`}>
+                      <div className="h-full flex items-center overflow-hidden">
+                        <p className="truncate" title={surat.asal_surat}>{surat.asal_surat}</p>
+                      </div>
+                    </td>
+                    <td className={`${tdStyle} min-w-[130px]`}>
+                      <div className="h-full flex items-center overflow-hidden">
+                        <p className="truncate" title={surat.tujuan_surat}>{surat.tujuan_surat}</p>
+                      </div>
+                    </td>
+                    <td className={`${tdStyle} min-w-[130px] text-xs`}>
+                      <div className="h-full flex flex-col justify-center">
                         <span className="whitespace-nowrap">
                           {(() => {
                           const d = new Date(surat.tanggal_diterima_dibuat);
@@ -535,30 +564,64 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                         </span>
                       </div>
                     </td>
-                    <td className={`${tdStyle} min-w-[160px] align-middle`}>
-                      <div className="flex flex-wrap gap-1">
-                        {surat.tujuan_disposisi.map((tujuan) => (
-                          <span
-                            key={tujuan}
-                            className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full"
-                          >
-                            {formatEnumText(
-                              tujuan
-                                .replace('KASUBBID_', '')
-                                .replace('KASUBBAG_', '')
-                                .replace('KAUR_', '')
-                            )}
-                          </span>
-                        ))}
+                    <td className={`${tdStyle} min-w-[140px]`}>
+                      <div className="h-full flex flex-wrap content-center gap-0.5 overflow-hidden items-center">
+                        {surat.tujuan_disposisi.map((tujuan, index) => {
+                          // Define soft colors for different disposition targets
+                          const getTagColor = (target: string) => {
+                            switch (target) {
+                              case 'KASUBBID_TEKKOM':
+                                return 'bg-blue-25 dark:bg-blue-900/15 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/30';
+                              case 'KASUBBID_TEKINFO':
+                                return 'bg-emerald-25 dark:bg-emerald-900/15 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30';
+                              case 'KASUBBAG_RENMIN':
+                                return 'bg-purple-25 dark:bg-purple-900/15 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/30';
+                              case 'KAUR_KEU':
+                                return 'bg-rose-25 dark:bg-rose-900/15 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800/30';
+                              default:
+                                return 'bg-indigo-25 dark:bg-indigo-900/15 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/30';
+                            }
+                          };
+
+                          return (
+                            <span
+                              key={tujuan}
+                              className={`px-1.5 py-0.5 text-xs rounded-full text-[10px] leading-tight ${getTagColor(tujuan)}`}
+                              title={formatEnumText(
+                                tujuan
+                                  .replace('KASUBBID_', '')
+                                  .replace('KASUBBAG_', '')
+                                  .replace('KAUR_', '')
+                              )}
+                            >
+                              {formatEnumText(
+                                tujuan
+                                  .replace('KASUBBID_', '')
+                                  .replace('KASUBBAG_', '')
+                                  .replace('KAUR_', '')
+                              )}
+                            </span>
+                          );
+                        })}
                       </div>
                     </td>
-                    <td className={`${tdStyle} min-w-[180px] align-middle`}>
-                      <p className="truncate whitespace-normal break-words dark:text-gray-300">
-                        {surat.isi_disposisi}
-                      </p>
+                    <td className={`${tdStyle} min-w-[200px]`}>
+                      <div className="h-full flex items-center overflow-hidden">
+                        <p className="dark:text-gray-300 overflow-hidden" 
+                           style={{ 
+                             display: '-webkit-box', 
+                             WebkitLineClamp: 3, 
+                             WebkitBoxOrient: 'vertical' as const,
+                             lineHeight: '1.2em',
+                             maxHeight: '3.6em'
+                           }} 
+                           title={surat.isi_disposisi}>
+                          {surat.isi_disposisi}
+                        </p>
+                      </div>
                     </td>
-                    <td className={`${tdStyle} w-28 text-center align-middle`}>
-                      <div className="flex items-center justify-center space-x-3">
+                    <td className={`${tdStyle} w-28 text-center`}>
+                      <div className="h-full flex items-center justify-center space-x-1.5">
                         {surat.lampiran[0] && (
                           <button
                             onClick={(e) => {
@@ -693,21 +756,32 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
 
       {/* Surat Detail Modal */}
       <Transition appear show={isModalOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50 focus:outline-none" onClose={closeModal}>
-          <div className="fixed inset-0 bg-black/30 dark:bg-black/50" aria-hidden="true" />
+        <Dialog as="div" className="relative z-50" onClose={closeModal}>
+          {/* Animated backdrop overlay */}
+          <TransitionChild
+            as={Fragment}
+            enter="ease-out duration-200"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-150"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/25 dark:bg-black/40" aria-hidden="true" />
+          </TransitionChild>
           
-          <div className="fixed inset-0 w-screen overflow-y-auto">
+          <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4">
               <TransitionChild
                 as={Fragment}
-                enter="ease-out duration-300"
+                enter="ease-out duration-250"
                 enterFrom="opacity-0 scale-95"
                 enterTo="opacity-100 scale-100"
                 leave="ease-in duration-200"
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <DialogPanel className="w-full max-w-2xl rounded-xl bg-white dark:bg-gray-800 p-6 shadow-xl">
+                <DialogPanel className="w-full max-w-2xl transform overflow-hidden rounded-xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-2xl transition-all border dark:border-gray-700">
                   {selectedSurat && (
                     <>
                       <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
@@ -784,19 +858,43 @@ export default function SuratDashboardClient({ suratId, suratList, role }: Props
                         <div>
                           <span className="font-semibold text-gray-700 dark:text-gray-300">Tujuan Disposisi:</span>
                           <div className="flex flex-wrap gap-1 mt-1">
-                            {selectedSurat.tujuan_disposisi.map((tujuan) => (
-                              <span
-                                key={tujuan}
-                                className="px-2 py-1 text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full"
-                              >
-                                {formatEnumText(
-                                  tujuan
-                                    .replace('KASUBBID_', '')
-                                    .replace('KASUBBAG_', '')
-                                    .replace('KAUR_', '')
-                                )}
-                              </span>
-                            ))}
+                            {selectedSurat.tujuan_disposisi.map((tujuan) => {
+                              // Define soft colors for different disposition targets
+                              const getTagColor = (target: string) => {
+                                switch (target) {
+                                  case 'KASUBBID_TEKKOM':
+                                    return 'bg-blue-25 dark:bg-blue-900/15 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/30';
+                                  case 'KASUBBID_TEKINFO':
+                                    return 'bg-emerald-25 dark:bg-emerald-900/15 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30';
+                                  case 'KASUBBAG_RENMIN':
+                                    return 'bg-purple-25 dark:bg-purple-900/15 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/30';
+                                  case 'KAUR_KEU':
+                                    return 'bg-rose-25 dark:bg-rose-900/15 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800/30';
+                                  default:
+                                    return 'bg-indigo-25 dark:bg-indigo-900/15 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/30';
+                                }
+                              };
+
+                              return (
+                                <span
+                                  key={tujuan}
+                                  className={`px-2 py-1 text-xs rounded-full ${getTagColor(tujuan)}`}
+                                  title={formatEnumText(
+                                    tujuan
+                                      .replace('KASUBBID_', '')
+                                      .replace('KASUBBAG_', '')
+                                      .replace('KAUR_', '')
+                                  )}
+                                >
+                                  {formatEnumText(
+                                    tujuan
+                                      .replace('KASUBBID_', '')
+                                      .replace('KASUBBAG_', '')
+                                      .replace('KAUR_', '')
+                                  )}
+                                </span>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
