@@ -84,16 +84,18 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
           {/* Logo and Brand */}
           <div className="flex items-center space-x-4 md:space-x-6 lg:space-x-8">
             <Link href="/dashboard" className="flex items-center space-x-3 group">
-              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg group-hover:scale-105 transition-transform duration-200">
-                <Shield className="w-5 h-5 text-white" />
-              </div>
+              <img
+                src="/logo/TIK_POLRI_navbar.png"
+                alt="TIK POLRI Logo"
+                className="w-8 h-8 object-contain transition-transform duration-1500 group-hover:rotate-y-360"
+              />
               <div className="hidden sm:block">
-                <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                  SIAD POLDA
-                </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-1 hidden lg:block">
-                  Sistem Informasi Arsip Digital
-                </p>
+              <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                S I A P
+              </h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400 -mt-1 hidden lg:block">
+                Sistem Informasi Arsip POLDA
+              </p>
               </div>
             </Link>
 

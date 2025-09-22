@@ -25,81 +25,140 @@ export default function UpdateProfileForm({ user }: { user: Pengguna }) {
   };
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <h4 className="text-lg font-semibold text-gray-800 dark:text-white border-b dark:border-gray-700 pb-2">
-        Informasi Profil
-      </h4>
-      <div>
-        <label
-          htmlFor="nama"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Nama Lengkap
-        </label>
-        <input
-          type="text"
-          name="nama"
-          id="nama"
-          defaultValue={user.nama}
-          required
-          className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
-        />
+    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+      {/* Header */}
+      <div className="relative p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-b border-gray-200/50 dark:border-gray-700/50">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="text-lg font-bold text-gray-900 dark:text-white">Informasi Profil</h4>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Perbarui informasi personal Anda</p>
+          </div>
+        </div>
       </div>
-      <div>
-        <label
-          htmlFor="username"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Username
-        </label>
-        <input
-          type="text"
-          name="username"
-          id="username"
-          defaultValue={user.username}
-          required
-          className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="nrp_nip"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          NIP / NRP
-        </label>
-        <input
-          type="text"
-          name="nrp_nip"
-          id="nrp_nip"
-          defaultValue={user.nrp_nip || ''}
-          placeholder="Isi NIP atau NRP Anda"
-          className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="profilePicture"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Ganti Foto Profil
-        </label>
-        <input
-          type="file"
-          name="profilePicture"
-          id="profilePicture"
-          accept="image/*"
-          className="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-900/50 file:text-indigo-700 dark:file:text-indigo-300 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900"
-        />
-      </div>
-      <div className="text-right border-t dark:border-gray-700 pt-4">
-        <button
-          type="submit"
-          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Simpan Perubahan
-        </button>
-      </div>
-    </form>
+
+      <form ref={formRef} onSubmit={handleSubmit} className="p-5 space-y-4">
+        <div className="space-y-4">
+          {/* Nama Lengkap */}
+          <div className="group">
+            <label
+              htmlFor="nama"
+              className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span>Nama Lengkap</span>
+            </label>
+            <input
+              type="text"
+              name="nama"
+              id="nama"
+              defaultValue={user.nama}
+              required
+              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+              placeholder="Masukkan nama lengkap Anda"
+            />
+          </div>
+
+          {/* Username */}
+          <div className="group">
+            <label
+              htmlFor="username"
+              className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+              </svg>
+              <span>Username</span>
+            </label>
+            <input
+              type="text"
+              name="username"
+              id="username"
+              defaultValue={user.username}
+              required
+              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+              placeholder="Masukkan username unik Anda"
+            />
+          </div>
+
+          {/* NIP/NRP */}
+          <div className="group">
+            <label
+              htmlFor="nrp_nip"
+              className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-4 0v1m4-1v1" />
+              </svg>
+              <span>NIP / NRP</span>
+            </label>
+            <input
+              type="text"
+              name="nrp_nip"
+              id="nrp_nip"
+              defaultValue={user.nrp_nip || ''}
+              placeholder="Isi NIP atau NRP Anda"
+              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Nomor Induk Pegawai atau Nomor Register Pokok</p>
+          </div>
+
+          {/* Profile Picture */}
+          <div className="group">
+            <label
+              htmlFor="profilePicture"
+              className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span>Ganti Foto Profil</span>
+            </label>
+            <label
+              htmlFor="profilePicture"
+              className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+            >
+              <div className="flex flex-col items-center justify-center pt-3 pb-3">
+                <svg className="w-6 h-6 mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="font-medium">Klik untuk upload</span>
+                </p>
+                <p className="text-xs text-gray-400">PNG, JPG (MAX. 5MB)</p>
+              </div>
+              <input
+                type="file"
+                name="profilePicture"
+                id="profilePicture"
+                accept="image/*"
+                className="hidden"
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <div className="pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 text-sm"
+          >
+            <span className="flex items-center justify-center space-x-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Simpan Perubahan</span>
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

@@ -1,5 +1,4 @@
 // file: app/(app)/about/page.tsx
-
 import { Shield, Users, FileText, Target, Award, Clock } from 'lucide-react';
 
 export default function AboutPage() {
@@ -8,11 +7,11 @@ export default function AboutPage() {
       {/* Header Section */}
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          Tentang SIAD TIK POLDA
+          Tentang S I A P
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-          Sistem Informasi Arsip Digital TIK POLDA adalah platform modern untuk mengelola 
-          dan mengarsipkan surat-menyurat secara digital dengan keamanan dan efisiensi tinggi.
+          Sistem Informasi Arsip POLDA (SIAP) adalah platform modern untuk mengelola 
+          dan mengarsipkan surat disposisi secara digital dengan aman dan efisien.
         </p>
       </div>
 
@@ -96,7 +95,7 @@ export default function AboutPage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center shadow-sm border border-gray-200 dark:border-gray-600">
             <h4 className="font-semibold text-gray-900 dark:text-white">Frontend</h4>
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-              Next.js 14, React, TypeScript, Tailwind CSS
+              Next.js 15, React, TypeScript, Tailwind CSS
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center shadow-sm border border-gray-200 dark:border-gray-600">

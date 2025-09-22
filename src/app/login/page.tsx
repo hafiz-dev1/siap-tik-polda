@@ -1,7 +1,7 @@
 // file: app/login/page.tsx
 'use client';
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import ConstellationBackground from "../components/ConstellationBackground";
@@ -11,7 +11,24 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [logoError, setLogoError] = useState(false);
+  const [logoLoaded, setLogoLoaded] = useState(false);
+  const [logoKey, setLogoKey] = useState(Date.now());
   const router = useRouter();
+
+  // Preload the logo image to ensure it's available before rendering
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      console.log('Logo preloaded successfully');
+      setLogoLoaded(true);
+    };
+    img.onerror = (error) => {
+      console.error('Logo preload failed:', error);
+      setLogoError(true);
+    };
+    img.src = `/logo/TIK_POLRI.png?v=${logoKey}`;
+  }, [logoKey]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -60,15 +77,25 @@ export default function LoginPage() {
         <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30 dark:border-gray-700/50 p-8 space-y-8">
           
           {/* Header */}
-          <div className="text-center space-y-4">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
+            <div className="text-center space-y-4">
+            <div className="flex items-center justify-center mb-4">
+              {logoError ? (
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                TIK
+              </div>
+              ) : (
+              <img
+                src="/logo/TIK_POLRI.png"
+                alt="TIK POLRI Logo"
+                className="w-20 h-20 object-contain"
+                onError={() => setLogoError(true)}
+                loading="eager"
+              />
+              )}
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Selamat Datang</h1>
-              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Sistem Informasi Arsip Dokumen TIK POLDA</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Sistem Informasi Arsip POLDA</p>
             </div>
           </div>
 

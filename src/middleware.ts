@@ -12,6 +12,17 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('token')?.value;
 
+  // Bypass middleware for static assets so they load before login
+  // Example: /logo/TIK_POLRI.png, other images, icons, uploads, etc.
+  if (
+    pathname.startsWith('/logo') ||
+    pathname.startsWith('/uploads') ||
+    pathname === '/favicon.ico' ||
+    /\.(?:png|jpg|jpeg|svg|gif|ico|webp|css|js|map|txt|xml)$/i.test(pathname)
+  ) {
+    return NextResponse.next();
+  }
+
   // 1. ATURAN EKSPLISIT UNTUK HALAMAN UTAMA ('/')
   if (pathname === '/') {
     if (!token) {
@@ -73,6 +84,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/', // Pastikan '/' ditangkap secara eksplisit
-    '/((?!api|_next/static|_next/image|favicon.ico|default-profile.png|uploads).*)',
+    // Jangan jalankan middleware untuk aset statis seperti /logo
+    '/((?!api|_next/static|_next/image|favicon.ico|default-profile.png|uploads|logo).*)',
   ],
 };
