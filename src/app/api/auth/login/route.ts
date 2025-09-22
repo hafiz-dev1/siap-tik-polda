@@ -12,7 +12,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Username dan password diperlukan" }, { status: 400 });
     }
 
-    const pengguna = await prisma.pengguna.findUnique({ where: { username } });
+    const pengguna = await prisma.pengguna.findUnique({
+      where: { username },
+      select: { id: true, role: true, password: true },
+    });
     if (!pengguna) {
       return NextResponse.json({ error: "Username atau password salah" }, { status: 401 });
     }
@@ -29,11 +32,8 @@ export async function POST(request: NextRequest) {
       { expiresIn: "1d" }
     );
 
-    const response = NextResponse.json({
-      message: "Login berhasil",
-      success: true,
-      role: pengguna.role,
-    });
+    // Return no content for faster client handling; cookie carries session
+    const response = new NextResponse(null, { status: 204 });
 
     response.cookies.set("token", token, {
       httpOnly: true,

@@ -18,6 +18,12 @@ export default function LoginPage() {
 
   // Preload the logo image to ensure it's available before rendering
   useEffect(() => {
+    // Prefetch dashboard to speed up post-login navigation
+    try {
+      // @ts-ignore - prefetch exists on App Router's useRouter
+      router.prefetch?.("/dashboard");
+    } catch {}
+
     const img = new Image();
     img.onload = () => {
       console.log('Logo preloaded successfully');
@@ -43,23 +49,30 @@ export default function LoginPage() {
         body: JSON.stringify({ username, password }),
       });
 
-      const data = await response.json();
-
+      // Fast-path: on success, navigate immediately without extra JSON parsing
       if (response.ok) {
+        // Optional UX: quick success toast (non-blocking)
         toast.success("Login berhasil!");
-        
-        // After refactor: All users are sent to the unified dashboard.
-        // The middleware will handle routing from there if needed.
-        router.push("/dashboard");
-        router.refresh(); // Crucial to update session-aware server components
-
-      } else {
-        toast.error(data.error || "Terjadi kesalahan");
+        // Use replace to avoid adding an extra history entry and skip refresh
+        router.replace("/dashboard");
+        return; // Avoid extra work; navigation will take over
       }
+
+      // Only parse JSON when we actually need the error
+      let errorMessage = "Terjadi kesalahan";
+      try {
+        const data = await response.json();
+        errorMessage = data.error || errorMessage;
+      } catch {
+        // ignore JSON parse errors
+      }
+      toast.error(errorMessage);
     } catch (error) {
       console.error("Fetch error:", error);
       toast.error("Tidak dapat terhubung ke server.");
     } finally {
+      // Keep spinner on if we're navigating away
+      // (replace above returns early, so we only get here if not navigating)
       setIsLoading(false);
     }
   };
@@ -80,17 +93,19 @@ export default function LoginPage() {
             <div className="text-center space-y-4">
             <div className="flex items-center justify-center mb-4">
               {logoError ? (
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                TIK
-              </div>
+                <div
+                  className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg transition-transform duration-500 hover:animate-spin-horizontal"
+                >
+                  TIK
+                </div>
               ) : (
-              <img
-                src="/logo/TIK_POLRI.png"
-                alt="TIK POLRI Logo"
-                className="w-20 h-20 object-contain"
-                onError={() => setLogoError(true)}
-                loading="eager"
-              />
+                <img
+                  src="/logo/TIK_POLRI.png"
+                  alt="TIK POLRI Logo"
+                  className="w-20 h-20 object-contain transition-transform duration-2000 hover:rotate-y-360"
+                  onError={() => setLogoError(true)}
+                  loading="eager"
+                />
               )}
             </div>
             <div>
