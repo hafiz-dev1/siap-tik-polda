@@ -20,8 +20,8 @@ export default function LoginPage() {
   useEffect(() => {
     // Prefetch dashboard to speed up post-login navigation
     try {
-      // @ts-ignore - prefetch exists on App Router's useRouter
-      router.prefetch?.("/dashboard");
+      const r = router as unknown as { prefetch?: (href: string) => void };
+      r.prefetch?.("/dashboard");
     } catch {}
 
     const img = new Image();
@@ -34,7 +34,7 @@ export default function LoginPage() {
       setLogoError(true);
     };
     img.src = `/logo/TIK_POLRI.png?v=${logoKey}`;
-  }, [logoKey]);
+  }, [logoKey, router]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -215,7 +215,6 @@ export default function LoginPage() {
         {/* Decorative Elements - Enhanced for constellation theme */}
         <div className="absolute -top-6 -right-6 w-32 h-32 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-6 -left-6 w-40 h-40 bg-gradient-to-br from-blue-400/30 to-indigo-400/30 rounded-full blur-3xl"></div>
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-indigo-400 rounded-full shadow-lg shadow-indigo-400/50"></div>
       </div>
     </div>
   );

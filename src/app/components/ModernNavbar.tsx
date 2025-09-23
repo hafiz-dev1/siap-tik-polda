@@ -119,13 +119,13 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
 
           {/* Right Side - Desktop and Medium screens */}
           <div className="hidden md:flex md:items-center md:space-x-3 lg:space-x-4">
-            {/* <ThemeSwitcher /> // dark mode toggle */}
+            <ThemeSwitcher /> {/* dark mode toggle */}
             <UserDropdown user={user} onLogout={onLogout} />
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
-            {/* <ThemeSwitcher /> {/* dark mode toggle */}
+            <ThemeSwitcher /> {/* dark mode toggle */}
             <button
               type="button"
               className="p-2 rounded-lg text-gray-500 hover:bg-gray-100/80 dark:text-gray-400 dark:hover:bg-gray-800/80 transition-all duration-200 backdrop-blur-sm hover:backdrop-blur-md"
