@@ -102,7 +102,7 @@ export default function LoginPage() {
                 <img
                   src="/logo/TIK_POLRI.png"
                   alt="TIK POLRI Logo"
-                  className="w-20 h-20 object-contain transition-transform duration-2000 hover:rotate-y-360"
+                  className="w-20 h-20 object-contain transition-transform duration-2000 hover:animate-rotate-y"
                   onError={() => setLogoError(true)}
                   loading="eager"
                 />

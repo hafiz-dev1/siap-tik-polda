@@ -1,0 +1,161 @@
+/* Chrome-specific optimizations for better performance and compatibility */
+
+/* Chrome performance optimizations */
+* {
+  box-sizing: border-box;
+}
+
+/* Hardware acceleration for Chrome */
+.gpu-accelerated {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* Chrome-specific backdrop filter fallbacks */
+@supports not (backdrop-filter: blur(10px)) {
+  .navbar-blur {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+  
+  .dark .navbar-blur {
+    background-color: rgba(15, 23, 42, 0.95) !important;
+  }
+  
+  .dropdown-menu {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+  
+  .dark .dropdown-menu {
+    background-color: rgba(15, 23, 42, 0.95) !important;
+  }
+}
+
+/* Chrome scroll optimization */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Chrome-specific animations with better performance */
+@keyframes chrome-fade-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes chrome-slide-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Chrome-optimized hover effects */
+.chrome-hover-effect {
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transform: translateZ(0);
+}
+
+.chrome-hover-effect:hover {
+  transform: translate3d(0, -1px, 0);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Chrome-specific gradient optimizations */
+.chrome-gradient {
+  background-attachment: fixed;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* Chrome form field optimizations */
+input, textarea, select {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="text"], 
+input[type="password"], 
+input[type="email"],
+textarea {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Chrome-specific dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  * {
+    color-scheme: dark;
+  }
+}
+
+/* Chrome mobile optimizations */
+@media screen and (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  input, textarea, select {
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+}
+
+/* Chrome memory optimization for long lists */
+.virtual-scroll {
+  overflow-anchor: none;
+  contain: layout;
+}
+
+/* Chrome-specific table optimizations */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Chrome-optimized modal animations */
+.modal-overlay {
+  animation: chrome-fade-in 0.2s ease-out;
+}
+
+.modal-content {
+  animation: chrome-slide-up 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Chrome print optimizations */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* Chrome-specific loading spinner */
+.chrome-spinner {
+  animation: spin 1s linear infinite;
+  transform-origin: center;
+  will-change: transform;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

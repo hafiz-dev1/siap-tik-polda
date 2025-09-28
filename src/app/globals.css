@@ -65,43 +65,68 @@ body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* Enhanced utility classes for navbar */
+/* Enhanced utility classes for navbar with Chrome optimization */
 .navbar-blur {
   backdrop-filter: blur(var(--navbar-backdrop-blur));
   -webkit-backdrop-filter: blur(var(--navbar-backdrop-blur));
+  /* Chrome-specific optimizations */
+  -moz-backdrop-filter: blur(var(--navbar-backdrop-blur));
+  -ms-backdrop-filter: blur(var(--navbar-backdrop-blur));
   /* Additional glassmorphism effects */
   background: var(--navbar-bg);
+  background-color: rgba(255, 255, 255, 0.8); /* Fallback for older Chrome */
   border: 1px solid var(--navbar-border);
+  border-color: rgba(0, 0, 0, 0.12); /* Fallback */
   box-shadow: var(--navbar-shadow);
+  /* Chrome performance optimization */
+  will-change: backdrop-filter, background-color;
+  transform: translateZ(0); /* Force hardware acceleration */
 }
 
-/* Enhanced navbar navigation items */
+/* Enhanced navbar navigation items with Chrome compatibility */
 .nav-item {
   position: relative;
   padding: var(--nav-padding-y) var(--nav-padding-x);
+  padding: 0.75rem 1.5rem; /* Fallback */
   border-radius: var(--radius-md);
+  border-radius: 0.5rem; /* Fallback */
   color: var(--nav-item-text);
+  color: #64748b; /* Fallback */
   font-weight: 500;
   font-size: 0.875rem;
   transition: all var(--transition-fast);
+  transition: all 150ms ease-out; /* Fallback */
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  -moz-backdrop-filter: blur(4px);
+  -ms-backdrop-filter: blur(4px);
+  /* Chrome performance optimization */
+  will-change: transform, background-color, backdrop-filter;
+  transform: translateZ(0);
 }
 
 .nav-item:hover {
   background-color: var(--nav-item-hover);
+  background-color: rgba(59, 130, 246, 0.1); /* Fallback */
   color: var(--nav-item-text-hover);
+  color: #1e293b; /* Fallback */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transform: translateY(-1px);
+  -moz-backdrop-filter: blur(8px);
+  -ms-backdrop-filter: blur(8px);
+  transform: translateY(-1px) translateZ(0);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .nav-item.active {
   color: var(--nav-item-active);
+  color: #3b82f6; /* Fallback */
   background-color: var(--nav-item-hover);
+  background-color: rgba(59, 130, 246, 0.1); /* Fallback */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  -moz-backdrop-filter: blur(12px);
+  -ms-backdrop-filter: blur(12px);
 }
 
 .nav-item.active::after {
@@ -113,25 +138,34 @@ body {
   width: 80%;
   height: 2px;
   background-color: var(--nav-item-active);
+  background-color: #3b82f6; /* Fallback */
   border-radius: var(--radius-full);
+  border-radius: 9999px; /* Fallback */
 }
 
-/* Button styles */
+/* Button styles with Chrome optimization */
 .btn-primary {
   background-color: var(--brand-primary);
+  background-color: #3b82f6; /* Fallback */
   color: white;
   padding: 0.5rem 1rem;
   border-radius: var(--radius-md);
+  border-radius: 0.5rem; /* Fallback */
   font-weight: 500;
   font-size: 0.875rem;
   transition: all var(--transition-fast);
+  transition: all 150ms ease-out; /* Fallback */
   border: none;
   cursor: pointer;
+  /* Chrome performance optimization */
+  will-change: transform, background-color;
+  transform: translateZ(0);
 }
 
 .btn-primary:hover {
   background-color: var(--brand-primary-hover);
-  transform: translateY(-1px);
+  background-color: #2563eb; /* Fallback */
+  transform: translateY(-1px) translateZ(0);
 }
 
 .btn-ghost {
@@ -190,13 +224,20 @@ body {
   transition: all var(--transition-normal);
 }
 
-/* Enhanced dropdown positioning and styling */
+/* Enhanced dropdown positioning and styling with Chrome optimization */
 .dropdown-menu {
   background: var(--navbar-bg);
+  background-color: rgba(255, 255, 255, 0.8); /* Fallback */
   backdrop-filter: blur(var(--navbar-backdrop-blur));
   -webkit-backdrop-filter: blur(var(--navbar-backdrop-blur));
+  -moz-backdrop-filter: blur(var(--navbar-backdrop-blur));
+  -ms-backdrop-filter: blur(var(--navbar-backdrop-blur));
   border: 1px solid var(--navbar-border);
+  border-color: rgba(0, 0, 0, 0.12); /* Fallback */
   box-shadow: var(--navbar-shadow);
+  /* Chrome performance optimization */
+  will-change: backdrop-filter, opacity, transform;
+  transform: translateZ(0);
 }
 
 /* Responsive dropdown positioning */

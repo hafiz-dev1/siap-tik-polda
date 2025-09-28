@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Menu, X, Shield, FileText, Users, Trash2, LayoutDashboard, Info } from 'lucide-react';
 import UserDropdown from './UserDropdown';
 import ThemeSwitcher from './ThemeSwitcher';
+import { useChromeOptimizations } from '@/app/hooks/useBrowserDetection';
 
 interface User {
   nama: string;
@@ -28,6 +29,7 @@ interface NavItem {
 export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { isChrome, shouldUseBackdropFilter, optimizationClass } = useChromeOptimizations();
 
   const navItems: NavItem[] = [
     {
@@ -71,13 +73,21 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b navbar-blur" 
-         style={{ 
-           backgroundColor: 'var(--navbar-bg)',
-           borderColor: 'var(--navbar-border)',
-           boxShadow: 'var(--navbar-shadow)',
-           height: 'var(--navbar-height)'
-         }}>
+    <nav 
+      className={`sticky top-0 z-50 border-b navbar-blur ${optimizationClass}`}
+      style={{ 
+        backgroundColor: 'var(--navbar-bg)',
+        borderColor: 'var(--navbar-border)',
+        boxShadow: 'var(--navbar-shadow)',
+        height: 'var(--navbar-height)',
+        ...(isChrome && shouldUseBackdropFilter ? {
+          backdropFilter: 'blur(var(--navbar-backdrop-blur))',
+          WebkitBackdropFilter: 'blur(var(--navbar-backdrop-blur))',
+        } : {
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        })
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           
@@ -87,7 +97,7 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
               <img
                 src="/logo/TIK_POLRI_navbar.png"
                 alt="TIK POLRI Logo"
-                className="w-8 h-8 object-contain transition-transform duration-1500 group-hover:rotate-y-360"
+                className="w-8 h-8 object-contain transition-transform duration-1500 group-hover:animate-rotate-y"
               />
               <div className="hidden sm:block">
               <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
