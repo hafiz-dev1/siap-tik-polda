@@ -2,28 +2,39 @@
 'use client';
 
 import { useState, useTransition, Fragment, ReactNode } from 'react';
-import { deleteSuratPermanently, restoreSurat } from '@/app/(app)/admin/actions';
+import { deleteSuratPermanently, deleteUserPermanently, restoreSurat, restoreUser } from '@/app/(app)/admin/actions';
 import toast from 'react-hot-toast';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 
 type Props = {
-  suratId: string;
+  entityId: string;
+  entityType: 'surat' | 'pengguna';
+  entityName?: string;
 };
 
-export default function TrashActionButtons({ suratId }: Props) {
+export default function TrashActionButtons({ entityId, entityType, entityName }: Props) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
-  let [isPending, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
+
+  const entityLabel = entityType === 'surat' ? 'surat' : 'akun pengguna';
+  const entityLabelCapitalized = entityLabel
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+  const entityIdentifier = entityName ? ` "${entityName}"` : '';
 
   // Handler untuk memulihkan surat
   const handleRestore = () => {
     startTransition(async () => {
-      const result = await restoreSurat(suratId);
+      const result = entityType === 'surat'
+        ? await restoreSurat(entityId)
+        : await restoreUser(entityId);
 
       if ("error" in result) {
-        toast.error(result.error ?? "Terjadi kesalahan saat memulihkan surat.");
+        toast.error(result.error ?? `Terjadi kesalahan saat memulihkan ${entityLabel}.`);
       } else {
-        toast.success(result.success ?? "Surat berhasil dipulihkan.");
+        toast.success(result.success ?? `${entityLabelCapitalized} berhasil dipulihkan.`);
       }
 
       setIsRestoreModalOpen(false);
@@ -33,12 +44,14 @@ export default function TrashActionButtons({ suratId }: Props) {
   // Handler untuk menghapus surat secara permanen
   const handleDelete = () => {
     startTransition(async () => {
-      const result = await deleteSuratPermanently(suratId);
+      const result = entityType === 'surat'
+        ? await deleteSuratPermanently(entityId)
+        : await deleteUserPermanently(entityId);
 
       if ("error" in result) {
-        toast.error(result.error ?? "Terjadi kesalahan saat menghapus surat.");
+        toast.error(result.error ?? `Terjadi kesalahan saat menghapus ${entityLabel}.`);
       } else {
-        toast.success(result.success ?? "Surat berhasil dihapus permanen.");
+        toast.success(result.success ?? `${entityLabelCapitalized} berhasil dihapus permanen.`);
       }
 
       setIsDeleteModalOpen(false);
@@ -67,10 +80,11 @@ export default function TrashActionButtons({ suratId }: Props) {
       <ModalTemplate
         isOpen={isRestoreModalOpen}
         closeModal={() => setIsRestoreModalOpen(false)}
-        title="Konfirmasi Pemulihan"
+        title={`Konfirmasi Pemulihan ${entityLabelCapitalized}`}
       >
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Apakah Anda yakin ingin memulihkan surat ini ke arsip utama?
+          Apakah Anda yakin ingin memulihkan {entityLabel}
+          {entityIdentifier} ke data utama?
         </p>
         <div className="mt-4 flex justify-end gap-4">
           <button
@@ -93,11 +107,12 @@ export default function TrashActionButtons({ suratId }: Props) {
       <ModalTemplate
         isOpen={isDeleteModalOpen}
         closeModal={() => setIsDeleteModalOpen(false)}
-        title="Konfirmasi Hapus Permanen"
+        title={`Konfirmasi Hapus Permanen ${entityLabelCapitalized}`}
       >
         <p className="text-sm text-gray-500 dark:text-gray-400">
           <span className="font-bold text-red-600 dark:text-red-400">PERINGATAN:</span>
-          Aksi ini tidak dapat dibatalkan. Data surat akan hilang selamanya. Apakah Anda benar-benar yakin?
+          Aksi ini tidak dapat dibatalkan. Data {entityLabel}
+          {entityIdentifier} akan hilang selamanya. Apakah Anda benar-benar yakin?
         </p>
         <div className="mt-4 flex justify-end gap-4">
           <button

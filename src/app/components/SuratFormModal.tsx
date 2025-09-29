@@ -1,7 +1,8 @@
 // file: app/components/SuratFormModal.tsx
 'use client';
 
-import { useState, FormEvent, useRef, Fragment, ReactNode, MouseEvent } from 'react';
+import { useState, FormEvent, useRef, Fragment, ReactNode, MouseEvent, ChangeEvent } from 'react';
+import { flushSync } from 'react-dom';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { createSurat, updateSurat } from '@/app/(app)/admin/actions'; // Menggunakan path alias yang benar
 import toast from 'react-hot-toast';
@@ -21,9 +22,23 @@ type Props = {
 export default function SuratFormModal({ suratToEdit, children }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isEditMode = suratToEdit !== undefined;
+  const [selectedFileName, setSelectedFileName] = useState('');
+  const [inputAccept, setInputAccept] = useState('application/pdf,image/*');
+  const [captureSetting, setCaptureSetting] = useState<"user" | "environment" | undefined>(undefined);
 
-  const closeModal = () => setIsOpen(false);
+  const closeModal = () => {
+    setIsOpen(false);
+    setSelectedFileName('');
+    setInputAccept('application/pdf,image/*');
+    setCaptureSetting(undefined);
+
+    const input = fileInputRef.current;
+    if (input) {
+      input.value = '';
+    }
+  };
   
   // Menghentikan propagasi event agar tidak memicu modal lain
   const openModal = (e?: MouseEvent) => {
@@ -61,6 +76,54 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
       closeModal();
     }
   }
+
+  const openFilePicker = () => {
+    const input = fileInputRef.current;
+    if (!input) return;
+
+    flushSync(() => {
+      setInputAccept('application/pdf,image/*');
+      setCaptureSetting(undefined);
+    });
+
+    input.value = '';
+    setSelectedFileName('');
+    input.click();
+  };
+
+  const openCameraCapture = () => {
+    const input = fileInputRef.current;
+    if (!input) return;
+
+    flushSync(() => {
+      setInputAccept('image/*');
+      setCaptureSetting('environment');
+    });
+
+    input.value = '';
+    setSelectedFileName('');
+    input.click();
+  };
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    setSelectedFileName(file ? file.name : '');
+
+    if (!file) {
+      setInputAccept('application/pdf,image/*');
+      setCaptureSetting(undefined);
+    }
+  };
+
+  const clearSelectedFile = () => {
+    const input = fileInputRef.current;
+    if (!input) return;
+
+    input.value = '';
+    setSelectedFileName('');
+    setInputAccept('application/pdf,image/*');
+    setCaptureSetting(undefined);
+  };
 
   return (
     <>
@@ -165,9 +228,50 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                         ))}
                       </div>
                     </div>
-                    <div className={isEditMode ? 'hidden' : 'block'}>
-                        <label htmlFor="scan_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Upload Scan Surat (PDF, JPG, PNG)</label>
-                        <input type="file" name="scan_surat" id="scan_surat" required={!isEditMode} className="mt-1 ml-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-900/50 file:text-indigo-700 dark:file:text-indigo-300 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900"/>
+                    <div className={isEditMode ? 'hidden' : 'space-y-2'}>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="scan_surat">Upload Scan Surat (PDF, JPG, PNG)</label>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={openFilePicker}
+                            className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-md border border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-700"
+                          >
+                            Upload File
+                          </button>
+                          <button
+                            type="button"
+                            onClick={openCameraCapture}
+                            className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md"
+                          >
+                            Ambil Foto
+                          </button>
+                          {selectedFileName && (
+                            <button
+                              type="button"
+                              onClick={clearSelectedFile}
+                              className="px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                            >
+                              Hapus Pilihan
+                            </button>
+                          )}
+                        </div>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          name="scan_surat"
+                          id="scan_surat"
+                          accept={inputAccept}
+                          capture={captureSetting}
+                          required={!isEditMode}
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Kamera perangkat akan terbuka ketika memilih opsi Ambil Foto Kamera pada smartphone yang mendukung.
+                        </p>
+                        {selectedFileName && (
+                          <p className="text-sm text-gray-700 dark:text-gray-200">File dipilih: <span className="font-medium">{selectedFileName}</span></p>
+                        )}
                     </div>
                     {isEditMode && <p className="text-xs text-gray-500 dark:text-gray-400">Upload ulang scan surat tidak didukung dalam mode ubah.</p>}
                     <div className="mt-6 flex justify-end gap-4 border-t dark:border-gray-700 pt-4">

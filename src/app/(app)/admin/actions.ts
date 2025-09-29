@@ -9,6 +9,34 @@ import fs from 'fs/promises';
 import path from 'path';
 import { getSession } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
+import { SURAT_TRASH_RETENTION_DAYS } from '@/lib/trashRetention';
+
+const SURAT_TRASH_RETENTION_MS = SURAT_TRASH_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+
+type LampiranRecord = {
+  path_file: string | null;
+};
+
+async function removeLampiranFiles(lampiranList: LampiranRecord[]) {
+  await Promise.all(
+    lampiranList
+      .map((lampiran) => lampiran.path_file)
+      .filter((filePath): filePath is string => Boolean(filePath))
+      .map(async (filePath) => {
+        const relativePath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
+        const absolutePath = path.join(process.cwd(), 'public', relativePath);
+
+        try {
+          await fs.unlink(absolutePath);
+        } catch (unlinkError) {
+          const nodeError = unlinkError as NodeJS.ErrnoException;
+          if (nodeError?.code !== 'ENOENT') {
+            console.warn('Gagal menghapus file lampiran surat:', absolutePath, unlinkError);
+          }
+        }
+      })
+  );
+}
 
 /**
  * Menangani proses logout pengguna (Admin dan User).
@@ -229,17 +257,151 @@ export async function deleteSuratPermanently(suratId: string) {
   }
 
   try {
-    // TODO: Tambahkan logika untuk menghapus file fisik dari public/uploads
-    // (Aksi ini saat ini hanya menghapus data DB, bukan file fisiknya)
-    
+    const surat = await prisma.surat.findUnique({
+      where: { id: suratId },
+      select: {
+        id: true,
+        lampiran: {
+          select: {
+            path_file: true,
+          },
+        },
+      },
+    });
+
+    if (!surat) {
+      return { error: 'Surat tidak ditemukan.' };
+    }
+
+    await removeLampiranFiles(surat.lampiran);
+
     await prisma.surat.delete({
       where: { id: suratId },
     });
-  } catch (error) {
+  } catch (deleteError) {
+    console.error('Gagal menghapus surat secara permanen:', deleteError);
     return { error: 'Gagal menghapus surat secara permanen.' };
   }
 
   revalidatePath('/admin/trash');
   revalidatePath('/dashboard'); // Update statistik
   return { success: 'Surat berhasil dihapus permanen.' };
+}
+
+/**
+ * Memulihkan akun pengguna yang di-soft-delete. Hanya Admin.
+ */
+export async function restoreUser(userId: string) {
+  const session = await getSession();
+  if (!session?.operatorId || session.role !== 'ADMIN') {
+    return { error: 'Gagal: Anda tidak memiliki hak akses.' };
+  }
+
+  try {
+    await prisma.pengguna.update({
+      where: { id: userId },
+      data: { deletedAt: null },
+    });
+  } catch (error) {
+    console.error('Gagal memulihkan pengguna:', error);
+    return { error: 'Gagal memulihkan akun pengguna.' };
+  }
+
+  revalidatePath('/admin/users');
+  revalidatePath('/admin/trash');
+  return { success: 'Akun pengguna berhasil dipulihkan.' };
+}
+
+/**
+ * Menghapus akun pengguna secara permanen. Hanya Admin dan tidak bisa menghapus diri sendiri.
+ */
+export async function deleteUserPermanently(userId: string) {
+  const session = await getSession();
+  if (!session?.operatorId || session.role !== 'ADMIN') {
+    return { error: 'Gagal: Anda tidak memiliki hak akses.' };
+  }
+
+  if (session.operatorId === userId) {
+    return { error: 'Gagal: Anda tidak dapat menghapus akun Anda sendiri.' };
+  }
+
+  try {
+    const user = await prisma.pengguna.findUnique({
+      where: { id: userId },
+      select: { profilePictureUrl: true },
+    });
+
+    if (!user) {
+      return { error: 'Akun pengguna tidak ditemukan.' };
+    }
+
+    if (user.profilePictureUrl) {
+      const profilePicturePath = user.profilePictureUrl.startsWith('/')
+        ? user.profilePictureUrl.slice(1)
+        : user.profilePictureUrl;
+      const absolutePath = path.join(process.cwd(), 'public', profilePicturePath);
+      try {
+        await fs.unlink(absolutePath);
+      } catch (unlinkError) {
+        const nodeError = unlinkError as NodeJS.ErrnoException;
+        if (nodeError?.code !== 'ENOENT') {
+          console.warn('Gagal menghapus file foto profil:', unlinkError);
+        }
+      }
+    }
+
+    await prisma.pengguna.delete({
+      where: { id: userId },
+    });
+  } catch (error) {
+    console.error('Gagal menghapus pengguna secara permanen:', error);
+    return { error: 'Gagal menghapus akun pengguna secara permanen.' };
+  }
+
+  revalidatePath('/admin/users');
+  revalidatePath('/admin/trash');
+  return { success: 'Akun pengguna berhasil dihapus permanen.' };
+}
+
+/**
+ * Menghapus permanen surat yang sudah lebih dari 30 hari berada di tempat sampah.
+ */
+export async function purgeExpiredSuratTrash() {
+  const cutoffDate = new Date(Date.now() - SURAT_TRASH_RETENTION_MS);
+
+  const expiredSuratList = await prisma.surat.findMany({
+    where: {
+      deletedAt: {
+        not: null,
+        lt: cutoffDate,
+      },
+    },
+    select: {
+      id: true,
+      lampiran: {
+        select: {
+          path_file: true,
+        },
+      },
+    },
+  });
+
+  if (expiredSuratList.length === 0) {
+    return { purged: 0 };
+  }
+
+  await Promise.all(
+    expiredSuratList.map(async (surat) => {
+      await removeLampiranFiles(surat.lampiran);
+      await prisma.surat.delete({
+        where: { id: surat.id },
+      });
+    })
+  );
+
+  revalidatePath('/admin/trash');
+  revalidatePath('/dashboard');
+  revalidatePath('/arsip');
+
+  return { purged: expiredSuratList.length };
 }
