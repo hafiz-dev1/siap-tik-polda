@@ -5,7 +5,7 @@ import { useState, FormEvent, useRef, Fragment, MouseEvent } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { createUser, updateUser } from '@/app/(app)/admin/users/actions'; // Menggunakan path alias yang benar
 import toast from 'react-hot-toast';
-import { Pengguna, Role } from '@prisma/client';
+import { Pengguna } from '@prisma/client';
 
 type Props = {
   userToEdit?: Pengguna; // Prop opsional untuk menentukan mode
@@ -15,6 +15,7 @@ export default function UserFormModal({ userToEdit }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const isEditMode = userToEdit !== undefined;
+  const isSuperAdmin = userToEdit?.role === 'SUPER_ADMIN';
 
   const closeModal = () => setIsOpen(false);
   
@@ -121,12 +122,23 @@ export default function UserFormModal({ userToEdit }: Props) {
                         name="role" 
                         id="role" 
                         required 
-                        defaultValue={userToEdit?.role || 'USER'} 
-                        className="mt-1 w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
+                        defaultValue={userToEdit?.role || 'ADMIN'} 
+                        disabled={isSuperAdmin}
+                        className={`mt-1 w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm ${
+                          isSuperAdmin ? 'bg-gray-100 dark:bg-gray-600 cursor-not-allowed' : ''
+                        }`}
                       >
-                        <option value="USER">User Biasa</option>
                         <option value="ADMIN">Admin</option>
+                        {isSuperAdmin && <option value="SUPER_ADMIN">Super Admin</option>}
                       </select>
+                      {isSuperAdmin && (
+                        <>
+                          <input type="hidden" name="role" value="SUPER_ADMIN" />
+                          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Hanya ada satu Super Admin aktif. Peran ini tidak dapat diubah di sini.
+                          </p>
+                        </>
+                      )}
                     </div>
                     
                     {/* Input file foto profil HANYA muncul saat mode Tambah Baru */}

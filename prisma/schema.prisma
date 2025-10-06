@@ -25,8 +25,8 @@ enum TipeDokumen {
 
 // Enum baru untuk Tipe User (Peran)
 enum Role {
+  SUPER_ADMIN
   ADMIN
-  USER
 }
 
 // Model untuk pengguna yang bisa login, sekarang disebut Pengguna
@@ -36,7 +36,7 @@ model Pengguna {
   username          String    @unique
   nrp_nip           String?  
   password          String
-  role              Role      @default(USER) // Peran pengguna (Admin/User Biasa)
+  role              Role      @default(ADMIN) // Peran pengguna (Admin/Super Admin)
   profilePictureUrl String?   // URL foto profil (opsional)
   surat             Surat[]
   createdAt         DateTime  @default(now())

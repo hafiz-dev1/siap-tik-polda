@@ -324,15 +324,19 @@ export default async function TrashPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700">
-                      <span
-                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                          user.role === 'ADMIN'
-                            ? 'bg-purple-50 text-purple-600'
-                            : 'bg-sky-50 text-sky-600'
-                        }`}
-                      >
-                        {user.role === 'ADMIN' ? 'Administrator' : 'Operator'}
-                      </span>
+                      {(() => {
+                        const normalizedRole = user.role as string;
+                        const isSuperAdmin = normalizedRole === 'SUPER_ADMIN';
+                        const badgeClass = isSuperAdmin
+                          ? 'bg-amber-50 text-amber-600'
+                          : 'bg-purple-50 text-purple-600';
+                        const roleLabel = isSuperAdmin ? 'Super Admin' : 'Admin';
+                        return (
+                          <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${badgeClass}`}>
+                            {roleLabel}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700">
                       <p className="font-medium text-gray-900">{formatDateTime(user.deletedAt)}</p>

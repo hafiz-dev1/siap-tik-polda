@@ -88,6 +88,9 @@ const VirtualRow = memo(function VirtualRow({
     }
   }, [surat.lampiran]);
 
+  const normalizedRole = (role ?? undefined) as string | undefined;
+  const canManage = normalizedRole === 'ADMIN' || normalizedRole === 'SUPER_ADMIN';
+
   // Helper function to truncate text safely
   const truncateText = useCallback((text: string, maxLength: number = 150) => {
     if (!text) return '';
@@ -248,7 +251,7 @@ const VirtualRow = memo(function VirtualRow({
                 <DownloadIcon />
               </button>
             )}
-            {role === 'ADMIN' && (
+            {canManage && (
               <>
                 <div onClick={(e) => e.stopPropagation()}>
                   <SuratFormModal suratToEdit={surat}>

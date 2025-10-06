@@ -27,6 +27,9 @@ const DocumentTypeFilter = memo(function DocumentTypeFilter({
     onTipeChange(tipe);
   }, [onTipeChange]);
 
+  const normalizedRole = (role ?? undefined) as string | undefined;
+  const canManageSurat = normalizedRole === 'ADMIN' || normalizedRole === 'SUPER_ADMIN';
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg px-5 py-4 border border-gray-200 dark:border-gray-700 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -99,7 +102,7 @@ const DocumentTypeFilter = memo(function DocumentTypeFilter({
           </button>
           
           {/* Tambah Surat Button - Only for Admin */}
-          {role === 'ADMIN' && (
+          {canManageSurat && (
             <SuratFormModal>
               <button
                 type="button"

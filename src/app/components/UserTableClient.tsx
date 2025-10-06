@@ -68,12 +68,21 @@ export default function UserTableClient({ users, currentAdminId }: Props) {
                   </td>
                   <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-transparent text-sm">
                     <span className={`relative inline-block px-3 py-1 font-semibold leading-tight ${
-                      user.role === 'ADMIN' ? 'text-green-900 dark:text-green-200' : 'text-blue-900 dark:text-blue-200'
+                      user.role === 'SUPER_ADMIN'
+                        ? 'text-amber-900 dark:text-amber-200'
+                        : 'text-green-900 dark:text-green-200'
                     }`}>
-                      <span aria-hidden className={`absolute inset-0 ${
-                        user.role === 'ADMIN' ? 'bg-green-200 dark:bg-green-700' : 'bg-blue-200 dark:bg-blue-700'
-                      } opacity-50 rounded-full`}></span>
-                      <span className="relative">{user.role}</span>
+                      <span
+                        aria-hidden
+                        className={`absolute inset-0 ${
+                          user.role === 'SUPER_ADMIN'
+                            ? 'bg-amber-200 dark:bg-amber-700'
+                            : 'bg-green-200 dark:bg-green-700'
+                        } opacity-60 rounded-full`}
+                      ></span>
+                      <span className="relative">
+                        {user.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Admin'}
+                      </span>
                     </span>
                   </td>
                   <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 bg-transparent text-sm">

@@ -54,8 +54,10 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
     },
   ];
 
+  const isPrivileged = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
+
   const filteredNavItems = navItems.filter(item => 
-    !item.adminOnly || user.role === 'ADMIN'
+    !item.adminOnly || isPrivileged
   );
 
   const isActiveLink = (href: string) => {
@@ -159,7 +161,7 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
                     {user.nama}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {user.role === 'ADMIN' ? 'Administrator' : 'Pengguna'}
+                    {user.role === 'SUPER_ADMIN' ? 'Super Admin' : user.role === 'ADMIN' ? 'Admin' : user.role}
                   </p>
                 </div>
               </div>

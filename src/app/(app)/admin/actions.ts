@@ -53,7 +53,8 @@ export async function logout() {
 export async function createSurat(formData: FormData) {
   // --- ROLE GUARD ---
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'ADMIN') {
+  const role = session?.role as unknown as string | undefined;
+  if (!session?.operatorId || !role || !['ADMIN', 'SUPER_ADMIN'].includes(role)) {
     return { error: 'Gagal: Anda tidak memiliki hak akses untuk aksi ini.' };
   }
   // --- AKHIR ROLE GUARD ---
@@ -137,7 +138,8 @@ export async function createSurat(formData: FormData) {
 export async function deleteSurat(suratId: string) {
   // --- ROLE GUARD ---
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'ADMIN') {
+  const role = session?.role as unknown as string | undefined;
+  if (!session?.operatorId || !role || !['ADMIN', 'SUPER_ADMIN'].includes(role)) {
     return { error: 'Gagal: Anda tidak memiliki hak akses untuk aksi ini.' };
   }
   // --- AKHIR ROLE GUARD ---
@@ -171,7 +173,8 @@ export async function deleteSurat(suratId: string) {
 export async function updateSurat(suratId: string, formData: FormData) {
   // --- ROLE GUARD ---
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'ADMIN') {
+  const role = session?.role as unknown as string | undefined;
+  if (!session?.operatorId || !role || !['ADMIN', 'SUPER_ADMIN'].includes(role)) {
     return { error: 'Gagal: Anda tidak memiliki hak akses untuk aksi ini.' };
   }
   // --- AKHIR ROLE GUARD ---
@@ -229,7 +232,8 @@ export async function updateSurat(suratId: string, formData: FormData) {
  */
 export async function restoreSurat(suratId: string) {
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'ADMIN') {
+  const role = session?.role as unknown as string | undefined;
+  if (!session?.operatorId || !role || !['ADMIN', 'SUPER_ADMIN'].includes(role)) {
     return { error: 'Gagal: Anda tidak memiliki hak akses.' };
   }
 
@@ -252,7 +256,8 @@ export async function restoreSurat(suratId: string) {
  */
 export async function deleteSuratPermanently(suratId: string) {
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'ADMIN') {
+  const role = session?.role as unknown as string | undefined;
+  if (!session?.operatorId || !role || !['ADMIN', 'SUPER_ADMIN'].includes(role)) {
     return { error: 'Gagal: Anda tidak memiliki hak akses.' };
   }
 
@@ -293,7 +298,8 @@ export async function deleteSuratPermanently(suratId: string) {
  */
 export async function restoreUser(userId: string) {
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'ADMIN') {
+  const role = session?.role as unknown as string | undefined;
+  if (!session?.operatorId || role !== 'SUPER_ADMIN') {
     return { error: 'Gagal: Anda tidak memiliki hak akses.' };
   }
 
@@ -317,7 +323,8 @@ export async function restoreUser(userId: string) {
  */
 export async function deleteUserPermanently(userId: string) {
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'ADMIN') {
+  const role = session?.role as unknown as string | undefined;
+  if (!session?.operatorId || role !== 'SUPER_ADMIN') {
     return { error: 'Gagal: Anda tidak memiliki hak akses.' };
   }
 
