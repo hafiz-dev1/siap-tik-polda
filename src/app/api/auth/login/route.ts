@@ -61,20 +61,20 @@ export async function POST(request: NextRequest) {
     // Return no content for faster client handling; cookie carries session
     const response = new NextResponse(null, { status: 204 });
 
-    // Deteksi production environment (untuk Vercel, Railway, dll)
+    // ✅ DIPERBAIKI: Auto-detect production environment
     const isProduction = process.env.NODE_ENV === 'production' || 
                          process.env.VERCEL === '1' ||
                          process.env.RAILWAY_ENVIRONMENT === 'production';
 
     response.cookies.set("token", token, {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "lax" : "strict", // lax untuk production compatibility
+      secure: isProduction,  // Auto-detect
+      sameSite: isProduction ? "lax" : "strict",  // lax untuk HTTPS compatibility
       maxAge: 60 * 60 * 24,
       path: "/",
     });
     
-    console.log('✅ Login successful for user:', username);
+    // Logging untuk debugging
     console.log('🍪 Cookie settings:', {
       secure: isProduction,
       sameSite: isProduction ? "lax" : "strict",
