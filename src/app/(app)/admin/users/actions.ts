@@ -213,6 +213,11 @@ export async function deleteUser(userId: string) {
       return { error: 'Pengguna tidak ditemukan.' };
     }
 
+    // 3. Proteksi: Admin tidak bisa menghapus Super Admin
+    if (targetUser.role === Role.SUPER_ADMIN && session.role !== Role.SUPER_ADMIN) {
+      return { error: 'Gagal: Anda tidak memiliki hak untuk menghapus akun Super Admin.' };
+    }
+
     if (targetUser.role === Role.SUPER_ADMIN) {
       return { error: 'Super Admin tidak dapat dihapus.' };
     }
