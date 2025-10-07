@@ -6,7 +6,7 @@ import { getSession } from '@/lib/session'; // <-- Impor getSession
 
 export default async function UserManagementPage() {
   const session = await getSession(); // <-- Dapatkan data sesi
-  if (session?.role !== 'SUPER_ADMIN') {
+  if (!session || !['SUPER_ADMIN', 'ADMIN'].includes(session.role)) {
     redirect('/dashboard');
   }
 

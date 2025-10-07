@@ -9,14 +9,29 @@ import path from 'path';
 import { getSession } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 
+const USER_MANAGEMENT_ROLES: Role[] = [Role.SUPER_ADMIN, Role.ADMIN];
+
+type SessionResult = Awaited<ReturnType<typeof getSession>>;
+type AppSession = SessionResult extends null ? never : SessionResult;
+
+function hasUserManagementAccess(
+  session: SessionResult
+): session is AppSession {
+  return (
+    !!session &&
+    typeof session.operatorId === 'string' &&
+    USER_MANAGEMENT_ROLES.includes(session.role)
+  );
+}
+
 /**
  * Mengambil semua pengguna yang aktif (belum di-soft-delete).
- * Hanya bisa diakses oleh ADMIN.
+ * Hanya bisa diakses oleh peran manajer pengguna (Super Admin & Admin).
  */
 export async function getUsers() {
   // --- ROLE GUARD ---
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'SUPER_ADMIN') {
+  if (!hasUserManagementAccess(session)) {
     return []; // Jika bukan admin, kembalikan array kosong (tidak berhak melihat)
   }
   // --- AKHIR ROLE GUARD ---
@@ -34,12 +49,12 @@ export async function getUsers() {
 }
 
 /**
- * Membuat pengguna baru. Hanya bisa dilakukan oleh ADMIN.
+ * Membuat pengguna baru. Hanya bisa dilakukan oleh peran manajer pengguna (Super Admin & Admin).
  */
 export async function createUser(formData: FormData) {
   // --- ROLE GUARD ---
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'SUPER_ADMIN') {
+  if (!hasUserManagementAccess(session)) {
     return { error: 'Gagal: Anda tidak memiliki hak akses.' };
   }
   // --- AKHIR ROLE GUARD ---
@@ -96,13 +111,13 @@ export async function createUser(formData: FormData) {
 }
 
 /**
- * Memperbarui data pengguna. Hanya Admin.
+ * Memperbarui data pengguna. Hanya peran manajer pengguna (Super Admin & Admin).
  * (Tidak bisa mengubah username atau foto profil, sesuai aturan kita sebelumnya)
  */
 export async function updateUser(userId: string, formData: FormData) {
   // --- ROLE GUARD ---
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'SUPER_ADMIN') {
+  if (!hasUserManagementAccess(session)) {
     return { error: 'Gagal: Anda tidak memiliki hak akses.' };
   }
   // --- AKHIR ROLE GUARD ---
@@ -125,6 +140,14 @@ export async function updateUser(userId: string, formData: FormData) {
       return { error: 'Pengguna tidak ditemukan.' };
     }
 
+    if (!session) {
+      return { error: 'Sesi tidak valid.' };
+    }
+
+    if (targetUser.role === Role.SUPER_ADMIN && session.role !== Role.SUPER_ADMIN) {
+      return { error: 'Anda tidak dapat mengubah akun Super Admin.' };
+    }
+
     if (!nama) {
       return { error: 'Nama wajib diisi.' };
     }
@@ -137,7 +160,7 @@ export async function updateUser(userId: string, formData: FormData) {
       return { error: 'Super Admin tidak dapat menurunkan perannya sendiri.' };
     }
 
-    const dataToUpdate: any = {
+    const dataToUpdate: Prisma.PenggunaUpdateInput = {
       nama,
       role,
     };
@@ -162,13 +185,17 @@ export async function updateUser(userId: string, formData: FormData) {
 }
 
 /**
- * Melakukan soft delete pada pengguna. Hanya Admin dan tidak bisa hapus diri sendiri.
+ * Melakukan soft delete pada pengguna. Hanya peran manajer pengguna (Super Admin & Admin) dan tidak bisa hapus diri sendiri.
  */
 export async function deleteUser(userId: string) {
   // 1. Role Guard
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'SUPER_ADMIN') {
+  if (!hasUserManagementAccess(session)) {
     return { error: 'Anda tidak memiliki hak akses.' };
+  }
+
+  if (!session) {
+    return { error: 'Sesi tidak valid.' };
   }
 
   // 2. Self-Deletion Guard
@@ -195,6 +222,7 @@ export async function deleteUser(userId: string) {
       data: { deletedAt: new Date() }, // Lakukan soft delete
     });
   } catch (error) {
+    console.error('Gagal menghapus pengguna:', error);
     return { error: 'Gagal menghapus pengguna.' };
   }
 
