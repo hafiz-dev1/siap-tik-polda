@@ -58,13 +58,22 @@ export async function POST(request: NextRequest) {
     );
     console.log('✅ Token created');
 
-    // Return no content for faster client handling; cookie carries session
-    const response = new NextResponse(null, { status: 204 });
-
     // ✅ DIPERBAIKI: Auto-detect production environment
     const isProduction = process.env.NODE_ENV === 'production' || 
                          process.env.VERCEL === '1' ||
                          process.env.RAILWAY_ENVIRONMENT === 'production';
+
+    // Return JSON response dengan data user untuk memastikan cookie sudah diset
+    const response = NextResponse.json(
+      { 
+        success: true,
+        user: {
+          id: pengguna.id,
+          role: pengguna.role
+        }
+      }, 
+      { status: 200 }
+    );
 
     response.cookies.set("token", token, {
       httpOnly: true,

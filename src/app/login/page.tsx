@@ -47,15 +47,25 @@ export default function LoginPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, password }),
+        credentials: 'include', // Pastikan cookie dikirim dan diterima
       });
 
-      // Fast-path: on success, navigate immediately without extra JSON parsing
       if (response.ok) {
-        // Optional UX: quick success toast (non-blocking)
+        // Parse response untuk memastikan data diterima
+        const data = await response.json();
+        console.log('Login successful:', data);
+        
+        // Success toast
         toast.success("Login berhasil!");
-        // Use replace to avoid adding an extra history entry and skip refresh
-        router.replace("/dashboard");
-        return; // Avoid extra work; navigation will take over
+        
+        // Tunggu sebentar untuk memastikan cookie sudah tersimpan
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Gunakan window.location untuk full page reload yang memastikan cookie terdeteksi
+        window.location.href = "/dashboard";
+        
+        // Tetap loading sampai redirect selesai
+        return;
       }
 
       // Only parse JSON when we actually need the error
@@ -72,7 +82,7 @@ export default function LoginPage() {
       toast.error("Tidak dapat terhubung ke server.");
     } finally {
       // Keep spinner on if we're navigating away
-      // (replace above returns early, so we only get here if not navigating)
+      // (return above keeps loading state, so we only get here if error occurred)
       setIsLoading(false);
     }
   };
