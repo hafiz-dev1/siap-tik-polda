@@ -14,9 +14,9 @@ export async function POST(request: NextRequest) {
 
     const pengguna = await prisma.pengguna.findUnique({
       where: { username },
-      select: { id: true, role: true, password: true },
+      select: { id: true, role: true, password: true, deletedAt: true },
     });
-    if (!pengguna) {
+    if (!pengguna || pengguna.deletedAt !== null) {
       return NextResponse.json({ error: "Username atau password salah" }, { status: 401 });
     }
 
