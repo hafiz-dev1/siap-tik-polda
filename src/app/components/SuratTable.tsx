@@ -83,6 +83,9 @@ const SuratTableRow = memo(function SuratTableRow({
     return text.substring(0, maxLength).trim() + '...';
   }, []);
 
+  const normalizedRole = (role ?? undefined) as string | undefined;
+  const canManage = normalizedRole === 'ADMIN' || normalizedRole === 'SUPER_ADMIN';
+
   return (
     <tr 
       onClick={handleRowClick}
@@ -220,7 +223,7 @@ const SuratTableRow = memo(function SuratTableRow({
               <DownloadIcon />
             </button>
           )}
-          {role === 'ADMIN' && (
+          {canManage && (
             <>
               <div onClick={(e) => e.stopPropagation()}>
                 <SuratFormModal suratToEdit={surat}>

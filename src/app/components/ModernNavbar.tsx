@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Shield, FileText, Users, Trash2, LayoutDashboard, Info } from 'lucide-react';
+import { Menu, X, Shield, FileText, Users, Trash2, LayoutDashboard } from 'lucide-react';
 import UserDropdown from './UserDropdown';
 import ThemeSwitcher from './ThemeSwitcher';
 import { useChromeOptimizations } from '@/app/hooks/useBrowserDetection';
@@ -43,26 +43,23 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
       icon: <FileText className="w-4 h-4" />,
     },
     {
-      href: '/about',
-      label: 'Tentang',
-      icon: <Info className="w-4 h-4" />,
-    },
-    {
       href: '/admin/users',
-      label: 'Manajemen Pengguna',
+      label: 'Pengguna',
       icon: <Users className="w-4 h-4" />,
       adminOnly: true,
     },
     {
       href: '/admin/trash',
-      label: 'Tempat Sampah',
+      label: 'Kotak Sampah',
       icon: <Trash2 className="w-4 h-4" />,
       adminOnly: true,
     },
   ];
 
+  const isPrivileged = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
+
   const filteredNavItems = navItems.filter(item => 
-    !item.adminOnly || user.role === 'ADMIN'
+    !item.adminOnly || isPrivileged
   );
 
   const isActiveLink = (href: string) => {
@@ -73,24 +70,15 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
   };
 
   return (
-    <nav 
-      className={`sticky top-0 z-50 border-b navbar-blur ${optimizationClass}`}
-      style={{ 
-        backgroundColor: 'var(--navbar-bg)',
-        borderColor: 'var(--navbar-border)',
-        boxShadow: 'var(--navbar-shadow)',
-        height: 'var(--navbar-height)',
-        ...(isChrome && shouldUseBackdropFilter ? {
-          backdropFilter: 'blur(var(--navbar-backdrop-blur))',
-          WebkitBackdropFilter: 'blur(var(--navbar-backdrop-blur))',
-        } : {
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        })
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          
+    <nav className="sticky top-0 z-50 border-b navbar-blur w-full" 
+         style={{ 
+           backgroundColor: 'var(--navbar-bg)',
+           borderColor: 'var(--navbar-border)',
+           boxShadow: 'var(--navbar-shadow)',
+           height: 'var(--navbar-height)'
+         }}>
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center h-16 w-full">
           {/* Logo and Brand */}
           <div className="flex items-center space-x-4 md:space-x-6 lg:space-x-8">
             <Link href="/dashboard" className="flex items-center space-x-3 group">
@@ -100,23 +88,24 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
                 className="w-8 h-8 object-contain transition-transform duration-1500 group-hover:animate-rotate-y"
               />
               <div className="hidden sm:block">
-              <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                S I A P
-              </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400 -mt-1 hidden lg:block">
-                Sistem Informasi Arsip POLDA
-              </p>
+                <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                  S I A P
+                </h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-1 hidden lg:block">
+                  Sistem Informasi Arsip Polda
+                </p>
               </div>
             </Link>
-
-            {/* Desktop Navigation - Show on medium screens and up */}
-            <div className="hidden md:flex md:space-x-1">
+          </div>
+          {/* Centered Desktop Navigation */}
+          <div className="hidden md:flex flex-1 justify-center">
+            <div className="flex items-center space-x-2">
               {filteredNavItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   data-tooltip={item.label}
-                  className={`nav-item flex items-center space-x-2 ${
+                  className={`nav-item flex items-center space-x-2 px-4 py-2 min-w-[140px] justify-center rounded-lg transition-all duration-200 ${
                     isActiveLink(item.href) ? 'active' : ''
                   }`}
                 >
@@ -126,13 +115,11 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
               ))}
             </div>
           </div>
-
           {/* Right Side - Desktop and Medium screens */}
           <div className="hidden md:flex md:items-center md:space-x-3 lg:space-x-4">
             <ThemeSwitcher /> {/* dark mode toggle */}
             <UserDropdown user={user} onLogout={onLogout} />
           </div>
-
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
             <ThemeSwitcher /> {/* dark mode toggle */}
@@ -176,7 +163,7 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
                     {user.nama}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {user.role === 'ADMIN' ? 'Administrator' : 'Pengguna'}
+                    {user.role === 'SUPER_ADMIN' ? 'Super Admin' : user.role === 'ADMIN' ? 'Admin' : user.role}
                   </p>
                 </div>
               </div>

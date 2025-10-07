@@ -64,10 +64,15 @@ export async function middleware(request: NextRequest) {
   // 4. VERIFIKASI TOKEN DAN ROLE
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    const userRole = payload.role as string;
+    const userRole = payload.role as string | undefined;
+    const isElevated = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
 
-    // Jika USER biasa mencoba akses area /admin, tolak
-    if (pathname.startsWith('/admin') && userRole !== 'ADMIN') {
+    if (pathname.startsWith('/admin/users') && userRole !== 'SUPER_ADMIN') {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+
+    // Jika peran tidak elevated mencoba akses area /admin, tolak
+    if (pathname.startsWith('/admin') && !isElevated) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 

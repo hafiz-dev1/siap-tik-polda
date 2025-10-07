@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { User2, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { User2, Settings, LogOut, ChevronDown, Info } from 'lucide-react';
 
 interface User {
   nama: string;
@@ -46,10 +46,10 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
 
   const getRoleDisplayName = (role: string) => {
     switch (role) {
+      case 'SUPER_ADMIN':
+        return 'Super Admin';
       case 'ADMIN':
-        return 'Administrator';
-      case 'USER':
-        return 'Pengguna';
+        return 'Admin';
       default:
         return role;
     }
@@ -57,10 +57,10 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
+      case 'SUPER_ADMIN':
+        return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300';
       case 'ADMIN':
         return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
-      case 'USER':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
@@ -141,6 +141,15 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
             >
               <User2 className="w-4 h-4 mr-3" />
               Profile Saya
+            </Link>
+            
+            <Link
+              href="/about"
+              className="flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
+              onClick={() => setIsOpen(false)}
+            >
+              <Info className="w-4 h-4 mr-3" />
+              Tentang
             </Link>
             
             <Link

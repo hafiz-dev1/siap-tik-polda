@@ -1,0 +1,1 @@
+export const SURAT_TRASH_RETENTION_DAYS = 30;

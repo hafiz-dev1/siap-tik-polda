@@ -16,7 +16,7 @@ import { prisma } from '@/lib/prisma';
 export async function getUsers() {
   // --- ROLE GUARD ---
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'ADMIN') {
+  if (!session?.operatorId || session.role !== 'SUPER_ADMIN') {
     return []; // Jika bukan admin, kembalikan array kosong (tidak berhak melihat)
   }
   // --- AKHIR ROLE GUARD ---
@@ -39,7 +39,7 @@ export async function getUsers() {
 export async function createUser(formData: FormData) {
   // --- ROLE GUARD ---
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'ADMIN') {
+  if (!session?.operatorId || session.role !== 'SUPER_ADMIN') {
     return { error: 'Gagal: Anda tidak memiliki hak akses.' };
   }
   // --- AKHIR ROLE GUARD ---
@@ -53,6 +53,10 @@ export async function createUser(formData: FormData) {
 
     if (!nama || !username || !password || !role) {
       return { error: 'Gagal: Semua field wajib diisi.' };
+    }
+
+    if (role === Role.SUPER_ADMIN) {
+      return { error: 'Gagal: Hanya boleh ada satu Super Admin aktif.' };
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -98,7 +102,7 @@ export async function createUser(formData: FormData) {
 export async function updateUser(userId: string, formData: FormData) {
   // --- ROLE GUARD ---
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'ADMIN') {
+  if (!session?.operatorId || session.role !== 'SUPER_ADMIN') {
     return { error: 'Gagal: Anda tidak memiliki hak akses.' };
   }
   // --- AKHIR ROLE GUARD ---
@@ -111,6 +115,27 @@ export async function updateUser(userId: string, formData: FormData) {
     const nama = formData.get('nama') as string;
     const role = formData.get('role') as Role;
     const password = formData.get('password') as string;
+
+    const targetUser = await prisma.pengguna.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (!targetUser) {
+      return { error: 'Pengguna tidak ditemukan.' };
+    }
+
+    if (!nama) {
+      return { error: 'Nama wajib diisi.' };
+    }
+
+    if (role === Role.SUPER_ADMIN && userId !== session.operatorId) {
+      return { error: 'Hanya Super Admin aktif yang dapat mempertahankan peran Super Admin.' };
+    }
+
+    if (userId === session.operatorId && role !== Role.SUPER_ADMIN) {
+      return { error: 'Super Admin tidak dapat menurunkan perannya sendiri.' };
+    }
 
     const dataToUpdate: any = {
       nama,
@@ -142,7 +167,7 @@ export async function updateUser(userId: string, formData: FormData) {
 export async function deleteUser(userId: string) {
   // 1. Role Guard
   const session = await getSession();
-  if (!session?.operatorId || session.role !== 'ADMIN') {
+  if (!session?.operatorId || session.role !== 'SUPER_ADMIN') {
     return { error: 'Anda tidak memiliki hak akses.' };
   }
 
@@ -152,6 +177,19 @@ export async function deleteUser(userId: string) {
   }
 
   try {
+    const targetUser = await prisma.pengguna.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (!targetUser) {
+      return { error: 'Pengguna tidak ditemukan.' };
+    }
+
+    if (targetUser.role === Role.SUPER_ADMIN) {
+      return { error: 'Super Admin tidak dapat dihapus.' };
+    }
+
     await prisma.pengguna.update({
       where: { id: userId },
       data: { deletedAt: new Date() }, // Lakukan soft delete
