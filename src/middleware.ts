@@ -67,7 +67,8 @@ export async function middleware(request: NextRequest) {
     const userRole = payload.role as string | undefined;
     const isElevated = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
 
-    if (pathname.startsWith('/admin/users') && userRole !== 'SUPER_ADMIN') {
+    // Halaman /admin/users bisa diakses oleh SUPER_ADMIN dan ADMIN
+    if (pathname.startsWith('/admin/users') && !isElevated) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
