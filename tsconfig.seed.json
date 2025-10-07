@@ -2,7 +2,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "CommonJS"
+    "module": "CommonJS",
+    "moduleResolution": "node"
   },
   "include": ["prisma/seed.ts"]
 }
