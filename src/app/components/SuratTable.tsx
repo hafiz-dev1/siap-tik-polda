@@ -4,6 +4,7 @@ import { memo, useCallback } from 'react';
 import { Surat, Lampiran, Role } from '@prisma/client';
 import SuratFormModal from './SuratFormModal';
 import DeleteSuratButton from './DeleteSuratButton';
+import { SortField } from '../hooks/useSuratSorting';
 
 type SuratWithLampiran = Surat & { lampiran: Lampiran[] };
 
@@ -18,6 +19,9 @@ interface SuratTableProps {
   formatDate: (date: string | Date) => string;
   formatTime: (date: string | Date) => string;
   getTagColor: (target: string) => string;
+  // Sorting props
+  onSort?: (field: SortField) => void;
+  getSortIcon?: (field: SortField) => string;
 }
 
 // Icons components
@@ -267,10 +271,39 @@ const SuratTable = memo(function SuratTable({
   formatDate,
   formatTime,
   getTagColor,
+  onSort,
+  getSortIcon,
 }: SuratTableProps) {
   // Memoized styles
   const thStyle = 'px-4 py-2.5 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider backdrop-blur-sm align-middle';
+  const thSortableStyle = `${thStyle} cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors select-none`;
   const tdStyle = 'px-4 py-3.5 border-b border-gray-200 dark:border-gray-700 bg-transparent text-sm text-gray-900 dark:text-gray-300 align-top h-20';
+
+  // Handler untuk sorting
+  const handleSort = useCallback((field: SortField) => {
+    if (onSort) {
+      onSort(field);
+    }
+  }, [onSort]);
+
+  // Helper untuk render header dengan sorting
+  const renderSortableHeader = useCallback((field: SortField, label: string, className: string = '') => {
+    const icon = getSortIcon ? getSortIcon(field) : '';
+    return (
+      <th 
+        className={`${thSortableStyle} ${className}`}
+        onClick={() => handleSort(field)}
+        title={`Klik untuk mengurutkan berdasarkan ${label}`}
+      >
+        <div className="flex items-center justify-between gap-1">
+          <span>{label}</span>
+          <span className="text-base font-bold min-w-[12px] text-indigo-600 dark:text-indigo-400">
+            {icon}
+          </span>
+        </div>
+      </th>
+    );
+  }, [thSortableStyle, handleSort, getSortIcon]);
 
   return (
     <div
@@ -282,16 +315,16 @@ const SuratTable = memo(function SuratTable({
         <table className="min-w-full leading-normal">
           <thead className="sticky top-0 bg-white dark:bg-gray-800 z-10">
             <tr>
-              <th className={`${thStyle} w-12 text-center rounded-tl-lg`}>No.</th>
-              <th className={`${thStyle} min-w-[180px]`}>Perihal</th>
-              <th className={`${thStyle} min-w-[130px]`}>Dari</th>
-              <th className={`${thStyle} min-w-[130px]`}>Kepada</th>
+              {renderSortableHeader('index', 'No.', 'w-12 text-center rounded-tl-lg')}
+              {renderSortableHeader('perihal', 'Perihal', 'min-w-[180px]')}
+              {renderSortableHeader('dari', 'Dari', 'min-w-[130px]')}
+              {renderSortableHeader('kepada', 'Kepada', 'min-w-[130px]')}
               {activeTipe === 'ALL' && (
                 <th className={`${thStyle} min-w-[120px]`}>Jenis Dokumen</th>
               )}
-              <th className={`${thStyle} min-w-[130px] whitespace-nowrap`}>Diterima</th>
+              {renderSortableHeader('diterima', 'Diterima', 'min-w-[130px] whitespace-nowrap')}
               <th className={`${thStyle} min-w-[140px]`}>Disposisi</th>
-              <th className={`${thStyle} w-[200px] max-w-[200px]`}>Isi Disposisi</th>
+              {renderSortableHeader('isi_disposisi', 'Isi Disposisi', 'w-[200px] max-w-[200px]')}
               <th className={`${thStyle} w-28 text-center rounded-tr-lg`}>Aksi</th>
             </tr>
           </thead>

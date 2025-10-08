@@ -17,6 +17,7 @@ import { useSuratFilters } from '../hooks/useSuratFilters';
 import { usePagination } from '../hooks/usePagination';
 import { useModalManagement } from '../hooks/useModalManagement';
 import { useSuratFormatters, useExcelExport } from '../hooks/useSuratUtils';
+import { useSuratSorting } from '../hooks/useSuratSorting';
 
 type SuratWithLampiran = Surat & { lampiran: Lampiran[] };
 
@@ -50,7 +51,17 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
     resetFilters,
   } = useSuratFilters(suratList, formatEnumText);
 
+  // Sorting hook - diterapkan setelah filtering
+  const {
+    sortField,
+    sortOrder,
+    sortedData,
+    handleSort,
+    getSortIcon,
+  } = useSuratSorting(filteredSurat);
+
   // Always use pagination for consistent UX across all document types
+  // Gunakan sortedData untuk pagination agar urutan tetap konsisten
   const {
     currentPageData: currentPageSurat,
     page,
@@ -61,7 +72,7 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
     lastItemIndex,
     setPage,
     setPageSize,
-  } = usePagination(filteredSurat, 25);
+  } = usePagination(sortedData, 25);
 
   const { isModalOpen, selectedSurat, openModal, closeModal } = useModalManagement();
 
@@ -70,7 +81,7 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
     setIsAnimating(true);
     const id = setTimeout(() => setIsAnimating(false), 220);
     return () => clearTimeout(id);
-  }, [activeArah, activeTipe, fromDate, toDate, searchQuery]);
+  }, [activeArah, activeTipe, fromDate, toDate, searchQuery, sortField, sortOrder]);
 
   // Optimized event handlers
   const handleSearchChange = useCallback((value: string) => {
@@ -138,6 +149,8 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
         formatDate={formatDate}
         formatTime={formatTime}
         getTagColor={getTagColor}
+        onSort={handleSort}
+        getSortIcon={getSortIcon}
       />
 
       {/* Pagination - Always shown for consistent navigation */}
