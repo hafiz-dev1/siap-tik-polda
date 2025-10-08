@@ -78,16 +78,16 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
            height: 'var(--navbar-height)'
          }}>
       <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center h-16 w-full">
+        <div className="flex items-center justify-between h-16 w-full">
           {/* Logo and Brand */}
-          <div className="flex items-center space-x-4 md:space-x-6 lg:space-x-8">
+          <div className="flex items-center space-x-3 md:space-x-6 lg:space-x-8">
             <Link href="/dashboard" className="flex items-center space-x-3 group">
               <img
                 src="/logo/TIK_POLRI_navbar.png"
                 alt="TIK POLRI Logo"
                 className="w-8 h-8 object-contain transition-transform duration-1500 group-hover:animate-rotate-y"
               />
-              <div className="hidden sm:block">
+              <div className="block">
                 <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                   S I A P
                 </h1>
