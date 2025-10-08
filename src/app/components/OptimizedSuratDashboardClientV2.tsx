@@ -9,7 +9,6 @@ import SearchFilters from './SearchFilters';
 import DocumentTypeFilter from './DocumentTypeFilter';
 import TabNavigation from './TabNavigation';
 import SuratTable from './SuratTable';
-import VirtualizedSuratTable from './VirtualizedSuratTable';
 import Pagination from './Pagination';
 import OptimizedSuratDetailModal from './OptimizedSuratDetailModal';
 
@@ -26,8 +25,6 @@ type Props = {
   suratList: SuratWithLampiran[];
   role?: Role | null;
 };
-
-const VIRTUALIZATION_THRESHOLD = 100; // Use virtualization for more than 100 items
 
 export default function OptimizedSuratDashboardClientV2({ suratId, suratList, role }: Props) {
   const [isAnimating, setIsAnimating] = useState(false);
@@ -53,9 +50,7 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
     resetFilters,
   } = useSuratFilters(suratList, formatEnumText);
 
-  // Decide whether to use virtualization or pagination
-  const useVirtualization = filteredSurat.length > VIRTUALIZATION_THRESHOLD;
-  
+  // Always use pagination for consistent UX across all document types
   const {
     currentPageData: currentPageSurat,
     page,
@@ -66,7 +61,7 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
     lastItemIndex,
     setPage,
     setPageSize,
-  } = usePagination(filteredSurat, useVirtualization ? filteredSurat.length : 25);
+  } = usePagination(filteredSurat, 25);
 
   const { isModalOpen, selectedSurat, openModal, closeModal } = useModalManagement();
 
@@ -132,62 +127,32 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
         onArahChange={handleArahChange}
       />
 
-      {/* Performance indicator
-      {useVirtualization && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <span className="text-sm font-medium">
-              Mode Virtualisasi Aktif - Menampilkan {filteredSurat.length} item dengan performa optimal
-            </span>
-          </div>
-        </div>
-      )} */}
+      {/* Table Section - Always use pagination for consistent UX */}
+      <SuratTable
+        suratData={currentPageSurat}
+        role={role}
+        isAnimating={isAnimating}
+        firstItemIndex={firstItemIndex}
+        onSuratClick={openModal}
+        formatEnumText={formatEnumText}
+        formatDate={formatDate}
+        formatTime={formatTime}
+        getTagColor={getTagColor}
+      />
 
-      {/* Table Section - Conditional rendering based on data size */}
-      {useVirtualization ? (
-        <VirtualizedSuratTable
-          suratData={filteredSurat}
-          role={role}
-          isAnimating={isAnimating}
-          firstItemIndex={1}
-          onSuratClick={openModal}
-          formatEnumText={formatEnumText}
-          formatDate={formatDate}
-          formatTime={formatTime}
-          getTagColor={getTagColor}
+      {/* Pagination - Always shown for consistent navigation */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <Pagination
+          page={page}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          totalPages={totalPages}
+          firstItemIndex={firstItemIndex}
+          lastItemIndex={lastItemIndex}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
         />
-      ) : (
-        <>
-          <SuratTable
-            suratData={currentPageSurat}
-            role={role}
-            isAnimating={isAnimating}
-            firstItemIndex={firstItemIndex}
-            onSuratClick={openModal}
-            formatEnumText={formatEnumText}
-            formatDate={formatDate}
-            formatTime={formatTime}
-            getTagColor={getTagColor}
-          />
-
-          {/* Pagination - Only show when not using virtualization */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            <Pagination
-              page={page}
-              pageSize={pageSize}
-              totalItems={totalItems}
-              totalPages={totalPages}
-              firstItemIndex={firstItemIndex}
-              lastItemIndex={lastItemIndex}
-              onPageChange={setPage}
-              onPageSizeChange={setPageSize}
-            />
-          </div>
-        </>
-      )}
+      </div>
 
       {/* Surat Detail Modal */}
       <OptimizedSuratDetailModal
