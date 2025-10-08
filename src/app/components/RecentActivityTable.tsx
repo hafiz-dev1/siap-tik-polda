@@ -111,10 +111,16 @@ export default function RecentActivityTable({ recentSurat }: RecentActivityTable
                     <td className="px-4 py-3.5 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-300 align-top h-20 min-w-[130px]">
                       <div className="h-full flex flex-col justify-center text-xs">
                         <span className="whitespace-nowrap">
-                          {new Date(surat.tanggal_diterima_dibuat).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          {surat.tanggal_diterima_dibuat 
+                            ? new Date(surat.tanggal_diterima_dibuat).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+                            : '-'
+                          }
                         </span>
                         <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                          {new Date(surat.tanggal_diterima_dibuat).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                          {surat.tanggal_diterima_dibuat 
+                            ? new Date(surat.tanggal_diterima_dibuat).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                            : ''
+                          }
                         </span>
                       </div>
                     </td>

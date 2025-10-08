@@ -4,7 +4,6 @@ import { Prisma } from '@prisma/client';
 import Link from 'next/link';
 import StatsCard from '@/app/components/StatsCard';
 import SuratChart from '@/app/components/SuratChart';
-import RecentActivityTable from '@/app/components/RecentActivityTable';
 import LiveDateTime from '@/app/components/LiveDateTime';
 import { Suspense } from 'react';
 import { prisma } from '@/lib/prisma';
@@ -76,19 +75,12 @@ export default async function DashboardPage() {
     totalKeluar, 
     totalDokumen, 
     chartData, 
-    recentSurat,
     disposisiCountsData
   ] = await Promise.all([
     prisma.surat.count({ where: { arah_surat: 'MASUK', deletedAt: null } }),
     prisma.surat.count({ where: { arah_surat: 'KELUAR', deletedAt: null } }),
     prisma.surat.count({ where: { deletedAt: null } }),
     getChartData(),
-    prisma.surat.findMany({
-      where: { deletedAt: null },
-      include: { lampiran: true },
-      orderBy: { createdAt: 'desc' },
-      take: 10,
-    }),
     prisma.surat.findMany({
       where: { deletedAt: null },
       select: { tujuan_disposisi: true, arah_surat: true },
@@ -178,15 +170,6 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Panel Aktivitas Terbaru (Full Width) */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 animate-fade-in delay-200 overflow-hidden">
-        <div className="flex items-center justify-between border-b-2 border-gray-200 dark:border-gray-700 px-6 py-4 bg-gray-50 dark:bg-gray-700/50">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Aktivitas Terbaru</h3>
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-        </div>
-        
-        <RecentActivityTable recentSurat={recentSurat} />
-      </div>
      </div>
    );
 }

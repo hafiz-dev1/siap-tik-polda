@@ -1,11 +1,11 @@
 // file: app/(app)/admin/trash/page.tsx
 
-import Image from 'next/image';
-import TrashActionButtons from '@/app/components/TrashActionButtons';
-import TrashSuratTableClient from '@/app/components/TrashSuratTableClient';
+import TrashSuratWithPagination from '@/app/components/TrashSuratWithPagination';
+import TrashUsersWithPagination from '@/app/components/TrashUsersWithPagination';
 import LiveDateTime from '@/app/components/LiveDateTime';
 import { purgeExpiredSuratTrash } from '@/app/(app)/admin/actions';
 import { prisma } from '@/lib/prisma';
+import { getSession } from '@/lib/session';
 import { SURAT_TRASH_RETENTION_DAYS } from '@/lib/trashRetention';
 import { Clock, FileText, ShieldAlert, Trash2, Users } from 'lucide-react';
 
@@ -48,18 +48,11 @@ function formatRelativeTime(date: Date | null | undefined) {
   return '';
 }
 
-function getInitials(name: string) {
-  const initials = name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase() ?? '')
-    .join('');
-
-  return initials || name.slice(0, 2).toUpperCase() || '??';
-}
-
 export default async function TrashPage() {
+  // Get session untuk mendapatkan role user
+  const session = await getSession();
+  const userRole = session?.role as unknown as string | undefined;
+  
   const { purged } = await purgeExpiredSuratTrash();
   const [deletedSuratList, deletedUsers] = await Promise.all([
     prisma.surat.findMany({
@@ -207,7 +200,7 @@ export default async function TrashPage() {
           </span>
         </div>
 
-        <TrashSuratTableClient
+        <TrashSuratWithPagination
           deletedSuratList={deletedSuratList}
         />
       </section>
@@ -225,97 +218,10 @@ export default async function TrashPage() {
           </span>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-700/50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Pengguna
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Peran
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Tanggal Dihapus
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Aksi
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {deletedUsers.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-                      <div className="mx-auto flex max-w-md flex-col items-center gap-3">
-                        <div className="flex-shrink-0 bg-gray-100 dark:bg-gray-700 rounded-full w-16 h-16 flex items-center justify-center">
-                          <Users className="h-8 w-8 text-gray-400 dark:text-gray-500" aria-hidden="true" />
-                        </div>
-                        <p className="font-medium text-gray-700 dark:text-gray-300">Tidak ada akun pengguna di kotak sampah.</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Penghapusan akun hanya boleh dilakukan untuk operator yang tidak lagi aktif dalam sistem.
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  deletedUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        <div className="flex items-center gap-3">
-                          {user.profilePictureUrl ? (
-                            <Image
-                              src={user.profilePictureUrl}
-                              alt={`Foto profil ${user.nama}`}
-                              width={40}
-                              height={40}
-                              className="h-10 w-10 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
-                            />
-                          ) : (
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 text-sm font-semibold text-indigo-700 dark:text-indigo-300 border-2 border-indigo-200 dark:border-indigo-700">
-                              {getInitials(user.nama)}
-                            </div>
-                          )}
-                          <div>
-                            <p className="font-semibold text-gray-900 dark:text-white">{user.nama}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">@{user.username}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        {(() => {
-                          const normalizedRole = user.role as string;
-                          const isSuperAdmin = normalizedRole === 'SUPER_ADMIN';
-                          const badgeClass = isSuperAdmin
-                            ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-700'
-                            : 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-700';
-                          const roleLabel = isSuperAdmin ? 'Super Admin' : 'Admin';
-                          return (
-                            <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border ${badgeClass}`}>
-                              {roleLabel}
-                            </span>
-                          );
-                        })()}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        <p className="font-medium text-gray-900 dark:text-white">{formatDateTime(user.deletedAt)}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{formatRelativeTime(user.deletedAt)}</p>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        <TrashActionButtons
-                          entityId={user.id}
-                          entityType="pengguna"
-                          entityName={user.nama}
-                        />
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <TrashUsersWithPagination
+          deletedUsers={deletedUsers}
+          userRole={userRole}
+        />
       </section>
     </div>
   );

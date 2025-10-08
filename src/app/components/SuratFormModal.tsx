@@ -171,7 +171,7 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                     <div className="grid grid-cols-1 md:grid-cols-2 pt-2 gap-x-7 gap-y-3">
                       <div className="flex items-center">
                         <label htmlFor="nomor_agenda" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Nomor Agenda</label>
-                        <input type="text" name="nomor_agenda" id="nomor_agenda" required defaultValue={suratToEdit?.nomor_agenda} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                        <input type="text" name="nomor_agenda" id="nomor_agenda" defaultValue={suratToEdit?.nomor_agenda || undefined} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" placeholder="(opsional)"/>
                       </div>
                       <div className="flex items-center">
                         <label htmlFor="nomor_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Nomor Surat</label>
@@ -185,7 +185,7 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                       </div>
                       <div className="flex items-center">
                         <label htmlFor="tanggal_diterima_dibuat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tgl Diterima</label>
-                        <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                        <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" defaultValue={suratToEdit?.tanggal_diterima_dibuat ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" placeholder="(opsional)"/>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-3">

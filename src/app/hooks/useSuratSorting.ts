@@ -28,10 +28,11 @@ interface UseSuratSortingReturn {
 /**
  * Custom hook untuk mengelola sorting data surat
  * Hanya satu kolom yang bisa aktif sorting pada satu waktu
+ * Default: urutkan berdasarkan surat terbaru (createdAt desc)
  */
 export function useSuratSorting(data: SuratWithLampiran[]): UseSuratSortingReturn {
-  const [sortField, setSortField] = useState<SortField>('none');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [sortField, setSortField] = useState<SortField>('index');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   /**
    * Handler untuk mengubah field dan order sorting
@@ -93,7 +94,9 @@ export function useSuratSorting(data: SuratWithLampiran[]): UseSuratSortingRetur
           break;
 
         case 'diterima':
-          compareValue = new Date(a.tanggal_diterima_dibuat).getTime() - new Date(b.tanggal_diterima_dibuat).getTime();
+          const timeA = a.tanggal_diterima_dibuat ? new Date(a.tanggal_diterima_dibuat).getTime() : 0;
+          const timeB = b.tanggal_diterima_dibuat ? new Date(b.tanggal_diterima_dibuat).getTime() : 0;
+          compareValue = timeA - timeB;
           break;
 
         case 'isi_disposisi':

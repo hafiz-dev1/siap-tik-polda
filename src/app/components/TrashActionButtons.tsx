@@ -10,9 +10,10 @@ type Props = {
   entityId: string;
   entityType: 'surat' | 'pengguna';
   entityName?: string;
+  userRole?: string; // Role user yang sedang login
 };
 
-export default function TrashActionButtons({ entityId, entityType, entityName }: Props) {
+export default function TrashActionButtons({ entityId, entityType, entityName, userRole }: Props) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -23,6 +24,12 @@ export default function TrashActionButtons({ entityId, entityType, entityName }:
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
   const entityIdentifier = entityName ? ` "${entityName}"` : '';
+
+  // Cek apakah user adalah SUPER_ADMIN
+  const isSuperAdmin = userRole === 'SUPER_ADMIN';
+  
+  // Untuk pengguna, hanya SUPER_ADMIN yang bisa restore/delete
+  const canManageUsers = entityType === 'pengguna' ? isSuperAdmin : true;
 
   // Handler untuk memulihkan surat
   const handleRestore = () => {
@@ -57,6 +64,15 @@ export default function TrashActionButtons({ entityId, entityType, entityName }:
       setIsDeleteModalOpen(false);
     });
   };
+
+  // Jika user tidak punya akses untuk manage users, tampilkan pesan
+  if (!canManageUsers) {
+    return (
+      <div className="text-xs text-gray-400 dark:text-gray-500 italic">
+        Hanya Super Admin
+      </div>
+    );
+  }
 
   return (
     <div className="flex space-x-4">

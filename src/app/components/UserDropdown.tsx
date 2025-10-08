@@ -79,7 +79,7 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
           <div className="relative">
             <Image
               src={user.profilePictureUrl || '/default-profile.png'}
-              alt={`${user.nama} profile`}
+              alt={`foto`}
               width={32}
               height={32}
               className="avatar ring-2 ring-gray-200 dark:ring-gray-700"
@@ -115,7 +115,7 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
             <div className="flex items-center space-x-3">
               <Image
                 src={user.profilePictureUrl || '/default-profile.png'}
-                alt={`${user.nama} profile`}
+                alt={`foto`}
                 width={40}
                 height={40}
                 className="avatar ring-2 ring-gray-200 dark:ring-gray-600"

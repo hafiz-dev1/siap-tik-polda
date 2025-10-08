@@ -202,10 +202,10 @@ const SuratTableRow = memo(function SuratTableRow({
       <td className={`${tdStyle} min-w-[130px] text-xs`}>
         <div className="h-full flex flex-col justify-center">
           <span className="whitespace-nowrap">
-            {formatDate(surat.tanggal_diterima_dibuat)}
+            {surat.tanggal_diterima_dibuat ? formatDate(surat.tanggal_diterima_dibuat) : '-'}
           </span>
           <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
-            {formatTime(surat.tanggal_diterima_dibuat)}
+            {surat.tanggal_diterima_dibuat ? formatTime(surat.tanggal_diterima_dibuat) : ''}
           </span>
         </div>
       </td>

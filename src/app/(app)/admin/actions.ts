@@ -60,8 +60,9 @@ export async function createSurat(formData: FormData) {
   // --- AKHIR ROLE GUARD ---
 
   try {
-    const nomor_agenda = formData.get('nomor_agenda') as string;
-    const tanggal_diterima_dibuat = new Date(formData.get('tanggal_diterima_dibuat') as string);
+    const nomor_agenda = (formData.get('nomor_agenda') as string) || null;
+    const tanggal_diterima_dibuat_raw = formData.get('tanggal_diterima_dibuat') as string;
+    const tanggal_diterima_dibuat = tanggal_diterima_dibuat_raw ? new Date(tanggal_diterima_dibuat_raw) : null;
     const scan_surat = formData.get('scan_surat') as File;
     const nomor_surat = formData.get('nomor_surat') as string;
     const tanggal_surat = new Date(formData.get('tanggal_surat') as string);
@@ -119,7 +120,7 @@ export async function createSurat(formData: FormData) {
          return { error: 'Gagal: Nomor Agenda ini sudah digunakan.' };
       }
       if (target?.includes('nomor_surat')) {
-         return { error: 'Gagal: Nomor Surat ini sudah digunakan.' };
+         return { error: 'Gagal: Kombinasi Nomor Surat dan Tanggal Surat ini sudah digunakan. Silakan gunakan nomor atau tanggal yang berbeda.' };
       }
       return { error: 'Gagal: Data duplikat terdeteksi.'};
     }
@@ -224,8 +225,9 @@ export async function updateSurat(suratId: string, formData: FormData) {
     }
     
     // Ekstrak data dari form
-    const nomor_agenda = formData.get('nomor_agenda') as string;
-    const tanggal_diterima_dibuat = new Date(formData.get('tanggal_diterima_dibuat') as string);
+    const nomor_agenda = (formData.get('nomor_agenda') as string) || null;
+    const tanggal_diterima_dibuat_raw = formData.get('tanggal_diterima_dibuat') as string;
+    const tanggal_diterima_dibuat = tanggal_diterima_dibuat_raw ? new Date(tanggal_diterima_dibuat_raw) : null;
     const nomor_surat = formData.get('nomor_surat') as string;
     const tanggal_surat = new Date(formData.get('tanggal_surat') as string);
     const perihal = formData.get('perihal') as string;
@@ -256,7 +258,14 @@ export async function updateSurat(suratId: string, formData: FormData) {
   } catch (error) {
     console.error('Gagal memperbarui surat:', error);
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-       return { error: 'Gagal: Nomor Agenda atau Nomor Surat sudah digunakan oleh data lain.' };
+      const target = error.meta?.target as string[];
+      if (target?.includes('nomor_agenda')) {
+        return { error: 'Gagal: Nomor Agenda ini sudah digunakan oleh surat lain.' };
+      }
+      if (target?.includes('nomor_surat')) {
+        return { error: 'Gagal: Kombinasi Nomor Surat dan Tanggal Surat ini sudah digunakan oleh surat lain. Silakan gunakan nomor atau tanggal yang berbeda.' };
+      }
+      return { error: 'Gagal: Data duplikat terdeteksi.' };
     }
     return { error: 'Gagal memperbarui surat.' };
   }
@@ -488,6 +497,97 @@ export async function deleteUserPermanently(userId: string) {
   revalidatePath('/admin/users');
   revalidatePath('/admin/trash');
   return { success: 'Akun pengguna berhasil dihapus permanen.' };
+}
+
+/**
+ * Memulihkan multiple akun pengguna yang di-soft-delete. Hanya SUPER_ADMIN.
+ */
+export async function restoreBulkUsers(userIds: string[]) {
+  const session = await getSession();
+  const role = session?.role as unknown as string | undefined;
+  if (!session?.operatorId || role !== 'SUPER_ADMIN') {
+    return { error: 'Gagal: Anda tidak memiliki hak akses.' };
+  }
+
+  if (!Array.isArray(userIds) || userIds.length === 0) {
+    return { error: 'Daftar akun pengguna tidak valid.' };
+  }
+
+  try {
+    await prisma.pengguna.updateMany({
+      where: { id: { in: userIds } },
+      data: { deletedAt: null },
+    });
+  } catch (error) {
+    console.error('Gagal memulihkan pengguna secara bulk:', error);
+    return { error: 'Gagal memulihkan akun pengguna.' };
+  }
+
+  revalidatePath('/admin/users');
+  revalidatePath('/admin/trash');
+  return { success: `${userIds.length} akun pengguna berhasil dipulihkan.` };
+}
+
+/**
+ * Menghapus multiple akun pengguna secara permanen. Hanya SUPER_ADMIN.
+ */
+export async function deleteBulkUsersPermanently(userIds: string[]) {
+  const session = await getSession();
+  const role = session?.role as unknown as string | undefined;
+  if (!session?.operatorId || role !== 'SUPER_ADMIN') {
+    return { error: 'Gagal: Anda tidak memiliki hak akses.' };
+  }
+
+  if (!Array.isArray(userIds) || userIds.length === 0) {
+    return { error: 'Daftar akun pengguna tidak valid.' };
+  }
+
+  // Cek apakah user mencoba menghapus diri sendiri
+  if (userIds.includes(session.operatorId)) {
+    return { error: 'Gagal: Anda tidak dapat menghapus akun Anda sendiri.' };
+  }
+
+  try {
+    const users = await prisma.pengguna.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, profilePictureUrl: true },
+    });
+
+    if (users.length === 0) {
+      return { error: 'Tidak ada akun pengguna yang ditemukan.' };
+    }
+
+    // Hapus foto profil jika ada
+    await Promise.all(
+      users.map(async (user) => {
+        if (user.profilePictureUrl) {
+          const profilePicturePath = user.profilePictureUrl.startsWith('/')
+            ? user.profilePictureUrl.slice(1)
+            : user.profilePictureUrl;
+          const absolutePath = path.join(process.cwd(), 'public', profilePicturePath);
+          try {
+            await fs.unlink(absolutePath);
+          } catch (unlinkError) {
+            const nodeError = unlinkError as NodeJS.ErrnoException;
+            if (nodeError?.code !== 'ENOENT') {
+              console.warn('Gagal menghapus file foto profil:', unlinkError);
+            }
+          }
+        }
+      })
+    );
+
+    await prisma.pengguna.deleteMany({
+      where: { id: { in: userIds } },
+    });
+  } catch (error) {
+    console.error('Gagal menghapus pengguna secara permanen (bulk):', error);
+    return { error: 'Gagal menghapus akun pengguna secara permanen.' };
+  }
+
+  revalidatePath('/admin/users');
+  revalidatePath('/admin/trash');
+  return { success: `${userIds.length} akun pengguna berhasil dihapus permanen.` };
 }
 
 /**

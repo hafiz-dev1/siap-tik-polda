@@ -49,10 +49,10 @@ model Pengguna {
 // Model utama untuk data surat
 model Surat {
   id                      String     @id @default(uuid())
-  nomor_agenda            String     @unique
-  nomor_surat             String     @unique
+  nomor_agenda            String?    @unique
+  nomor_surat             String     // Removed @unique - now part of composite unique constraint
   tanggal_surat           DateTime
-  tanggal_diterima_dibuat DateTime
+  tanggal_diterima_dibuat DateTime?
   perihal                 String     @db.Text
   asal_surat              String
   tujuan_surat            String
@@ -67,6 +67,8 @@ model Surat {
   createdAt               DateTime   @default(now())
   updatedAt               DateTime   @updatedAt
 
+  // Composite unique constraint: kombinasi nomor_surat + tanggal_surat harus unik
+  @@unique([nomor_surat, tanggal_surat], name: "unique_nomor_tanggal")
   @@map("surat")
 }
 

@@ -68,20 +68,22 @@ export function useExcelExport() {
     const prepareDataForExcel = (data: SuratWithLampiran[]) => {
       return data.map((surat, index) => ({
         'No': index + 1,
-        'Nomor Agenda': surat.nomor_agenda,
+        'Nomor Agenda': surat.nomor_agenda || '-',
         'Nomor Surat': surat.nomor_surat,
         'Tanggal Surat': new Date(surat.tanggal_surat).toLocaleDateString('id-ID', {
           day: '2-digit',
           month: '2-digit', 
           year: 'numeric'
         }),
-        'Tanggal Diterima/Dibuat': new Date(surat.tanggal_diterima_dibuat).toLocaleString('id-ID', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
+        'Tanggal Diterima/Dibuat': surat.tanggal_diterima_dibuat 
+          ? new Date(surat.tanggal_diterima_dibuat).toLocaleString('id-ID', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+          : '-',
         'Asal Surat': surat.asal_surat,
         'Tujuan Surat': surat.tujuan_surat,
         'Perihal': surat.perihal,

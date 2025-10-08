@@ -2,7 +2,7 @@
 
 import { useState, useTransition, Fragment } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import { restoreBulkSurat, deleteBulkSuratPermanently } from '@/app/(app)/admin/actions';
+import { restoreBulkSurat, deleteBulkSuratPermanently, restoreBulkUsers, deleteBulkUsersPermanently } from '@/app/(app)/admin/actions';
 import toast from 'react-hot-toast';
 
 interface BulkTrashActionsToolbarProps {
@@ -10,6 +10,7 @@ interface BulkTrashActionsToolbarProps {
   onClearSelection: () => void;
   selectedIds: string[];
   entityType: 'surat' | 'pengguna';
+  userRole?: string; // Role user yang sedang login
 }
 
 export default function BulkTrashActionsToolbar({
@@ -17,14 +18,23 @@ export default function BulkTrashActionsToolbar({
   onClearSelection,
   selectedIds,
   entityType,
+  userRole,
 }: BulkTrashActionsToolbarProps) {
   const [isRestoreOpen, setIsRestoreOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  // Cek apakah user adalah SUPER_ADMIN
+  const isSuperAdmin = userRole === 'SUPER_ADMIN';
+  
+  // Untuk pengguna, hanya SUPER_ADMIN yang bisa melakukan bulk actions
+  const canManageUsers = entityType === 'pengguna' ? isSuperAdmin : true;
+
   const handleBulkRestore = () => {
     startTransition(async () => {
-      const result = await restoreBulkSurat(selectedIds);
+      const result = entityType === 'surat'
+        ? await restoreBulkSurat(selectedIds)
+        : await restoreBulkUsers(selectedIds);
       if (result.error) {
         toast.error(result.error);
       } else if (result.success) {
@@ -37,7 +47,9 @@ export default function BulkTrashActionsToolbar({
 
   const handleBulkDelete = () => {
     startTransition(async () => {
-      const result = await deleteBulkSuratPermanently(selectedIds);
+      const result = entityType === 'surat'
+        ? await deleteBulkSuratPermanently(selectedIds)
+        : await deleteBulkUsersPermanently(selectedIds);
       if (result.error) {
         toast.error(result.error);
       } else if (result.success) {
@@ -49,6 +61,9 @@ export default function BulkTrashActionsToolbar({
   };
 
   if (selectedCount === 0) return null;
+
+  // Jika user tidak punya akses untuk manage users, jangan tampilkan toolbar
+  if (!canManageUsers) return null;
 
   const entityLabel = entityType === 'surat' ? 'surat' : 'akun';
 

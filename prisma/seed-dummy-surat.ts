@@ -68,7 +68,7 @@ async function getCurrentSequenceBases(year: number) {
     select: { nomor_agenda: true },
     orderBy: { nomor_agenda: 'desc' }
   });
-  const baseAgenda = lastAgenda
+  const baseAgenda = lastAgenda && lastAgenda.nomor_agenda
     ? parseInt(lastAgenda.nomor_agenda.split('-').pop() || '0', 10)
     : 0;
 
@@ -90,7 +90,7 @@ async function main() {
   const yearForCodes = new Date().getFullYear();
   const { baseAgenda, baseNomorSurat } = await getCurrentSequenceBases(yearForCodes);
 
-  const COUNT = 100;
+  const COUNT = 400;
   console.log(
     `Seeding ${COUNT} Surat (range tanggal acak 12 bulan terakhir). Mulai nomor_agenda ${(baseAgenda + 1)
       .toString()
@@ -99,7 +99,8 @@ async function main() {
       .padStart(5, '0')} (tahun kode ${yearForCodes})`
   );
 
-  const suratData = Array.from({ length: COUNT }, (_, i) => {
+  // Create surat dengan lampiran
+  for (let i = 0; i < COUNT; i++) {
     const seqAgenda = baseAgenda + i + 1;
     const seqSurat = baseNomorSurat + i + 1;
 
@@ -123,33 +124,43 @@ async function main() {
       }
     }
 
-    return {
-      nomor_agenda: `AG-${yearForCodes}-${String(seqAgenda).padStart(4, '0')}`,
-      nomor_surat: `NS/${yearForCodes}/${String(seqSurat).padStart(5, '0')}`,
-      tanggal_surat: tanggalSurat,
-      tanggal_diterima_dibuat: tanggalDiterimaDibuat,
-      perihal: `${randomPick(PERIHAL_SAMPLES)} (${seqAgenda})`,
-      asal_surat: arah === ArahSurat.MASUK ? randomPick(ASAL_SAMPLES) : 'Bid TIK Polda',
-      tujuan_surat: randomPick(TUJUAN_SAMPLES),
-      arah_surat: arah,
-      tipe_dokumen: randomPick([
-        TipeDokumen.NOTA_DINAS,
-        TipeDokumen.SURAT_BIASA,
-        TipeDokumen.SPRIN,
-        TipeDokumen.TELEGRAM
-      ]),
-      tujuan_disposisi: randomSubset(TUJUAN_DISPOSISI),
-      isi_disposisi: 'Isi disposisi dummy otomatis. Ref #' + seqAgenda + '. Uji sistem.',
-      id_operator: operator.id
-    };
-  });
+    // Create surat with lampiran
+    const surat = await prisma.surat.create({
+      data: {
+        nomor_agenda: `AG-${yearForCodes}-${String(seqAgenda).padStart(4, '0')}`,
+        nomor_surat: `NS/${yearForCodes}/${String(seqSurat).padStart(5, '0')}`,
+        tanggal_surat: tanggalSurat,
+        tanggal_diterima_dibuat: tanggalDiterimaDibuat,
+        perihal: `${randomPick(PERIHAL_SAMPLES)} (${seqAgenda})`,
+        asal_surat: arah === ArahSurat.MASUK ? randomPick(ASAL_SAMPLES) : 'Bid TIK Polda',
+        tujuan_surat: randomPick(TUJUAN_SAMPLES),
+        arah_surat: arah,
+        tipe_dokumen: randomPick([
+          TipeDokumen.NOTA_DINAS,
+          TipeDokumen.SURAT_BIASA,
+          TipeDokumen.SPRIN,
+          TipeDokumen.TELEGRAM
+        ]),
+        tujuan_disposisi: randomSubset(TUJUAN_DISPOSISI),
+        isi_disposisi: 'Isi disposisi dummy otomatis. Ref #' + seqAgenda + '. Uji sistem.',
+        id_operator: operator.id,
+        lampiran: {
+          create: {
+            nama_file: `scan_surat_${seqSurat}_dummy.pdf`,
+            path_file: `/uploads/dummy/scan_${seqSurat}.pdf`,
+            tipe_file: 'application/pdf',
+            ukuran_file: randomInt(50000, 500000)
+          }
+        }
+      }
+    });
 
-  await prisma.surat.createMany({
-    data: suratData,
-    skipDuplicates: true
-  });
+    if ((i + 1) % 50 === 0) {
+      console.log(`Progress: ${i + 1}/${COUNT} surat dibuat...`);
+    }
+  }
 
-  console.log('Selesai menambah data dummy 12 bulan terakhir.');
+  console.log(`Selesai menambah ${COUNT} data dummy beserta lampiran (12 bulan terakhir).`);
 }
 
 main()
