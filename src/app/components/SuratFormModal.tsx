@@ -160,14 +160,15 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
           <div className="fixed inset-0 w-screen overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4">
               <TransitionChild as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
-                <DialogPanel className="w-full max-w-2xl rounded-xl bg-white dark:bg-gray-800 p-6 shadow-xl">
-                  <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white border-b dark:border-gray-700 pb-2">
-                    {isEditMode ? 'Ubah Arsip Surat' : 'Tambah Arsip Surat Baru'}
+                <DialogPanel className="w-full max-w-2xl rounded-xl bg-white dark:bg-gray-800 shadow-xl overflow-hidden">
+                  <DialogTitle as="h3" className="text-base font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 px-5 py-3 text-center">
+                    {isEditMode ? 'Ubah Surat' : 'Tambah Surat'}
                   </DialogTitle>
                   
-                  <form ref={formRef} onSubmit={handleSubmit} className="mt-4 max-h-[70vh] overflow-y-auto pr-2 space-y-4">
+                  <div className="p-5">
+                    <form ref={formRef} onSubmit={handleSubmit} className="max-h-[75vh] overflow-y-auto pr-2 space-y-3">
                     {/* Semua input diisi dengan defaultValue untuk mode Ubah */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <label htmlFor="nomor_agenda" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Agenda</label>
                         <input type="text" name="nomor_agenda" id="nomor_agenda" required defaultValue={suratToEdit?.nomor_agenda} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm "/>
@@ -177,7 +178,7 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                         <input type="text" name="nomor_surat" id="nomor_surat" required defaultValue={suratToEdit?.nomor_surat} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <label htmlFor="tanggal_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Surat</label>
                         <input type="date" name="tanggal_surat" id="tanggal_surat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_surat) : ''} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
@@ -187,7 +188,7 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                         <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <label htmlFor="asal_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Asal Surat</label>
                         <input type="text" name="asal_surat" id="asal_surat" required defaultValue={suratToEdit?.asal_surat} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" list="asal-surat-list"/>
@@ -211,16 +212,16 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                         </datalist>
                       </div>
                     </div>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <label htmlFor="arah_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Arah Surat</label>
-                        <select name="arah_surat" id="arah_surat" required defaultValue={suratToEdit?.arah_surat} className="pl-2 py-1 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
+                        <select name="arah_surat" id="arah_surat" required defaultValue={suratToEdit?.arah_surat} className="pl-2 py-0.25 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
                           {ARAH_SURAT.map(arah => <option key={arah} value={arah}>{formatEnumText(arah)}</option>)}
                         </select>
                       </div>
                       <div>
                         <label htmlFor="tipe_dokumen" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipe Dokumen</label>
-                        <select name="tipe_dokumen" id="tipe_dokumen" required defaultValue={suratToEdit?.tipe_dokumen} className="pl-2 py-1 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
+                        <select name="tipe_dokumen" id="tipe_dokumen" required defaultValue={suratToEdit?.tipe_dokumen} className="pl-2 py-0.25 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
                           {TIPE_DOKUMEN.map(tipe => <option key={tipe} value={tipe}>{formatEnumText(tipe)}</option>)}
                         </select>
                       </div>
@@ -230,8 +231,8 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                       <textarea name="perihal" id="perihal" rows={2} required defaultValue={suratToEdit?.perihal} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"></textarea>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Tujuan Disposisi</label>
-                      <div className="ml-3 grid grid-cols-2 gap-3">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tujuan Disposisi</label>
+                      <div className="ml-3 grid grid-cols-2 gap-2.5">
                         {TUJUAN_DISPOSISI.map((tujuan) => (
                           <label key={tujuan} className="flex items-center gap-2 cursor-pointer">
                             <input
@@ -293,19 +294,20 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                           onChange={handleFileChange}
                           className="hidden"
                         />
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {/* <p className="text-xs text-gray-500 dark:text-gray-400">
                           Kamera perangkat akan terbuka ketika memilih opsi Ambil Foto Kamera pada smartphone yang mendukung.
-                        </p>
+                        </p> */}
                         {selectedFileName && (
                           <p className="text-sm text-gray-700 dark:text-gray-200">File dipilih: <span className="font-medium">{selectedFileName}</span></p>
                         )}
                     </div>
                     {isEditMode && <p className="text-xs text-gray-500 dark:text-gray-400">Upload ulang scan surat tidak didukung dalam mode ubah.</p>}
-                    <div className="mt-6 flex justify-end gap-4 border-t dark:border-gray-700 pt-4">
+                    <div className="mt-4 flex justify-end gap-3 border-t dark:border-gray-700 pt-3">
                       <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-sm hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600" onClick={closeModal}>Batal</button>
                       <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-sm hover:bg-indigo-700">{isEditMode ? 'Simpan Perubahan' : 'Simpan'}</button>
                     </div>
                   </form>
+                  </div>
                 </DialogPanel>
               </TransitionChild>
             </div>
