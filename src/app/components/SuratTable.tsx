@@ -22,6 +22,10 @@ interface SuratTableProps {
   // Sorting props
   onSort?: (field: SortField) => void;
   getSortIcon?: (field: SortField) => string;
+  // Selection props
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
+  onToggleSelectAll?: () => void;
 }
 
 // Icons components
@@ -56,6 +60,8 @@ const SuratTableRow = memo(function SuratTableRow({
   formatTime,
   getTagColor,
   tdStyle,
+  isSelected,
+  onToggleSelect,
 }: {
   surat: SuratWithLampiran;
   index: number;
@@ -68,10 +74,19 @@ const SuratTableRow = memo(function SuratTableRow({
   formatTime: (date: string | Date) => string;
   getTagColor: (target: string) => string;
   tdStyle: string;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }) {
   const handleRowClick = useCallback(() => {
     onSuratClick(surat);
   }, [surat, onSuratClick]);
+
+  const handleCheckboxClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onToggleSelect) {
+      onToggleSelect(surat.id);
+    }
+  }, [surat.id, onToggleSelect]);
 
   const handleDownloadClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -93,9 +108,28 @@ const SuratTableRow = memo(function SuratTableRow({
   return (
     <tr 
       onClick={handleRowClick}
-      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+      className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all duration-200 ${
+        isSelected ? 'bg-indigo-100 dark:bg-indigo-900/30 border-l-4 border-indigo-600 dark:border-indigo-400' : ''
+      }`}
     >
-      <td className={`${tdStyle} w-12 text-center text-gray-500 dark:text-gray-400 align-middle`}>
+      {/* Checkbox column - hanya muncul jika canManage */}
+      {canManage && onToggleSelect && (
+        <td className="px-1.5 py-3.5 border-b border-gray-200 dark:border-gray-700 bg-transparent text-sm text-gray-900 dark:text-gray-300 align-top h-20 w-9 text-center">
+          <div className="h-full flex items-center justify-center" onClick={handleCheckboxClick}>
+            <div className={`relative p-0.5 rounded transition-all duration-200 ${
+              isSelected ? 'bg-indigo-100 dark:bg-indigo-800/50' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}>
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={() => {}}
+                className="w-4 h-4 text-indigo-600 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 dark:focus:ring-indigo-600 cursor-pointer transition-all duration-200 checked:border-indigo-600 dark:checked:border-indigo-500 checked:bg-indigo-600 dark:checked:bg-indigo-600"
+              />
+            </div>
+          </div>
+        </td>
+      )}
+      <td className="px-1.5 py-3.5 border-b border-gray-200 dark:border-gray-700 bg-transparent text-sm text-gray-500 dark:text-gray-400 align-middle h-20 w-10 text-center">
         <div className="h-full flex items-center justify-center">
           {firstItemIndex + index}
         </div>
@@ -273,11 +307,21 @@ const SuratTable = memo(function SuratTable({
   getTagColor,
   onSort,
   getSortIcon,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
 }: SuratTableProps) {
   // Memoized styles
   const thStyle = 'px-4 py-2.5 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider backdrop-blur-sm align-middle';
   const thSortableStyle = `${thStyle} cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors select-none`;
   const tdStyle = 'px-4 py-3.5 border-b border-gray-200 dark:border-gray-700 bg-transparent text-sm text-gray-900 dark:text-gray-300 align-top h-20';
+
+  const normalizedRole = (role ?? undefined) as string | undefined;
+  const canManage = normalizedRole === 'ADMIN' || normalizedRole === 'SUPER_ADMIN';
+
+  // Check if all items on current page are selected
+  const allSelected = suratData.length > 0 && selectedIds && suratData.every(surat => selectedIds.has(surat.id));
+  const someSelected = selectedIds && selectedIds.size > 0 && !allSelected;
 
   // Handler untuk sorting
   const handleSort = useCallback((field: SortField) => {
@@ -315,7 +359,30 @@ const SuratTable = memo(function SuratTable({
         <table className="min-w-full leading-normal">
           <thead className="sticky top-0 bg-white dark:bg-gray-800 z-10">
             <tr>
-              {renderSortableHeader('index', 'No.', 'w-12 text-center rounded-tl-lg')}
+              {/* Checkbox column header - hanya muncul jika canManage */}
+              {canManage && onToggleSelectAll && (
+                <th className="px-1.5 py-2.5 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider backdrop-blur-sm align-middle w-9 rounded-tl-lg">
+                  <div className="flex items-center justify-center">
+                    <div className={`relative p-0.5 rounded transition-all duration-200 ${
+                      allSelected || someSelected ? 'bg-indigo-200 dark:bg-indigo-700/50' : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}>
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        ref={(el) => {
+                          if (el) {
+                            el.indeterminate = someSelected || false;
+                          }
+                        }}
+                        onChange={onToggleSelectAll}
+                        className="w-4 h-4 text-indigo-600 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 dark:focus:ring-indigo-600 cursor-pointer transition-all duration-200 checked:border-indigo-600 dark:checked:border-indigo-500 checked:bg-indigo-600 dark:checked:bg-indigo-600"
+                        title="Pilih semua"
+                      />
+                    </div>
+                  </div>
+                </th>
+              )}
+              {renderSortableHeader('index', 'No.', canManage && onToggleSelectAll ? 'w-10 text-center' : 'w-10 text-center rounded-tl-lg')}
               {renderSortableHeader('perihal', 'Perihal', 'min-w-[180px]')}
               {renderSortableHeader('dari', 'Dari', 'min-w-[130px]')}
               {renderSortableHeader('kepada', 'Kepada', 'min-w-[130px]')}
@@ -335,7 +402,7 @@ const SuratTable = memo(function SuratTable({
           >
             {suratData.length === 0 ? (
               <tr>
-                <td colSpan={activeTipe === 'ALL' ? 9 : 8} className="text-center py-16 text-gray-500 dark:text-gray-400">
+                <td colSpan={canManage && onToggleSelectAll ? (activeTipe === 'ALL' ? 10 : 9) : (activeTipe === 'ALL' ? 9 : 8)} className="text-center py-16 text-gray-500 dark:text-gray-400">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -359,6 +426,8 @@ const SuratTable = memo(function SuratTable({
                   formatTime={formatTime}
                   getTagColor={getTagColor}
                   tdStyle={tdStyle}
+                  isSelected={selectedIds?.has(surat.id)}
+                  onToggleSelect={canManage ? onToggleSelect : undefined}
                 />
               ))
             )}

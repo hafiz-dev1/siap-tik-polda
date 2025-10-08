@@ -168,6 +168,45 @@ export async function deleteSurat(suratId: string) {
 }
 
 /**
+ * Melakukan soft delete pada multiple surat sekaligus. Hanya bisa dilakukan oleh ADMIN.
+ */
+export async function deleteBulkSurat(suratIds: string[]) {
+  // --- ROLE GUARD ---
+  const session = await getSession();
+  const role = session?.role as unknown as string | undefined;
+  if (!session?.operatorId || !role || !['ADMIN', 'SUPER_ADMIN'].includes(role)) {
+    return { error: 'Gagal: Anda tidak memiliki hak akses untuk aksi ini.' };
+  }
+  // --- AKHIR ROLE GUARD ---
+
+  try {
+    if (!suratIds || suratIds.length === 0) {
+      return { error: 'Gagal: Tidak ada surat yang dipilih.' };
+    }
+
+    // Bulk update semua surat yang dipilih
+    await prisma.surat.updateMany({
+      where: {
+        id: {
+          in: suratIds,
+        },
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+  } catch (error) {
+    console.error('Gagal menghapus surat secara bulk:', error);
+    return { error: 'Gagal menghapus surat.' };
+  }
+
+  revalidatePath('/arsip');
+  revalidatePath('/dashboard');
+  revalidatePath('/admin/trash');
+  return { success: `${suratIds.length} surat berhasil dihapus.` };
+}
+
+/**
  * Memperbarui data surat yang ada. Hanya bisa dilakukan oleh ADMIN.
  */
 export async function updateSurat(suratId: string, formData: FormData) {
@@ -252,6 +291,37 @@ export async function restoreSurat(suratId: string) {
 }
 
 /**
+ * Memulihkan multiple surat sekaligus dari soft-delete (restore). Hanya Admin.
+ */
+export async function restoreBulkSurat(suratIds: string[]) {
+  const session = await getSession();
+  const role = session?.role as unknown as string | undefined;
+  if (!session?.operatorId || !role || !['ADMIN', 'SUPER_ADMIN'].includes(role)) {
+    return { error: 'Gagal: Anda tidak memiliki hak akses.' };
+  }
+
+  try {
+    if (!suratIds || suratIds.length === 0) {
+      return { error: 'Gagal: Tidak ada surat yang dipilih.' };
+    }
+
+    await prisma.surat.updateMany({
+      where: { 
+        id: { in: suratIds },
+      },
+      data: { deletedAt: null }, // Set deletedAt kembali ke NULL
+    });
+  } catch (error) {
+    console.error('Gagal memulihkan surat secara bulk:', error);
+    return { error: 'Gagal memulihkan surat.' };
+  }
+
+  revalidatePath('/arsip');
+  revalidatePath('/admin/trash');
+  return { success: `${suratIds.length} surat berhasil dipulihkan.` };
+}
+
+/**
  * Menghapus surat secara permanen dari database. Hanya Admin.
  */
 export async function deleteSuratPermanently(suratId: string) {
@@ -291,6 +361,56 @@ export async function deleteSuratPermanently(suratId: string) {
   revalidatePath('/admin/trash');
   revalidatePath('/dashboard'); // Update statistik
   return { success: 'Surat berhasil dihapus permanen.' };
+}
+
+/**
+ * Menghapus multiple surat secara permanen dari database. Hanya Admin.
+ */
+export async function deleteBulkSuratPermanently(suratIds: string[]) {
+  const session = await getSession();
+  const role = session?.role as unknown as string | undefined;
+  if (!session?.operatorId || !role || !['ADMIN', 'SUPER_ADMIN'].includes(role)) {
+    return { error: 'Gagal: Anda tidak memiliki hak akses.' };
+  }
+
+  try {
+    if (!suratIds || suratIds.length === 0) {
+      return { error: 'Gagal: Tidak ada surat yang dipilih.' };
+    }
+
+    const suratList = await prisma.surat.findMany({
+      where: { id: { in: suratIds } },
+      select: {
+        id: true,
+        lampiran: {
+          select: {
+            path_file: true,
+          },
+        },
+      },
+    });
+
+    if (suratList.length === 0) {
+      return { error: 'Surat tidak ditemukan.' };
+    }
+
+    // Hapus semua lampiran files
+    for (const surat of suratList) {
+      await removeLampiranFiles(surat.lampiran);
+    }
+
+    // Delete semua surat
+    await prisma.surat.deleteMany({
+      where: { id: { in: suratIds } },
+    });
+  } catch (deleteError) {
+    console.error('Gagal menghapus surat secara permanen (bulk):', deleteError);
+    return { error: 'Gagal menghapus surat secara permanen.' };
+  }
+
+  revalidatePath('/admin/trash');
+  revalidatePath('/dashboard');
+  return { success: `${suratIds.length} surat berhasil dihapus secara permanen.` };
 }
 
 /**

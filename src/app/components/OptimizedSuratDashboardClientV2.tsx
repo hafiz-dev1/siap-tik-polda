@@ -11,6 +11,7 @@ import TabNavigation from './TabNavigation';
 import SuratTable from './SuratTable';
 import Pagination from './Pagination';
 import OptimizedSuratDetailModal from './OptimizedSuratDetailModal';
+import BulkActionsToolbar from './BulkActionsToolbar';
 
 // Hooks
 import { useSuratFilters } from '../hooks/useSuratFilters';
@@ -18,6 +19,7 @@ import { usePagination } from '../hooks/usePagination';
 import { useModalManagement } from '../hooks/useModalManagement';
 import { useSuratFormatters, useExcelExport } from '../hooks/useSuratUtils';
 import { useSuratSorting } from '../hooks/useSuratSorting';
+import { useSelection } from '../hooks/useSelection';
 
 type SuratWithLampiran = Surat & { lampiran: Lampiran[] };
 
@@ -75,6 +77,21 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
   } = usePagination(sortedData, 25);
 
   const { isModalOpen, selectedSurat, openModal, closeModal } = useModalManagement();
+
+  // Selection hook untuk multiple delete
+  const {
+    selectedIds,
+    selectedCount,
+    selectedArray,
+    toggleSelect,
+    toggleSelectAll,
+    clearSelection,
+  } = useSelection(currentPageSurat);
+
+  // Clear selection ketika pindah halaman atau filter berubah
+  useEffect(() => {
+    clearSelection();
+  }, [page, activeArah, activeTipe, fromDate, toDate, searchQuery, clearSelection]);
 
   // Animation effect when filters change (but exclude pagination changes)
   useEffect(() => {
@@ -138,6 +155,13 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
         onArahChange={handleArahChange}
       />
 
+      {/* Bulk Actions Toolbar - muncul jika ada item yang dipilih */}
+      <BulkActionsToolbar
+        selectedCount={selectedCount}
+        selectedIds={selectedArray}
+        onClearSelection={clearSelection}
+      />
+
       {/* Table Section - Always use pagination for consistent UX */}
       <SuratTable
         suratData={currentPageSurat}
@@ -151,6 +175,9 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
         getTagColor={getTagColor}
         onSort={handleSort}
         getSortIcon={getSortIcon}
+        selectedIds={selectedIds}
+        onToggleSelect={toggleSelect}
+        onToggleSelectAll={toggleSelectAll}
       />
 
       {/* Pagination - Always shown for consistent navigation */}

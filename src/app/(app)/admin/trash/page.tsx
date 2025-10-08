@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import TrashActionButtons from '@/app/components/TrashActionButtons';
+import TrashSuratTableClient from '@/app/components/TrashSuratTableClient';
 import LiveDateTime from '@/app/components/LiveDateTime';
 import { purgeExpiredSuratTrash } from '@/app/(app)/admin/actions';
 import { prisma } from '@/lib/prisma';
@@ -199,76 +200,16 @@ export default async function TrashPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Sampah Surat</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Daftar surat yang dihapus sementara dan dapat dipulihkan kapan saja.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Daftar surat yang dihapus sementara dan dapat dipulihkan sebelum 30 hari sejak surat dihapus.</p>
           </div>
           <span className="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700">
             {totalSurat.toLocaleString('id-ID')} item
           </span>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-700/50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Detail Surat
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Asal & Tujuan
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Tanggal Dihapus
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Aksi
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {deletedSuratList.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-                      <div className="mx-auto flex max-w-md flex-col items-center gap-3">
-                        <div className="flex-shrink-0 bg-gray-100 dark:bg-gray-700 rounded-full w-16 h-16 flex items-center justify-center">
-                          <FileText className="h-8 w-8 text-gray-400 dark:text-gray-500" aria-hidden="true" />
-                        </div>
-                        <p className="font-medium text-gray-700 dark:text-gray-300">Tidak ada surat di kotak sampah.</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Surat yang dihapus akan muncul di sini selama periode retensi sebelum dihapus permanen.
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  deletedSuratList.map((surat) => (
-                    <tr key={surat.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        <p className="font-semibold text-gray-900 dark:text-white">{surat.perihal}</p>
-                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Nomor: {surat.nomor_surat}</p>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        <p className="font-medium text-gray-900 dark:text-white">{surat.asal_surat}</p>
-                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">→ {surat.tujuan_surat}</p>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        <p className="font-medium text-gray-900 dark:text-white">{formatDateTime(surat.deletedAt)}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{formatRelativeTime(surat.deletedAt)}</p>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        <TrashActionButtons
-                          entityId={surat.id}
-                          entityType="surat"
-                          entityName={surat.perihal}
-                        />
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <TrashSuratTableClient
+          deletedSuratList={deletedSuratList}
+        />
       </section>
 
       <section className="space-y-4">
