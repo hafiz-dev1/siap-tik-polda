@@ -29,6 +29,24 @@ export default function UserFormModal({ userToEdit }: Props) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     
+    // Validasi password jika mode edit dan password diisi
+    if (isEditMode) {
+      const password = formData.get('password') as string;
+      const confirmPassword = formData.get('confirmPassword') as string;
+      
+      if (password || confirmPassword) {
+        if (password !== confirmPassword) {
+          toast.error('Password dan konfirmasi password tidak cocok!');
+          return;
+        }
+        
+        if (password.length < 6) {
+          toast.error('Password minimal 6 karakter!');
+          return;
+        }
+      }
+    }
+    
     // Memanggil action yang sesuai berdasarkan mode
     const result = isEditMode
       ? await updateUser(userToEdit.id, formData)
@@ -130,7 +148,9 @@ export default function UserFormModal({ userToEdit }: Props) {
                       </div>
                       
                       <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {isEditMode ? 'Password Baru' : 'Password'}
+                        </label>
                         <input 
                           type="password" 
                           name="password" 
@@ -139,12 +159,22 @@ export default function UserFormModal({ userToEdit }: Props) {
                           placeholder={isEditMode ? 'Kosongkan jika tidak diubah' : ''} 
                           className="pl-2 mt-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
                         />
-                        {isEditMode && (
-                          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            Kosongkan jika tidak ingin mengubah password.
-                          </p>
-                        )}
                       </div>
+                      
+                      {isEditMode && (
+                        <div>
+                          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Konfirmasi Password Baru
+                          </label>
+                          <input 
+                            type="password" 
+                            name="confirmPassword" 
+                            id="confirmPassword" 
+                            placeholder="Ketik ulang password baru"
+                            className="pl-2 mt-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
+                          />
+                        </div>
+                      )}
                       
                       <div>
                         <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Peran</label>

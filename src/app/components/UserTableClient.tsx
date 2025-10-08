@@ -10,6 +10,7 @@ import DeleteUserButton from './DeleteUserButton';
 type Props = {
   users: Pengguna[];
   currentAdminId: string;
+  currentAdminRole: string;
 };
 
 function getInitials(name: string) {
@@ -23,7 +24,7 @@ function getInitials(name: string) {
   return initials || name.slice(0, 2).toUpperCase() || '??';
 }
 
-export default function UserTableClient({ users, currentAdminId }: Props) {
+export default function UserTableClient({ users, currentAdminId, currentAdminRole }: Props) {
   const totalUsers = users.length;
   const totalSuperAdmin = users.filter(u => u.role === 'SUPER_ADMIN').length;
   const totalAdmin = users.filter(u => u.role === 'ADMIN').length;
@@ -83,7 +84,7 @@ export default function UserTableClient({ users, currentAdminId }: Props) {
             <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Daftar Pengguna Aktif</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Kelola akun dan hak akses pengguna</p>
           </div>
-          <UserFormModal />
+          {currentAdminRole === 'SUPER_ADMIN' && <UserFormModal />}
         </div>
 
         <div className="overflow-x-auto">
@@ -161,11 +162,17 @@ export default function UserTableClient({ users, currentAdminId }: Props) {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                       <div className="flex items-center space-x-4">
-                        {user.id === currentAdminId ? (
-                          <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/30 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700">
-                            Akun Anda
-                          </span>
+                        {currentAdminRole === 'ADMIN' ? (
+                          // Admin hanya bisa hapus akun sendiri
+                          user.id === currentAdminId ? (
+                            <DeleteUserButton userId={user.id} />
+                          ) : (
+                            <span className="inline-flex items-center rounded-full bg-gray-50 dark:bg-gray-900/30 px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+                              Akses Terbatas
+                            </span>
+                          )
                         ) : (
+                          // Super Admin bisa ubah dan hapus semua akun
                           <>
                             <UserFormModal userToEdit={user} />
                             <DeleteUserButton userId={user.id} />

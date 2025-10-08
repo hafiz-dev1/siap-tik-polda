@@ -13,6 +13,7 @@ export default async function UserManagementPage() {
 
   const users = await getUsers();
   const currentAdminId = session?.operatorId || '';
+  const currentAdminRole = session?.role || 'ADMIN';
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
@@ -23,7 +24,7 @@ export default async function UserManagementPage() {
         </div>
         <LiveDateTime />
       </div>
-      <UserTableClient users={users} currentAdminId={currentAdminId} />
+      <UserTableClient users={users} currentAdminId={currentAdminId} currentAdminRole={currentAdminRole} />
     </div>
   );
 }
