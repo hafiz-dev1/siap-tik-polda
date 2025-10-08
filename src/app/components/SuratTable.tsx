@@ -180,7 +180,7 @@ const SuratTableRow = memo(function SuratTableRow({
           {surat.tujuan_disposisi.map((tujuan) => (
             <span
               key={tujuan}
-              className={`px-1.5 py-0.5 text-xs rounded-full text-[10px] leading-tight ${getTagColor(tujuan)}`}
+              className={`px-1.5 py-0.5 text-xs rounded-sm text-[10px] leading-tight ${getTagColor(tujuan)}`}
               title={formatEnumText(
                 tujuan
                   .replace('KASUBBID_', '')

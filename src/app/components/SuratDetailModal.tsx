@@ -31,6 +31,17 @@ export default function SuratDetailModal({ surat, children }: Props) {
     return targetMap[target] || formatEnumText(target);
   };
 
+  // Fungsi untuk mendapatkan warna tag sesuai tujuan disposisi
+  const getTagColor = (target: string) => {
+    const colorMap: Record<string, string> = {
+      'KASUBBID_TEKKOM': 'bg-blue-25 dark:bg-blue-900/15 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/30',
+      'KASUBBID_TEKINFO': 'bg-emerald-25 dark:bg-emerald-900/15 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30',
+      'KASUBBAG_RENMIN': 'bg-purple-25 dark:bg-purple-900/15 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/30',
+      'KAUR_KEU': 'bg-rose-25 dark:bg-rose-900/15 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800/30'
+    };
+    return colorMap[target] || 'bg-indigo-25 dark:bg-indigo-900/15 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/30';
+  };
+
   // Clone the children and add onClick handler directly to the <tr> element
   const clonedChildren = cloneElement(children as React.ReactElement<any>, {
     onClick: (e: MouseEvent<HTMLTableRowElement>) => {
@@ -115,7 +126,7 @@ export default function SuratDetailModal({ surat, children }: Props) {
                         <strong className="text-gray-400 dark:text-gray-500 block mb-1">Tujuan Disposisi:</strong>
                         <div className="flex flex-wrap gap-2">
                             {surat.tujuan_disposisi.map((tujuan: string) => (
-                                <span key={tujuan} className="px-2 py-1 text-xs bg-gray-700 text-gray-200 rounded-sm dark:bg-gray-700 dark:text-gray-200">{formatDispositionTarget(tujuan)}</span>
+                                <span key={tujuan} className={`px-2 py-1 text-xs rounded-sm ${getTagColor(tujuan)}`}>{formatDispositionTarget(tujuan)}</span>
                             ))}
                         </div>
                      </div>

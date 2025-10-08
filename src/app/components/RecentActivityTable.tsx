@@ -123,7 +123,7 @@ export default function RecentActivityTable({ recentSurat }: RecentActivityTable
                         {surat.tujuan_disposisi.map((tujuan) => (
                           <span
                             key={tujuan}
-                            className="px-1.5 py-0.5 text-xs rounded-full text-[10px] leading-tight bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200"
+                            className="px-1.5 py-0.5 text-xs rounded-sm text-[10px] leading-tight bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200"
                             title={formatEnumText(
                               tujuan
                                 .replace('KASUBBID_', '')

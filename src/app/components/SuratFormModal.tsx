@@ -215,13 +215,13 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tujuan Disposisi</label>
                       <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
                         {TUJUAN_DISPOSISI.map((tujuan) => (
-                        <label key={tujuan} className="flex pl-3 items-center space-x-3 cursor-pointer">
+                        <label key={tujuan} className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded">
                           <input
                           type="checkbox"
                           name="tujuan_disposisi"
                           value={tujuan}
                           defaultChecked={suratToEdit?.tujuan_disposisi.includes(tujuan)}
-                          className=" ml-1 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                          className="h-4 w-4 text-indigo-600 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 focus:ring-2"
                           />
                           <span className="text-sm text-gray-800 dark:text-gray-300">{formatEnumText(tujuan)}</span>
                         </label>

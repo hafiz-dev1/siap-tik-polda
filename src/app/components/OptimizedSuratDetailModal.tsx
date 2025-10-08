@@ -143,7 +143,7 @@ const OptimizedSuratDetailModal = memo(function OptimizedSuratDetailModal({
                       {surat.tujuan_disposisi.map((tujuan) => (
                         <span
                           key={tujuan}
-                          className="px-2 py-1 text-xs bg-gray-700 text-gray-200 rounded-sm"
+                          className={`px-2 py-1 text-xs rounded-sm ${getTagColor(tujuan)}`}
                           title={formatDispositionTarget(tujuan)}
                         >
                           {formatDispositionTarget(tujuan)}
