@@ -226,18 +226,30 @@ body {
 
 /* Enhanced dropdown positioning and styling with Chrome optimization */
 .dropdown-menu {
-  background: var(--navbar-bg);
-  background-color: rgba(255, 255, 255, 0.8); /* Fallback */
-  backdrop-filter: blur(var(--navbar-backdrop-blur));
-  -webkit-backdrop-filter: blur(var(--navbar-backdrop-blur));
-  -moz-backdrop-filter: blur(var(--navbar-backdrop-blur));
-  -ms-backdrop-filter: blur(var(--navbar-backdrop-blur));
-  border: 1px solid var(--navbar-border);
-  border-color: rgba(0, 0, 0, 0.12); /* Fallback */
-  box-shadow: var(--navbar-shadow);
+  /* Solid background for better readability - NO transparency issues */
+  background: rgb(255, 255, 255);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  -moz-backdrop-filter: blur(20px);
+  -ms-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0 10px 30px -5px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(0, 0, 0, 0.03);
   /* Chrome performance optimization */
   will-change: backdrop-filter, opacity, transform;
   transform: translateZ(0);
+}
+
+/* Dark mode dropdown - Solid dark background */
+.dark .dropdown-menu {
+  background: rgb(31, 41, 55); /* gray-800 - SOLID, no transparency */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 10px 30px -5px rgba(0, 0, 0, 0.4),
+    0 4px 6px -2px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 /* Responsive dropdown positioning */

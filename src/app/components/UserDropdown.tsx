@@ -106,22 +106,22 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className={`absolute mt-2 dropdown-menu rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-50 fade-in ${
+        <div className={`absolute mt-2 dropdown-menu rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/10 z-50 fade-in bg-white dark:bg-gray-800 backdrop-blur-xl ${
           isMobile 
             ? 'right-0 left-0 mx-4 w-auto' 
             : 'right-0 w-64'
         }`}>
-          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-800">
             <div className="flex items-center space-x-3">
               <Image
                 src={user.profilePictureUrl || '/default-profile.png'}
                 alt={`${user.nama} profile`}
                 width={40}
                 height={40}
-                className="avatar"
+                className="avatar ring-2 ring-gray-200 dark:ring-gray-600"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                   {user.nama}
                 </p>
                 <div className="flex items-center mt-1">
@@ -133,45 +133,45 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
             </div>
           </div>
 
-          <div className="py-2">
+          <div className="py-2 bg-white dark:bg-gray-800">
             <Link
               href="/profile"
-              className="flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
+              className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-150 rounded-lg mx-1"
               onClick={() => setIsOpen(false)}
             >
-              <User2 className="w-4 h-4 mr-3" />
-              Profile Saya
+              <User2 className="w-4 h-4 mr-3 flex-shrink-0" />
+              <span>Profile Saya</span>
             </Link>
             
             <Link
               href="/about"
-              className="flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
+              className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-150 rounded-lg mx-1"
               onClick={() => setIsOpen(false)}
             >
-              <Info className="w-4 h-4 mr-3" />
-              Tentang
+              <Info className="w-4 h-4 mr-3 flex-shrink-0" />
+              <span>Tentang</span>
             </Link>
             
             <Link
-              href="/profile"
-              className="flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
+              href="/settings"
+              className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-150 rounded-lg mx-1"
               onClick={() => setIsOpen(false)}
             >
-              <Settings className="w-4 h-4 mr-3" />
-              Pengaturan
+              <Settings className="w-4 h-4 mr-3 flex-shrink-0" />
+              <span>Pengaturan</span>
             </Link>
           </div>
 
-          <div className="border-t border-gray-100 dark:border-gray-700 py-2">
+          <div className="border-t border-gray-200 dark:border-gray-700 py-2 bg-white dark:bg-gray-800">
             <button
               onClick={() => {
                 setIsOpen(false);
                 onLogout();
               }}
-              className="flex items-center w-full px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150"
+              className="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-300 transition-all duration-150 rounded-lg mx-1"
             >
-              <LogOut className="w-4 h-4 mr-3" />
-              Keluar
+              <LogOut className="w-4 h-4 mr-3 flex-shrink-0" />
+              <span>Keluar</span>
             </button>
           </div>
         </div>
