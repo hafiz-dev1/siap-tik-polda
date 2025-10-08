@@ -61,6 +61,28 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
 
   const formatEnumText = (text: string) => text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
+  // Fungsi untuk memformat tujuan disposisi dengan nama lengkap
+  const formatDispositionTarget = (target: string) => {
+    const targetMap: Record<string, string> = {
+      'KASUBBID_TEKKOM': 'KASUBBID TEKKOM',
+      'KASUBBID_TEKINFO': 'KASUBBID TEKINFO',
+      'KASUBBAG_RENMIN': 'KASUBBAG RENMIN',
+      'KAUR_KEU': 'KAUR KEU'
+    };
+    return targetMap[target] || formatEnumText(target);
+  };
+
+  // Fungsi untuk mendapatkan warna tag sesuai tujuan disposisi
+  const getTagColor = (target: string) => {
+    const colorMap: Record<string, string> = {
+      'KASUBBID_TEKKOM': 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700',
+      'KASUBBID_TEKINFO': 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700',
+      'KASUBBAG_RENMIN': 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700',
+      'KAUR_KEU': 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-700'
+    };
+    return colorMap[target] || 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700';
+  };
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -145,34 +167,30 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                   
                   <form ref={formRef} onSubmit={handleSubmit} className="mt-4 max-h-[70vh] overflow-y-auto pr-2 space-y-4">
                     {/* Semua input diisi dengan defaultValue untuk mode Ubah */}
-                    <div>
-                      <label htmlFor="perihal" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Perihal</label>
-                      <textarea name="perihal" id="perihal" rows={2} required defaultValue={suratToEdit?.perihal} className="pl-2 mt-1 ml-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"></textarea>
-                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="nomor_agenda" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Agenda</label>
-                        <input type="text" name="nomor_agenda" id="nomor_agenda" required defaultValue={suratToEdit?.nomor_agenda} className="pl-2 mt-1 ml-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm "/>
+                        <input type="text" name="nomor_agenda" id="nomor_agenda" required defaultValue={suratToEdit?.nomor_agenda} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm "/>
                       </div>
                       <div>
                         <label htmlFor="nomor_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Surat</label>
-                        <input type="text" name="nomor_surat" id="nomor_surat" required defaultValue={suratToEdit?.nomor_surat} className="pl-2 mt-1 ml-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                        <input type="text" name="nomor_surat" id="nomor_surat" required defaultValue={suratToEdit?.nomor_surat} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="tanggal_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Surat</label>
-                        <input type="date" name="tanggal_surat" id="tanggal_surat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_surat) : ''} className="pl-2 mt-1 ml-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                        <input type="date" name="tanggal_surat" id="tanggal_surat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_surat) : ''} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
                       </div>
                       <div>
                         <label htmlFor="tanggal_diterima_dibuat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal & Pukul Diterima</label>
-                        <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="pl-2 mt-1 ml-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                        <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="asal_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Asal Surat</label>
-                        <input type="text" name="asal_surat" id="asal_surat" required defaultValue={suratToEdit?.asal_surat} className="pl-2 mt-1 ml-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" list="asal-surat-list"/>
+                        <input type="text" name="asal_surat" id="asal_surat" required defaultValue={suratToEdit?.asal_surat} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" list="asal-surat-list"/>
                         <datalist id="asal-surat-list">
                           <option value="Bagian Umum" />
                           <option value="Bagian Keuangan" />
@@ -183,7 +201,7 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                       </div>
                       <div>
                         <label htmlFor="tujuan_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tujuan Surat</label>
-                        <input type="text" name="tujuan_surat" id="tujuan_surat" required defaultValue={suratToEdit?.tujuan_surat} className="pl-2 mt-1 ml-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" list="tujuan-surat-list"/>
+                        <input type="text" name="tujuan_surat" id="tujuan_surat" required defaultValue={suratToEdit?.tujuan_surat} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" list="tujuan-surat-list"/>
                         <datalist id="tujuan-surat-list">
                           <option value="Bagian Umum" />
                           <option value="Bagian Keuangan" />
@@ -196,52 +214,61 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="arah_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Arah Surat</label>
-                        <select name="arah_surat" id="arah_surat" required defaultValue={suratToEdit?.arah_surat} className="pl-2 py-1 mt-1 ml-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
+                        <select name="arah_surat" id="arah_surat" required defaultValue={suratToEdit?.arah_surat} className="pl-2 py-1 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
                           {ARAH_SURAT.map(arah => <option key={arah} value={arah}>{formatEnumText(arah)}</option>)}
                         </select>
                       </div>
                       <div>
                         <label htmlFor="tipe_dokumen" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipe Dokumen</label>
-                        <select name="tipe_dokumen" id="tipe_dokumen" required defaultValue={suratToEdit?.tipe_dokumen} className="pl-2 py-1 mt-1 ml-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
+                        <select name="tipe_dokumen" id="tipe_dokumen" required defaultValue={suratToEdit?.tipe_dokumen} className="pl-2 py-1 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
                           {TIPE_DOKUMEN.map(tipe => <option key={tipe} value={tipe}>{formatEnumText(tipe)}</option>)}
                         </select>
                       </div>
                     </div>
                     <div>
-                      <label htmlFor="isi_disposisi" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Isi Disposisi</label>
-                      <textarea name="isi_disposisi" id="isi_disposisi" rows={2} required defaultValue={suratToEdit?.isi_disposisi} className="pl-2 mt-1 ml-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"></textarea>
+                      <label htmlFor="perihal" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Perihal</label>
+                      <textarea name="perihal" id="perihal" rows={2} required defaultValue={suratToEdit?.perihal} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"></textarea>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tujuan Disposisi</label>
-                      <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Tujuan Disposisi</label>
+                      <div className="ml-3 grid grid-cols-2 gap-3">
                         {TUJUAN_DISPOSISI.map((tujuan) => (
-                        <label key={tujuan} className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded">
-                          <input
-                          type="checkbox"
-                          name="tujuan_disposisi"
-                          value={tujuan}
-                          defaultChecked={suratToEdit?.tujuan_disposisi.includes(tujuan)}
-                          className="h-4 w-4 text-indigo-600 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 focus:ring-2"
-                          />
-                          <span className="text-sm text-gray-800 dark:text-gray-300">{formatEnumText(tujuan)}</span>
-                        </label>
+                          <label key={tujuan} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              name="tujuan_disposisi"
+                              value={tujuan}
+                              defaultChecked={suratToEdit?.tujuan_disposisi.includes(tujuan)}
+                              className="h-4 w-4 rounded border-gray-300 dark:border-gray-500 cursor-pointer focus:ring-2 focus:ring-indigo-500 checked:bg-indigo-600 checked:border-indigo-600 dark:checked:bg-indigo-500 dark:checked:border-indigo-500 bg-white dark:bg-gray-600"
+                            />
+                            <span className={`inline-block px-2.5 py-1 text-xs font-medium rounded-sm ${getTagColor(tujuan)}`}>
+                              {formatDispositionTarget(tujuan)}
+                            </span>
+                          </label>
                         ))}
                       </div>
+                      {/* <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                        Pilih satu atau lebih tujuan disposisi yang sesuai.
+                        </p> */}
                     </div>
+                        <div>
+                          <label htmlFor="isi_disposisi" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Isi Disposisi</label>
+                          <textarea name="isi_disposisi" id="isi_disposisi" rows={2} required defaultValue={suratToEdit?.isi_disposisi} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"></textarea>
+                        </div>
                     <div className={isEditMode ? 'hidden' : 'space-y-2'}>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="scan_surat">Upload Scan Surat (PDF, JPG, PNG)</label>
                         <div className="flex flex-wrap gap-2">
                           <button
                             type="button"
                             onClick={openFilePicker}
-                            className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-md border border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-700"
+                            className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-sm border border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-700"
                           >
                             Upload File
                           </button>
                           <button
                             type="button"
                             onClick={openCameraCapture}
-                            className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md"
+                            className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-sm"
                           >
                             Ambil Foto
                           </button>
@@ -249,7 +276,7 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                             <button
                               type="button"
                               onClick={clearSelectedFile}
-                              className="px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                              className="px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-sm dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                             >
                               Hapus Pilihan
                             </button>
@@ -275,8 +302,8 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                     </div>
                     {isEditMode && <p className="text-xs text-gray-500 dark:text-gray-400">Upload ulang scan surat tidak didukung dalam mode ubah.</p>}
                     <div className="mt-6 flex justify-end gap-4 border-t dark:border-gray-700 pt-4">
-                      <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600" onClick={closeModal}>Batal</button>
-                      <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">{isEditMode ? 'Simpan Perubahan' : 'Simpan'}</button>
+                      <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-sm hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600" onClick={closeModal}>Batal</button>
+                      <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-sm hover:bg-indigo-700">{isEditMode ? 'Simpan Perubahan' : 'Simpan'}</button>
                     </div>
                   </form>
                 </DialogPanel>
