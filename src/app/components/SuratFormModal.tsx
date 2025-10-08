@@ -166,32 +166,32 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                   </DialogTitle>
                   
                   <div className="p-5">
-                    <form ref={formRef} onSubmit={handleSubmit} className="max-h-[75vh] overflow-y-auto pr-2 space-y-3">
+                    <form ref={formRef} onSubmit={handleSubmit} className="max-h-[75vh] overflow-y-auto pr-2 space-y-4">
                     {/* Semua input diisi dengan defaultValue untuk mode Ubah */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <label htmlFor="nomor_agenda" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Agenda</label>
-                        <input type="text" name="nomor_agenda" id="nomor_agenda" required defaultValue={suratToEdit?.nomor_agenda} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm "/>
+                    <div className="grid grid-cols-1 md:grid-cols-2 pt-2 gap-x-6 gap-y-3">
+                      <div className="flex items-center">
+                        <label htmlFor="nomor_agenda" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Nomor Agenda</label>
+                        <input type="text" name="nomor_agenda" id="nomor_agenda" required defaultValue={suratToEdit?.nomor_agenda} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
                       </div>
-                      <div>
-                        <label htmlFor="nomor_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Surat</label>
-                        <input type="text" name="nomor_surat" id="nomor_surat" required defaultValue={suratToEdit?.nomor_surat} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <label htmlFor="tanggal_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Surat</label>
-                        <input type="date" name="tanggal_surat" id="tanggal_surat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_surat) : ''} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
-                      </div>
-                      <div>
-                        <label htmlFor="tanggal_diterima_dibuat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal & Pukul Diterima</label>
-                        <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                      <div className="flex items-center">
+                        <label htmlFor="nomor_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Nomor Surat</label>
+                        <input type="text" name="nomor_surat" id="nomor_surat" required defaultValue={suratToEdit?.nomor_surat} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <label htmlFor="asal_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Asal Surat</label>
-                        <input type="text" name="asal_surat" id="asal_surat" required defaultValue={suratToEdit?.asal_surat} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" list="asal-surat-list"/>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                      <div className="flex items-center">
+                        <label htmlFor="tanggal_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tanggal Surat</label>
+                        <input type="date" name="tanggal_surat" id="tanggal_surat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_surat) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                      </div>
+                      <div className="flex items-center">
+                        <label htmlFor="tanggal_diterima_dibuat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tgl Diterima</label>
+                        <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                      <div className="flex items-center">
+                        <label htmlFor="asal_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Asal Surat</label>
+                        <input type="text" name="asal_surat" id="asal_surat" required defaultValue={suratToEdit?.asal_surat} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" list="asal-surat-list"/>
                         <datalist id="asal-surat-list">
                           <option value="Bagian Umum" />
                           <option value="Bagian Keuangan" />
@@ -200,9 +200,9 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                           {/* Tambahkan opsi lain sesuai kebutuhan */}
                         </datalist>
                       </div>
-                      <div>
-                        <label htmlFor="tujuan_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tujuan Surat</label>
-                        <input type="text" name="tujuan_surat" id="tujuan_surat" required defaultValue={suratToEdit?.tujuan_surat} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" list="tujuan-surat-list"/>
+                      <div className="flex items-center">
+                        <label htmlFor="tujuan_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tujuan Surat</label>
+                        <input type="text" name="tujuan_surat" id="tujuan_surat" required defaultValue={suratToEdit?.tujuan_surat} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" list="tujuan-surat-list"/>
                         <datalist id="tujuan-surat-list">
                           <option value="Bagian Umum" />
                           <option value="Bagian Keuangan" />
@@ -212,18 +212,28 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                         </datalist>
                       </div>
                     </div>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <label htmlFor="arah_surat" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Arah Surat</label>
-                        <select name="arah_surat" id="arah_surat" required defaultValue={suratToEdit?.arah_surat} className="pl-2 py-0.25 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
-                          {ARAH_SURAT.map(arah => <option key={arah} value={arah}>{formatEnumText(arah)}</option>)}
-                        </select>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                      <div className="flex items-center">
+                        <label htmlFor="arah_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Arah Surat</label>
+                        <div className="relative w-full">
+                          <select name="arah_surat" id="arah_surat" required defaultValue={suratToEdit?.arah_surat} className="pl-2 py-0.25 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm appearance-none pr-8">
+                            {ARAH_SURAT.map(arah => <option key={arah} value={arah}>{formatEnumText(arah)}</option>)}
+                          </select>
+                          <svg className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
                       </div>
-                      <div>
-                        <label htmlFor="tipe_dokumen" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipe Dokumen</label>
-                        <select name="tipe_dokumen" id="tipe_dokumen" required defaultValue={suratToEdit?.tipe_dokumen} className="pl-2 py-0.25 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm">
-                          {TIPE_DOKUMEN.map(tipe => <option key={tipe} value={tipe}>{formatEnumText(tipe)}</option>)}
-                        </select>
+                      <div className="flex items-center">
+                        <label htmlFor="tipe_dokumen" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tipe Dokumen</label>
+                        <div className="relative w-full">
+                          <select name="tipe_dokumen" id="tipe_dokumen" required defaultValue={suratToEdit?.tipe_dokumen} className="pl-2 py-0.25 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm appearance-none pr-8">
+                            {TIPE_DOKUMEN.map(tipe => <option key={tipe} value={tipe}>{formatEnumText(tipe)}</option>)}
+                          </select>
+                          <svg className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
                       </div>
                     </div>
                     <div>
