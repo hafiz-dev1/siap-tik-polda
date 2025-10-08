@@ -19,10 +19,10 @@
   --brand-secondary: #64748b;
   
   /* Interactive elements */
-  --nav-item-hover: rgba(59, 130, 246, 0.1);
-  --nav-item-active: #3b82f6;
+  --nav-item-hover: rgba(59, 130, 246, 0.15);
+  --nav-item-active: #1d4ed8;
   --nav-item-text: #64748b;
-  --nav-item-text-hover: #1e293b;
+  --nav-item-text-hover: #1e40af;
   
   /* Spacing */
   --nav-padding-x: 1.5rem;
@@ -53,9 +53,10 @@
     --navbar-backdrop-blur: 16px;
     
     /* Dark mode interactive elements */
-    --nav-item-hover: rgba(59, 130, 246, 0.15);
+    --nav-item-hover: rgba(59, 130, 246, 0.25);
+    --nav-item-active: #60a5fa;
     --nav-item-text: #94a3b8;
-    --nav-item-text-hover: #f1f5f9;
+    --nav-item-text-hover: #e0f2fe;
   }
 }
 
@@ -107,9 +108,10 @@ body {
 
 .nav-item:hover {
   background-color: var(--nav-item-hover);
-  background-color: rgba(59, 130, 246, 0.1); /* Fallback */
+  background-color: rgba(59, 130, 246, 0.15); /* Fallback dengan opacity lebih tinggi */
   color: var(--nav-item-text-hover);
-  color: #1e293b; /* Fallback */
+  color: #1e40af; /* Warna biru yang lebih gelap dan kontras */
+  font-weight: 600; /* Lebih bold untuk kejelasan */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   -moz-backdrop-filter: blur(8px);
@@ -120,9 +122,10 @@ body {
 
 .nav-item.active {
   color: var(--nav-item-active);
-  color: #3b82f6; /* Fallback */
+  color: #1d4ed8; /* Warna biru lebih gelap untuk kontras lebih baik */
+  font-weight: 600; /* Lebih bold */
   background-color: var(--nav-item-hover);
-  background-color: rgba(59, 130, 246, 0.1); /* Fallback */
+  background-color: rgba(59, 130, 246, 0.2); /* Opacity lebih tinggi */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   -moz-backdrop-filter: blur(12px);
@@ -349,4 +352,28 @@ body {
 
 .fade-in {
   animation: fadeIn 0.15s ease-out;
+}
+
+/* Dark mode specific overrides for better contrast */
+@media (prefers-color-scheme: dark) {
+  .nav-item:hover {
+    color: #e0f2fe; /* Light blue untuk dark mode */
+    background-color: rgba(59, 130, 246, 0.25);
+  }
+  
+  .nav-item.active {
+    color: #60a5fa; /* Bright blue untuk dark mode */
+    background-color: rgba(59, 130, 246, 0.3);
+  }
+}
+
+/* Force dark mode styles when html has dark class */
+.dark .nav-item:hover {
+  color: #e0f2fe !important;
+  background-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+.dark .nav-item.active {
+  color: #60a5fa !important;
+  background-color: rgba(59, 130, 246, 0.3) !important;
 }

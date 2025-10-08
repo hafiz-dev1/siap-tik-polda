@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import TrashActionButtons from '@/app/components/TrashActionButtons';
+import LiveDateTime from '@/app/components/LiveDateTime';
 import { purgeExpiredSuratTrash } from '@/app/(app)/admin/actions';
 import { prisma } from '@/lib/prisma';
 import { SURAT_TRASH_RETENTION_DAYS } from '@/lib/trashRetention';
@@ -127,233 +128,252 @@ export default async function TrashPage() {
   ];
 
   return (
-    <div className="space-y-10">
-      <div className="flex flex-col gap-4 border-b border-gray-200 pb-6 lg:flex-row lg:items-end lg:justify-between">
+    <div className="space-y-8 max-w-6xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-b border-gray-200 dark:border-gray-700 pb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Tempat Sampah Terpusat</h1>
-          <p className="mt-2 max-w-2xl text-sm text-gray-600">
-            Audit seluruh item yang telah di-soft-delete, baik surat maupun akun pengguna. Anda dapat memulihkan
-            data penting dengan sekali klik atau menghapusnya secara permanen jika tidak lagi dibutuhkan.
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white tracking-tight">Kotak Sampah</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Kelola item yang dihapus sementara. Pulihkan atau hapus permanen sesuai kebutuhan.
           </p>
         </div>
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 shadow-sm">
-          <p className="flex items-center gap-2 font-semibold">
-            <ShieldAlert className="h-4 w-4" aria-hidden="true" />
-            Catatan Keamanan
-          </p>
-          <p className="mt-1 leading-relaxed">
-            Penghapusan permanen akan menghapus data dari server termasuk lampiran terkait. Pastikan sudah melakukan
-            audit sebelum mengeksekusi aksi destruktif ini. Sistem akan menghapus otomatis surat yang tidak dipulihkan dalam
-            ${SURAT_TRASH_RETENTION_DAYS} hari.
-          </p>
-        </div>
+        <LiveDateTime />
       </div>
 
       {purged > 0 && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 shadow-sm">
-          <p className="font-semibold">Pembersihan Otomatis Berhasil</p>
-          <p className="mt-1">
-            {purged.toLocaleString('id-ID')} surat dihapus permanen karena melebihi periode retensi
-            {` ${SURAT_TRASH_RETENTION_DAYS} hari.`}
-          </p>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-emerald-200 dark:border-emerald-700 p-4 transition-all duration-300 hover:shadow-md animate-fade-in">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg w-10 h-10 flex items-center justify-center">
+              <ShieldAlert className="h-5 w-5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="font-semibold text-emerald-900 dark:text-emerald-100">Pembersihan Otomatis Berhasil</p>
+              <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
+                {purged.toLocaleString('id-ID')} surat dihapus permanen karena melebihi periode retensi
+                {` ${SURAT_TRASH_RETENTION_DAYS} hari.`}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
             <div
               key={card.label}
-              className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
+              className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600"
             >
-              <div className="flex items-start justify-between p-5">
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{card.label}</p>
-                  <p className="mt-2 text-2xl font-semibold text-gray-900">{card.value}</p>
-                  <p className="mt-1 text-sm text-gray-500">{card.description}</p>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{card.label}</p>
+                  <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">{card.value}</p>
                 </div>
-                <span className="inline-flex rounded-full bg-gradient-to-br from-indigo-50 via-sky-50 to-emerald-50 p-3 text-indigo-500">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                </span>
+                <div className="flex-shrink-0 bg-gradient-to-br from-indigo-50 via-sky-50 to-emerald-50 dark:from-indigo-900/30 dark:via-sky-900/30 dark:to-emerald-900/30 rounded-full p-3">
+                  <Icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
+                </div>
               </div>
-              <div className="h-1 bg-gradient-to-r from-indigo-500 via-sky-500 to-emerald-500" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">{card.description}</p>
             </div>
           );
         })}
       </section>
 
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-amber-200 dark:border-amber-700 p-5 transition-all duration-300 hover:shadow-md">
+        <div className="flex items-start gap-3">
+          <div className="flex-shrink-0 bg-amber-100 dark:bg-amber-900/30 rounded-lg w-10 h-10 flex items-center justify-center">
+            <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-amber-900 dark:text-amber-100">Catatan Keamanan</p>
+            <p className="mt-1 text-sm text-amber-700 dark:text-amber-300 leading-relaxed">
+              Penghapusan permanen akan menghapus data dari server termasuk lampiran terkait. Pastikan sudah melakukan
+              audit sebelum mengeksekusi aksi destruktif ini. Sistem akan menghapus otomatis surat yang tidak dipulihkan dalam
+              {` ${SURAT_TRASH_RETENTION_DAYS} hari.`}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Sampah Surat</h2>
-            <p className="text-sm text-gray-500">Daftar surat yang dihapus sementara dan dapat dipulihkan kapan saja.</p>
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Sampah Surat</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Daftar surat yang dihapus sementara dan dapat dipulihkan kapan saja.</p>
           </div>
-          <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
+          <span className="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700">
             {totalSurat.toLocaleString('id-ID')} item
           </span>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Detail Surat
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Asal & Tujuan
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Tanggal Dihapus
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {deletedSuratList.length === 0 ? (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700/50">
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500">
-                    <div className="mx-auto flex max-w-md flex-col items-center gap-3">
-                      <FileText className="h-8 w-8 text-gray-300" aria-hidden="true" />
-                      <p className="font-medium text-gray-600">Tidak ada surat di tempat sampah.</p>
-                      <p className="text-xs text-gray-500">
-                        Surat yang dihapus akan muncul di sini selama periode retensi sebelum dihapus permanen.
-                      </p>
-                    </div>
-                  </td>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Detail Surat
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Asal & Tujuan
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Tanggal Dihapus
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Aksi
+                  </th>
                 </tr>
-              ) : (
-                deletedSuratList.map((surat) => (
-                  <tr key={surat.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      <p className="font-semibold text-gray-900">{surat.perihal}</p>
-                      <p className="mt-1 text-xs text-gray-500">Nomor: {surat.nomor_surat}</p>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      <p className="font-medium text-gray-900">{surat.asal_surat}</p>
-                      <p className="mt-1 text-xs text-gray-500">→ {surat.tujuan_surat}</p>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      <p className="font-medium text-gray-900">{formatDateTime(surat.deletedAt)}</p>
-                      <p className="text-xs text-gray-500">{formatRelativeTime(surat.deletedAt)}</p>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      <TrashActionButtons
-                        entityId={surat.id}
-                        entityType="surat"
-                        entityName={surat.perihal}
-                      />
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {deletedSuratList.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                      <div className="mx-auto flex max-w-md flex-col items-center gap-3">
+                        <div className="flex-shrink-0 bg-gray-100 dark:bg-gray-700 rounded-full w-16 h-16 flex items-center justify-center">
+                          <FileText className="h-8 w-8 text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                        </div>
+                        <p className="font-medium text-gray-700 dark:text-gray-300">Tidak ada surat di kotak sampah.</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Surat yang dihapus akan muncul di sini selama periode retensi sebelum dihapus permanen.
+                        </p>
+                      </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  deletedSuratList.map((surat) => (
+                    <tr key={surat.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
+                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                        <p className="font-semibold text-gray-900 dark:text-white">{surat.perihal}</p>
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Nomor: {surat.nomor_surat}</p>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                        <p className="font-medium text-gray-900 dark:text-white">{surat.asal_surat}</p>
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">→ {surat.tujuan_surat}</p>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                        <p className="font-medium text-gray-900 dark:text-white">{formatDateTime(surat.deletedAt)}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{formatRelativeTime(surat.deletedAt)}</p>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                        <TrashActionButtons
+                          entityId={surat.id}
+                          entityType="surat"
+                          entityName={surat.perihal}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Sampah Akun Pengguna</h2>
-            <p className="text-sm text-gray-500">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Sampah Akun Pengguna</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Kelola akun operator yang telah dinonaktifkan. Pulihkan atau hapus permanen sesuai kebutuhan.
             </p>
           </div>
-          <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
+          <span className="inline-flex items-center rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700">
             {totalUsers.toLocaleString('id-ID')} akun
           </span>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Pengguna
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Peran
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Tanggal Dihapus
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {deletedUsers.length === 0 ? (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700/50">
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500">
-                    <div className="mx-auto flex max-w-md flex-col items-center gap-3">
-                      <Users className="h-8 w-8 text-gray-300" aria-hidden="true" />
-                      <p className="font-medium text-gray-600">Tidak ada akun pengguna di tempat sampah.</p>
-                      <p className="text-xs text-gray-500">
-                        Penghapusan akun hanya boleh dilakukan untuk operator yang tidak lagi aktif dalam sistem.
-                      </p>
-                    </div>
-                  </td>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Pengguna
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Peran
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Tanggal Dihapus
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Aksi
+                  </th>
                 </tr>
-              ) : (
-                deletedUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      <div className="flex items-center gap-3">
-                        {user.profilePictureUrl ? (
-                          <Image
-                            src={user.profilePictureUrl}
-                            alt={`Foto profil ${user.nama}`}
-                            width={40}
-                            height={40}
-                            className="h-10 w-10 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm font-semibold text-gray-600">
-                            {getInitials(user.nama)}
-                          </div>
-                        )}
-                        <div>
-                          <p className="font-semibold text-gray-900">{user.nama}</p>
-                          <p className="text-xs text-gray-500">@{user.username}</p>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {deletedUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                      <div className="mx-auto flex max-w-md flex-col items-center gap-3">
+                        <div className="flex-shrink-0 bg-gray-100 dark:bg-gray-700 rounded-full w-16 h-16 flex items-center justify-center">
+                          <Users className="h-8 w-8 text-gray-400 dark:text-gray-500" aria-hidden="true" />
                         </div>
+                        <p className="font-medium text-gray-700 dark:text-gray-300">Tidak ada akun pengguna di kotak sampah.</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Penghapusan akun hanya boleh dilakukan untuk operator yang tidak lagi aktif dalam sistem.
+                        </p>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      {(() => {
-                        const normalizedRole = user.role as string;
-                        const isSuperAdmin = normalizedRole === 'SUPER_ADMIN';
-                        const badgeClass = isSuperAdmin
-                          ? 'bg-amber-50 text-amber-600'
-                          : 'bg-purple-50 text-purple-600';
-                        const roleLabel = isSuperAdmin ? 'Super Admin' : 'Admin';
-                        return (
-                          <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${badgeClass}`}>
-                            {roleLabel}
-                          </span>
-                        );
-                      })()}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      <p className="font-medium text-gray-900">{formatDateTime(user.deletedAt)}</p>
-                      <p className="text-xs text-gray-500">{formatRelativeTime(user.deletedAt)}</p>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      <TrashActionButtons
-                        entityId={user.id}
-                        entityType="pengguna"
-                        entityName={user.nama}
-                      />
-                    </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  deletedUsers.map((user) => (
+                    <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
+                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                        <div className="flex items-center gap-3">
+                          {user.profilePictureUrl ? (
+                            <Image
+                              src={user.profilePictureUrl}
+                              alt={`Foto profil ${user.nama}`}
+                              width={40}
+                              height={40}
+                              className="h-10 w-10 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
+                            />
+                          ) : (
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 text-sm font-semibold text-indigo-700 dark:text-indigo-300 border-2 border-indigo-200 dark:border-indigo-700">
+                              {getInitials(user.nama)}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-semibold text-gray-900 dark:text-white">{user.nama}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">@{user.username}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                        {(() => {
+                          const normalizedRole = user.role as string;
+                          const isSuperAdmin = normalizedRole === 'SUPER_ADMIN';
+                          const badgeClass = isSuperAdmin
+                            ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-700'
+                            : 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-700';
+                          const roleLabel = isSuperAdmin ? 'Super Admin' : 'Admin';
+                          return (
+                            <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border ${badgeClass}`}>
+                              {roleLabel}
+                            </span>
+                          );
+                        })()}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                        <p className="font-medium text-gray-900 dark:text-white">{formatDateTime(user.deletedAt)}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{formatRelativeTime(user.deletedAt)}</p>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                        <TrashActionButtons
+                          entityId={user.id}
+                          entityType="pengguna"
+                          entityName={user.nama}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </div>
