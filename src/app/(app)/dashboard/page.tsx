@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 import Link from 'next/link';
 import StatsCard from '@/app/components/StatsCard';
 import SuratChart from '@/app/components/SuratChart';
-import SuratDetailModal from '@/app/components/SuratDetailModal';
+import RecentActivityTable from '@/app/components/RecentActivityTable';
 import LiveDateTime from '@/app/components/LiveDateTime';
 import { Suspense } from 'react';
 import { prisma } from '@/lib/prisma';
@@ -179,72 +179,13 @@ export default async function DashboardPage() {
       </div>
 
       {/* Panel Aktivitas Terbaru (Full Width) */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 animate-fade-in delay-200">
-        <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 px-6 py-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 animate-fade-in delay-200 overflow-hidden">
+        <div className="flex items-center justify-between border-b-2 border-gray-200 dark:border-gray-700 px-6 py-4 bg-gray-50 dark:bg-gray-700/50">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Aktivitas Terbaru</h3>
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
         </div>
         
-        {recentSurat.length > 0 ? (
-          <div className="relative">
-            <div className="overflow-auto max-h-80 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 rounded-b-xl">
-              <table className="min-w-full table-fixed">
-                <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0 z-20">
-                  <tr>
-                    <th className="w-16 px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">No.</th>
-                    <th className="w-2/5 px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Perihal</th>
-                    <th className="w-24 px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Arah</th>
-                    <th className="w-32 px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tanggal</th>
-                    <th className="w-24 px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
-                  {recentSurat.map((surat, index) => (
-                    <SuratDetailModal key={surat.id} surat={surat}>
-                      <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
-                        <td className="w-16 px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {index + 1}
-                        </td>
-                        <td className="w-2/5 px-6 py-4">
-                          <div className="text-sm font-medium text-gray-800 dark:text-white">
-                            <div className="truncate" title={surat.perihal}>{surat.perihal}</div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{surat.nomor_surat}</div>
-                          </div>
-                        </td>
-                        <td className="w-24 px-6 py-4">
-                          <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${
-                            surat.arah_surat === 'MASUK' 
-                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300' 
-                              : 'bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300'
-                          }`}>
-                            {surat.arah_surat === 'MASUK' ? 'Masuk' : 'Keluar'}
-                          </span>
-                        </td>
-                        <td className="w-32 px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {new Date(surat.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-                        </td>
-                        <td className="w-24 px-6 py-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300">
-                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                            Aktif
-                          </span>
-                        </td>
-                      </tr>
-                    </SuratDetailModal>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <svg className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Belum Ada Aktivitas</h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Surat yang baru ditambahkan akan muncul di sini.</p>
-          </div>
-        )}
+        <RecentActivityTable recentSurat={recentSurat} />
       </div>
      </div>
    );
