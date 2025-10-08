@@ -31,7 +31,7 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Custom hooks for business logic
-  const { formatEnumText, getTagColor, formatDate, formatTime } = useSuratFormatters();
+  const { formatEnumText, getTagColor, formatDate, formatTime, formatDispositionTarget } = useSuratFormatters();
   const { exportToExcel } = useExcelExport();
   
   const {
@@ -173,6 +173,7 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
         surat={selectedSurat}
         onClose={closeModal}
         formatEnumText={formatEnumText}
+        formatDispositionTarget={formatDispositionTarget}
         getTagColor={getTagColor}
       />
     </div>

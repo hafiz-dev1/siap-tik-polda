@@ -19,6 +19,17 @@ export default function SuratDetailModal({ surat, children }: Props) {
   
   // Fungsi helper untuk memformat teks enum agar mudah dibaca
   const formatEnumText = (text: string) => text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  
+  // Fungsi untuk memformat tujuan disposisi dengan nama lengkap
+  const formatDispositionTarget = (target: string) => {
+    const targetMap: Record<string, string> = {
+      'KASUBBID_TEKKOM': 'KASUBBID TEKKOM',
+      'KASUBBID_TEKINFO': 'KASUBBID TEKINFO',
+      'KASUBBAG_RENMIN': 'KASUBBAG RENMIN',
+      'KAUR_KEU': 'KAUR KEU'
+    };
+    return targetMap[target] || formatEnumText(target);
+  };
 
   // Clone the children and add onClick handler directly to the <tr> element
   const clonedChildren = cloneElement(children as React.ReactElement<any>, {
@@ -104,7 +115,7 @@ export default function SuratDetailModal({ surat, children }: Props) {
                         <strong className="text-gray-500 dark:text-gray-400">Tujuan Disposisi:</strong>
                         <div className="flex flex-wrap gap-2 mt-1">
                             {surat.tujuan_disposisi.map((tujuan: string) => (
-                                <span key={tujuan} className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full dark:bg-gray-700 dark:text-gray-200">{formatEnumText(tujuan)}</span>
+                                <span key={tujuan} className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full dark:bg-gray-700 dark:text-gray-200">{formatDispositionTarget(tujuan)}</span>
                             ))}
                         </div>
                      </div>

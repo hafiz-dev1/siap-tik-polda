@@ -11,6 +11,7 @@ interface OptimizedSuratDetailModalProps {
   surat: SuratWithLampiran | null;
   onClose: () => void;
   formatEnumText: (text: string) => string;
+  formatDispositionTarget: (target: string) => string;
   getTagColor: (target: string) => string;
 }
 
@@ -19,6 +20,7 @@ const OptimizedSuratDetailModal = memo(function OptimizedSuratDetailModal({
   surat,
   onClose,
   formatEnumText,
+  formatDispositionTarget,
   getTagColor,
 }: OptimizedSuratDetailModalProps) {
   if (!surat) return null;
@@ -129,19 +131,9 @@ const OptimizedSuratDetailModal = memo(function OptimizedSuratDetailModal({
                         <span
                           key={tujuan}
                           className={`px-2 py-1 text-xs rounded-full ${getTagColor(tujuan)}`}
-                          title={formatEnumText(
-                            tujuan
-                              .replace('KASUBBID_', '')
-                              .replace('KASUBBAG_', '')
-                              .replace('KAUR_', '')
-                          )}
+                          title={formatDispositionTarget(tujuan)}
                         >
-                          {formatEnumText(
-                            tujuan
-                              .replace('KASUBBID_', '')
-                              .replace('KASUBBAG_', '')
-                              .replace('KAUR_', '')
-                          )}
+                          {formatDispositionTarget(tujuan)}
                         </span>
                       ))}
                     </div>

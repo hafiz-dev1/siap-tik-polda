@@ -40,11 +40,23 @@ export function useSuratFormatters() {
     }) + ' WIB';
   }, []);
 
+  // Memoized function to format disposition target with full name
+  const formatDispositionTarget = useCallback((target: string) => {
+    const targetMap: Record<string, string> = {
+      'KASUBBID_TEKKOM': 'KASUBBID TEKKOM',
+      'KASUBBID_TEKINFO': 'KASUBBID TEKINFO',
+      'KASUBBAG_RENMIN': 'KASUBBAG RENMIN',
+      'KAUR_KEU': 'KAUR KEU'
+    };
+    return targetMap[target] || formatEnumText(target);
+  }, [formatEnumText]);
+
   return {
     formatEnumText,
     getTagColor,
     formatDate,
     formatTime,
+    formatDispositionTarget,
   };
 }
 
