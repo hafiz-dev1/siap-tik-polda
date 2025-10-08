@@ -27,7 +27,7 @@ const TabNavigation = memo(function TabNavigation({
         onClick={handleMasukClick}
         className={`flex-1 py-2.5 px-4 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 rounded-md cursor-pointer ${
           activeArah === 'MASUK'
-            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 ring-1 ring-indigo-500'
+            ? 'bg-gradient-to-r from-indigo-700 to-indigo-600 text-white shadow-lg shadow-indigo-500/25 ring-1 ring-indigo-500 hover:from-indigo-800 hover:to-indigo-700'
             : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-gray-700/60'
         }`}
       >
@@ -45,7 +45,7 @@ const TabNavigation = memo(function TabNavigation({
         onClick={handleKeluarClick}
         className={`flex-1 py-2.5 px-4 text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 rounded-md cursor-pointer ${
           activeArah === 'KELUAR'
-            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/25 ring-1 ring-emerald-500'
+            ? 'bg-gradient-to-r from-emerald-700 to-emerald-600 text-white shadow-lg shadow-emerald-500/25 ring-1 ring-emerald-500 hover:from-emerald-800 hover:to-emerald-700'
             : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-gray-700/60'
         }`}
       >

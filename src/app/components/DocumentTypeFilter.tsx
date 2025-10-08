@@ -56,7 +56,7 @@ const DocumentTypeFilter = memo(function DocumentTypeFilter({
               onClick={() => handleTipeClick('ALL')}
               className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
                 activeTipe === 'ALL'
-                  ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-500'
+                  ? 'bg-gradient-to-r from-indigo-700 to-indigo-600 text-white shadow-sm ring-1 ring-indigo-500 hover:from-indigo-800 hover:to-indigo-700'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
@@ -68,7 +68,7 @@ const DocumentTypeFilter = memo(function DocumentTypeFilter({
                 onClick={() => handleTipeClick(tipe)}
                 className={`px-3.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
                   activeTipe === tipe
-                    ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-500'
+                    ? 'bg-gradient-to-r from-indigo-700 to-indigo-600 text-white shadow-sm ring-1 ring-indigo-500 hover:from-indigo-800 hover:to-indigo-700'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
@@ -82,7 +82,7 @@ const DocumentTypeFilter = memo(function DocumentTypeFilter({
           <button
             onClick={onExportToExcel}
             type="button"
-            className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-1 focus:ring-green-500 transition-all whitespace-nowrap flex items-center gap-1.5 text-sm cursor-pointer"
+            className="px-3 py-2 bg-gradient-to-r from-green-700 to-green-600 text-white rounded-md hover:from-green-800 hover:to-green-700 dark:from-green-800 dark:to-green-700 dark:hover:from-green-900 dark:hover:to-green-800 focus:outline-none focus:ring-1 focus:ring-green-500 transition-all whitespace-nowrap flex items-center gap-1.5 text-sm cursor-pointer"
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
@@ -106,7 +106,7 @@ const DocumentTypeFilter = memo(function DocumentTypeFilter({
             <SuratFormModal>
               <button
                 type="button"
-                className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all whitespace-nowrap flex items-center gap-1.5 text-sm cursor-pointer"
+                className="px-3 py-2 bg-gradient-to-r from-indigo-800 to-indigo-600 text-white rounded-md hover:from-indigo-900 hover:to-indigo-700 dark:from-indigo-900 dark:to-indigo-700 dark:hover:from-indigo-950 dark:hover:to-indigo-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all whitespace-nowrap flex items-center gap-1.5 text-sm cursor-pointer"
               >
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 

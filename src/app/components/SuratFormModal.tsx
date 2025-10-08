@@ -161,14 +161,14 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
             <div className="flex min-h-full items-center justify-center p-4">
               <TransitionChild as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
                 <DialogPanel className="w-full max-w-2xl rounded-xl bg-white dark:bg-gray-800 shadow-xl overflow-hidden">
-                  <DialogTitle as="h3" className="text-base font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 px-5 py-3 text-center">
+                  <DialogTitle as="h3" className="text-base font-semibold text-white bg-gradient-to-r from-indigo-800 to-indigo-600 dark:from-indigo-900 dark:to-indigo-700 px-5 py-3 text-center">
                     {isEditMode ? 'Ubah Surat' : 'Tambah Surat'}
                   </DialogTitle>
                   
                   <div className="p-5">
                     <form ref={formRef} onSubmit={handleSubmit} className="max-h-[75vh] overflow-y-auto pr-2 space-y-4">
                     {/* Semua input diisi dengan defaultValue untuk mode Ubah */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 pt-2 gap-x-6 gap-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 pt-2 gap-x-7 gap-y-3">
                       <div className="flex items-center">
                         <label htmlFor="nomor_agenda" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Nomor Agenda</label>
                         <input type="text" name="nomor_agenda" id="nomor_agenda" required defaultValue={suratToEdit?.nomor_agenda} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
@@ -178,7 +178,7 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                         <input type="text" name="nomor_surat" id="nomor_surat" required defaultValue={suratToEdit?.nomor_surat} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-3">
                       <div className="flex items-center">
                         <label htmlFor="tanggal_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tanggal Surat</label>
                         <input type="date" name="tanggal_surat" id="tanggal_surat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_surat) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
@@ -188,7 +188,7 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                         <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-3">
                       <div className="flex items-center">
                         <label htmlFor="asal_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Asal Surat</label>
                         <input type="text" name="asal_surat" id="asal_surat" required defaultValue={suratToEdit?.asal_surat} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" list="asal-surat-list"/>
@@ -212,7 +212,7 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                         </datalist>
                       </div>
                     </div>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-3">
                       <div className="flex items-center">
                         <label htmlFor="arah_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Arah Surat</label>
                         <div className="relative w-full">
@@ -272,14 +272,14 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                           <button
                             type="button"
                             onClick={openFilePicker}
-                            className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-sm border border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-700"
+                            className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 hover:text-white hover:border-indigo-600 rounded-sm border border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-700 cursor-pointer"
                           >
                             Upload File
                           </button>
                           <button
                             type="button"
                             onClick={openCameraCapture}
-                            className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-sm"
+                            className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-700 to-emerald-600 rounded-sm hover:from-emerald-800 hover:to-emerald-700 dark:from-emerald-800 dark:to-emerald-700 dark:hover:from-emerald-900 dark:hover:to-emerald-800 transition-all duration-200 cursor-pointer"
                           >
                             Ambil Foto
                           </button>
@@ -287,7 +287,7 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                             <button
                               type="button"
                               onClick={clearSelectedFile}
-                              className="px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-sm dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                              className="px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-sm dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 cursor-pointer"
                             >
                               Hapus Pilihan
                             </button>
@@ -313,8 +313,8 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                     </div>
                     {isEditMode && <p className="text-xs text-gray-500 dark:text-gray-400">Upload ulang scan surat tidak didukung dalam mode ubah.</p>}
                     <div className="mt-4 flex justify-end gap-3 border-t dark:border-gray-700 pt-3">
-                      <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-sm hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600" onClick={closeModal}>Batal</button>
-                      <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-sm hover:bg-indigo-700">{isEditMode ? 'Simpan Perubahan' : 'Simpan'}</button>
+                      <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-sm hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 cursor-pointer" onClick={closeModal}>Batal</button>
+                      <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-800 to-indigo-700 rounded-sm hover:from-indigo-900 hover:to-indigo-800 dark:from-indigo-900 dark:to-indigo-700 dark:hover:from-indigo-950 dark:hover:to-indigo-800 transition-all duration-200 cursor-pointer">{isEditMode ? 'Simpan Perubahan' : 'Simpan'}</button>
                     </div>
                   </form>
                   </div>
