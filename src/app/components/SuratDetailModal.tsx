@@ -67,78 +67,80 @@ export default function SuratDetailModal({ surat, children }: Props) {
                     Detail Surat & Disposisi
                   </DialogTitle>
                   
-                  <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-4 text-sm">
-                    {/* Detail Utama */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                  <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-3 text-sm">
+                    {/* Detail Utama - 2 Kolom */}
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-3">
                       <div>
-                        <strong className="text-gray-500 dark:text-gray-400">Nomor Agenda:</strong>
-                        <p className="text-gray-900 dark:text-gray-100">{surat.nomor_agenda}</p>
+                        <strong className="text-gray-400 dark:text-gray-500 block mb-1">Nomor Agenda:</strong>
+                        <p className="text-gray-200 dark:text-gray-300">{surat.nomor_agenda}</p>
                       </div>
                       <div>
-                        <strong className="text-gray-500 dark:text-gray-400">Nomor Surat:</strong>
-                        <p className="text-gray-900 dark:text-gray-100">{surat.nomor_surat}</p>
+                        <strong className="text-gray-400 dark:text-gray-500 block mb-1">Nomor Surat:</strong>
+                        <p className="text-gray-200 dark:text-gray-300">{surat.nomor_surat}</p>
                       </div>
                       <div>
-                        <strong className="text-gray-500 dark:text-gray-400">Tanggal Surat:</strong>
-                        <p className="text-gray-900 dark:text-gray-100">{new Date(surat.tanggal_surat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                        <strong className="text-gray-400 dark:text-gray-500 block mb-1">Tanggal Surat:</strong>
+                        <p className="text-gray-200 dark:text-gray-300">{new Date(surat.tanggal_surat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                       </div>
                       <div>
-                        <strong className="text-gray-500 dark:text-gray-400">Tanggal Diterima:</strong>
-                        <p className="text-gray-900 dark:text-gray-100">{new Date(surat.tanggal_diterima_dibuat).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })} WIB</p>
+                        <strong className="text-gray-400 dark:text-gray-500 block mb-1">Tanggal Diterima:</strong>
+                        <p className="text-gray-200 dark:text-gray-300">{new Date(surat.tanggal_diterima_dibuat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} pukul {new Date(surat.tanggal_diterima_dibuat).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</p>
                       </div>
                       <div>
-                        <strong className="text-gray-500 dark:text-gray-400">Asal Surat:</strong>
-                        <p className="text-gray-900 dark:text-gray-100">{surat.asal_surat}</p>
+                        <strong className="text-gray-400 dark:text-gray-500 block mb-1">Asal Surat:</strong>
+                        <p className="text-gray-200 dark:text-gray-300">{surat.asal_surat}</p>
                       </div>
                       <div>
-                        <strong className="text-gray-500 dark:text-gray-400">Tujuan Surat:</strong>
-                        <p className="text-gray-900 dark:text-gray-100">{surat.tujuan_surat}</p>
+                        <strong className="text-gray-400 dark:text-gray-500 block mb-1">Tujuan Surat:</strong>
+                        <p className="text-gray-200 dark:text-gray-300">{surat.tujuan_surat}</p>
                       </div>
                       <div>
-                        <strong className="text-gray-500 dark:text-gray-400">Arah:</strong>
-                        <p className="text-gray-900 dark:text-gray-100">{formatEnumText(surat.arah_surat)}</p>
+                        <strong className="text-gray-400 dark:text-gray-500 block mb-1">Arah:</strong>
+                        <p className="text-gray-200 dark:text-gray-300">{formatEnumText(surat.arah_surat)}</p>
                       </div>
                       <div>
-                        <strong className="text-gray-500 dark:text-gray-400">Tipe Dokumen:</strong>
-                        <p className="text-gray-900 dark:text-gray-100">{formatEnumText(surat.tipe_dokumen)}</p>
+                        <strong className="text-gray-400 dark:text-gray-500 block mb-1">Tipe Dokumen:</strong>
+                        <p className="text-gray-200 dark:text-gray-300">{formatEnumText(surat.tipe_dokumen)}</p>
                       </div>
                     </div>
                     
                     {/* Detail Perihal */}
                     <div>
-                        <strong className="text-gray-500 dark:text-gray-400">Perihal:</strong>
-                        <p className="text-gray-900 dark:text-gray-100 mt-1 whitespace-pre-wrap">{surat.perihal}</p>
+                        <strong className="text-gray-400 dark:text-gray-500 block mb-1">Perihal:</strong>
+                        <p className="text-gray-200 dark:text-gray-300 whitespace-pre-wrap">{surat.perihal}</p>
                     </div>
 
                     {/* Detail Tujuan Disposisi */}
                      <div>
-                        <strong className="text-gray-500 dark:text-gray-400">Tujuan Disposisi:</strong>
-                        <div className="flex flex-wrap gap-2 mt-1">
+                        <strong className="text-gray-400 dark:text-gray-500 block mb-1">Tujuan Disposisi:</strong>
+                        <div className="flex flex-wrap gap-2">
                             {surat.tujuan_disposisi.map((tujuan: string) => (
-                                <span key={tujuan} className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full dark:bg-gray-700 dark:text-gray-200">{formatDispositionTarget(tujuan)}</span>
+                                <span key={tujuan} className="px-2 py-1 text-xs bg-gray-700 text-gray-200 rounded-sm dark:bg-gray-700 dark:text-gray-200">{formatDispositionTarget(tujuan)}</span>
                             ))}
                         </div>
                      </div>
 
                     {/* Detail Isi Disposisi */}
                     <div>
-                        <strong className="text-gray-500 dark:text-gray-400">Isi Disposisi:</strong>
-                        <p className="text-gray-900 dark:text-gray-100 mt-1 whitespace-pre-wrap bg-gray-50 dark:bg-gray-700/50 p-3 rounded-md border dark:border-gray-600">{surat.isi_disposisi}</p>
+                        <strong className="text-gray-400 dark:text-gray-500 block mb-1">Isi Disposisi:</strong>
+                        <div className="bg-gray-700 dark:bg-gray-700/50 p-3 rounded border border-gray-600 dark:border-gray-600">
+                          <p className="text-gray-200 dark:text-gray-300 whitespace-pre-wrap">{surat.isi_disposisi}</p>
+                        </div>
                     </div>
 
                     {/* Link Download */}
                     <div>
-                        <strong className="text-gray-500 dark:text-gray-400">Lampiran:</strong>
-                        <div className="mt-1">
+                        <strong className="text-gray-400 dark:text-gray-500 block mb-1">Lampiran:</strong>
+                        <div>
                            {surat.lampiran[0] ? (
                             <button 
                               onClick={() => window.open(surat.lampiran[0].path_file, '_blank')}
-                              className="text-indigo-600 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300 text-sm cursor-pointer bg-transparent border-none p-0"
+                              className="text-blue-400 hover:underline dark:text-blue-400 dark:hover:text-blue-300 text-sm cursor-pointer bg-transparent border-none p-0"
                             >
                               {surat.lampiran[0].nama_file}
                             </button>
                           ) : (
-                            <p className="text-gray-500 dark:text-gray-400">Tidak ada file terlampir.</p>
+                            <p className="text-gray-400 dark:text-gray-500">Tidak ada file terlampir.</p>
                           )}
                         </div>
                     </div>

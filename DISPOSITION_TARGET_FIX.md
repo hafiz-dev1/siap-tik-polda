@@ -1,11 +1,23 @@
 # Perbaikan Tampilan Tujuan Disposisi
 
 ## Deskripsi Perubahan
-Diperbaiki tampilan tujuan disposisi pada "Detail Surat Masuk" agar menampilkan nama lengkap dari tujuan disposisi yang sebenarnya:
+Diperbaiki tampilan tujuan disposisi pada "Detail Surat Masuk" dengan dua perbaikan:
+
+### 1. Format Nama Lengkap
+Menampilkan nama lengkap dari tujuan disposisi yang sebenarnya:
 - **KASUBBID TEKKOM** (bukan hanya TEKKOM)
 - **KASUBBID TEKINFO** (bukan hanya TEKINFO)
 - **KASUBBAG RENMIN** (bukan hanya RENMIN)
 - **KAUR KEU** (bukan hanya KEU)
+
+### 2. Urutan Tampilan
+Memindahkan posisi "Tujuan Disposisi" agar berada di atas "Isi Disposisi" pada detail modal.
+
+**Urutan Baru**:
+1. Perihal
+2. **Tujuan Disposisi** ← Dipindahkan ke atas
+3. **Isi Disposisi**
+4. Lampiran
 
 ### Tampilan
 - **Pada Tabel**: Tetap menggunakan singkatan (TEKKOM, TEKINFO, RENMIN, KEU)
@@ -65,8 +77,17 @@ interface OptimizedSuratDetailModalProps {
 
 **Perubahan**: Mengganti logic tampilan tujuan disposisi untuk menggunakan `formatDispositionTarget` alih-alih melakukan replace manual pada string.
 
+**Urutan Tampilan**: Memindahkan "Tujuan Disposisi" ke atas "Isi Disposisi".
+
 **Sebelum**:
 ```typescript
+// Urutan lama
+{/* Perihal */}
+{/* Isi Disposisi */}  ← Di atas
+{/* Tujuan Disposisi */}  ← Di bawah
+{/* Lampiran */}
+
+// Format lama
 {formatEnumText(
   tujuan
     .replace('KASUBBID_', '')
@@ -77,6 +98,13 @@ interface OptimizedSuratDetailModalProps {
 
 **Sesudah**:
 ```typescript
+// Urutan baru
+{/* Perihal */}
+{/* Tujuan Disposisi */}  ← Dipindahkan ke atas
+{/* Isi Disposisi */}
+{/* Lampiran */}
+
+// Format baru
 {formatDispositionTarget(tujuan)}
 ```
 
@@ -102,6 +130,12 @@ const { formatEnumText, getTagColor, formatDate, formatTime, formatDispositionTa
 
 ## Hasil Akhir
 
+### Urutan Tampilan pada Detail Modal
+1. **Perihal**: Isi perihal surat
+2. **Tujuan Disposisi**: Badge dengan nama lengkap (KASUBBID TEKKOM, dsb.)
+3. **Isi Disposisi**: Konten disposisi
+4. **Lampiran**: File terlampir (jika ada)
+
 ### Tabel (Tidak Berubah)
 Pada tabel, tujuan disposisi tetap ditampilkan dalam bentuk singkat:
 - TEKKOM
@@ -121,6 +155,7 @@ Pada modal detail surat, tujuan disposisi ditampilkan dalam bentuk lengkap:
 ✅ Komponen modal mendapatkan prop baru `formatDispositionTarget`
 ✅ Tampilan tabel tetap menggunakan singkatan (tidak terpengaruh)
 ✅ Tampilan detail modal menggunakan nama lengkap
+✅ Urutan tampilan: Perihal → Tujuan Disposisi → Isi Disposisi → Lampiran
 
 ## Catatan Implementasi
 - Fungsi `formatDispositionTarget` dibuat sebagai utility function yang dapat digunakan kembali
