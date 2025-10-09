@@ -10,6 +10,7 @@ import path from 'path';
 import { getSession } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { SURAT_TRASH_RETENTION_DAYS } from '@/lib/trashRetention';
+import { logActivity, ActivityDescriptions } from '@/lib/activityLogger';
 
 const SURAT_TRASH_RETENTION_MS = SURAT_TRASH_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
@@ -42,7 +43,20 @@ async function removeLampiranFiles(lampiranList: LampiranRecord[]) {
  * Menangani proses logout pengguna (Admin dan User).
  */
 export async function logout() {
-  const cookieStore = await cookies(); // Menggunakan await sesuai kebutuhan lingkungan Anda
+  const session = await getSession();
+  
+  // Log logout activity before deleting the session
+  if (session?.operatorId && session?.username) {
+    await logActivity({
+      userId: session.operatorId,
+      category: 'AUTH',
+      type: 'LOGOUT',
+      description: ActivityDescriptions.LOGOUT(session.username),
+      status: 'SUCCESS',
+    });
+  }
+  
+  const cookieStore = await cookies();
   cookieStore.delete('token');
   redirect('/login');
 }
@@ -78,7 +92,6 @@ export async function createSurat(formData: FormData) {
       return { error: 'Gagal: Scan surat wajib diupload.' };
     }
 
-    // Logika upload file
     const buffer = Buffer.from(await scan_surat.arrayBuffer());
     const filename = `${Date.now()}-${scan_surat.name.replace(/\s/g, '_')}`;
     const uploadPath = path.join(process.cwd(), 'public/uploads', filename);
@@ -86,7 +99,7 @@ export async function createSurat(formData: FormData) {
     await fs.writeFile(uploadPath, buffer);
     const publicPath = `/uploads/${filename}`;
 
-    await prisma.surat.create({
+    const newSurat = await prisma.surat.create({
       data: {
         nomor_agenda,
         tanggal_diterima_dibuat,
@@ -108,6 +121,22 @@ export async function createSurat(formData: FormData) {
             ukuran_file: scan_surat.size,
           }
         }
+      },
+    });
+
+    // Log activity
+    await logActivity({
+      userId: session.operatorId,
+      category: 'SURAT',
+      type: 'CREATE',
+      description: ActivityDescriptions.SURAT_CREATED(nomor_surat, perihal),
+      entityType: 'Surat',
+      entityId: newSurat.id,
+      metadata: {
+        nomor_surat,
+        perihal,
+        arah_surat,
+        tipe_dokumen,
       },
     });
 
@@ -149,6 +178,12 @@ export async function deleteSurat(suratId: string) {
     if (!suratId) {
       return { error: 'Gagal: ID Surat tidak valid.' };
     }
+    
+    const surat = await prisma.surat.findUnique({
+      where: { id: suratId },
+      select: { nomor_surat: true, perihal: true },
+    });
+    
     await prisma.surat.update({
       where: {
         id: suratId,
@@ -157,6 +192,22 @@ export async function deleteSurat(suratId: string) {
         deletedAt: new Date(),
       },
     });
+
+    // Log activity
+    if (surat) {
+      await logActivity({
+        userId: session.operatorId,
+        category: 'SURAT',
+        type: 'DELETE',
+        description: ActivityDescriptions.SURAT_DELETED(surat.nomor_surat),
+        entityType: 'Surat',
+        entityId: suratId,
+        metadata: {
+          nomor_surat: surat.nomor_surat,
+          perihal: surat.perihal,
+        },
+      });
+    }
   } catch (error) {
     console.error('Gagal menghapus surat:', error);
     return { error: 'Gagal menghapus surat.' };

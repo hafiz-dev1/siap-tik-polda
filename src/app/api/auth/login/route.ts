@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
+import { logActivity, ActivityDescriptions, getIpAddress, getUserAgent } from "@/lib/activityLogger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,11 +19,15 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Searching for user in database...');
     const pengguna = await prisma.pengguna.findUnique({
       where: { username },
-      select: { id: true, role: true, password: true, deletedAt: true },
+      select: { id: true, username: true, nama: true, role: true, password: true, deletedAt: true },
     });
     
     if (!pengguna) {
       console.log('❌ User not found');
+      
+      // Log failed login attempt (create a temporary log without userId)
+      // Note: We can't log to ActivityLog without a valid userId, so we'll skip it
+      
       return NextResponse.json({ error: "Username atau password salah" }, { status: 401 });
     }
     
@@ -39,6 +44,18 @@ export async function POST(request: NextRequest) {
     
     if (!isPasswordValid) {
       console.log('❌ Invalid password');
+      
+      // Log failed login attempt
+      await logActivity({
+        userId: pengguna.id,
+        category: 'AUTH',
+        type: 'LOGIN',
+        description: ActivityDescriptions.LOGIN_FAILED(pengguna.username),
+        ipAddress: getIpAddress(request),
+        userAgent: getUserAgent(request),
+        status: 'FAILED',
+      });
+      
       return NextResponse.json({ error: "Username atau password salah" }, { status: 401 });
     }
 
@@ -50,9 +67,14 @@ export async function POST(request: NextRequest) {
     console.log('✅ JWT_SECRET exists');
 
     console.log('🎫 Creating JWT token...');
-    // Pastikan payload token berisi 'role'
+    // Pastikan payload token berisi 'role', 'username', dan 'nama'
     const token = jwt.sign(
-      { operatorId: pengguna.id, role: pengguna.role },
+      { 
+        operatorId: pengguna.id, 
+        role: pengguna.role,
+        username: pengguna.username,
+        nama: pengguna.nama
+      },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -81,6 +103,17 @@ export async function POST(request: NextRequest) {
       sameSite: isProduction ? "lax" : "strict",  // lax untuk HTTPS compatibility
       maxAge: 60 * 60 * 24,
       path: "/",
+    });
+    
+    // Log successful login
+    await logActivity({
+      userId: pengguna.id,
+      category: 'AUTH',
+      type: 'LOGIN',
+      description: ActivityDescriptions.LOGIN_SUCCESS(pengguna.username),
+      ipAddress: getIpAddress(request),
+      userAgent: getUserAgent(request),
+      status: 'SUCCESS',
     });
     
     // Logging untuk debugging

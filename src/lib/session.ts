@@ -2,14 +2,15 @@
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { Role } from '@prisma/client'; // Impor tipe Role
+import type { Session } from '../../types/session';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET!);
 
 /**
  * Membaca cookie, memverifikasi token JWT, dan mengembalikan payload.
- * @returns {Promise<{ operatorId: string, role: Role } | null>} Payload berisi ID dan role, atau null.
+ * @returns {Promise<Session | null>} Payload berisi ID, role, username, dan nama, atau null.
  */
-export async function getSession() {
+export async function getSession(): Promise<Session | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
   
@@ -17,8 +18,8 @@ export async function getSession() {
 
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    // Perbarui tipe data di sini untuk menyertakan 'role'
-    return payload as { operatorId: string; role: Role; iat: number; exp: number };
+    // Perbarui tipe data di sini untuk menyertakan 'role', 'username', dan 'nama'
+    return payload as unknown as Session;
   } catch (error) {
     // console.error('Failed to verify session token:', error);
     return null;

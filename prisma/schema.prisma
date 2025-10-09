@@ -1,5 +1,3 @@
-// file: prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,70 +7,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enum untuk Arah Surat (Masuk/Keluar)
-enum ArahSurat {
-  MASUK
-  KELUAR
-}
-
-// Enum untuk Tipe Dokumen
-enum TipeDokumen {
-  NOTA_DINAS
-  SURAT_BIASA
-  SPRIN
-  TELEGRAM
-}
-
-// Enum baru untuk Tipe User (Peran)
-enum Role {
-  SUPER_ADMIN
-  ADMIN
-}
-
-// Model untuk pengguna yang bisa login, sekarang disebut Pengguna
 model Pengguna {
-  id                String    @id @default(uuid())
-  nama              String    // Nama lengkap pengguna
-  username          String    @unique
-  nrp_nip           String?  
+  id                String        @id @default(uuid())
+  nama              String
+  username          String        @unique
   password          String
-  role              Role      @default(ADMIN) // Peran pengguna (Admin/Super Admin)
-  profilePictureUrl String?   // URL foto profil (opsional)
-  surat             Surat[]
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  role              Role          @default(ADMIN)
+  profilePictureUrl String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  nrp_nip           String?
   deletedAt         DateTime?
+  activityLogs      ActivityLog[]
+  surat             Surat[]
 
   @@map("pengguna")
 }
 
-// Model utama untuk data surat
 model Surat {
-  id                      String     @id @default(uuid())
-  nomor_agenda            String?    @unique
-  nomor_surat             String     // Removed @unique - now part of composite unique constraint
+  id                      String      @id @default(uuid())
+  nomor_agenda            String?     @unique
+  nomor_surat             String
   tanggal_surat           DateTime
   tanggal_diterima_dibuat DateTime?
-  perihal                 String     @db.Text
+  perihal                 String
   asal_surat              String
   tujuan_surat            String
   arah_surat              ArahSurat
   tipe_dokumen            TipeDokumen
   tujuan_disposisi        String[]
-  isi_disposisi           String     @db.Text
+  isi_disposisi           String
   id_operator             String
-  operator                Pengguna   @relation(fields: [id_operator], references: [id]) // Relasi diperbarui ke model Pengguna
-  lampiran                Lampiran[]
   deletedAt               DateTime?
-  createdAt               DateTime   @default(now())
-  updatedAt               DateTime   @updatedAt
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+  lampiran                Lampiran[]
+  operator                Pengguna    @relation(fields: [id_operator], references: [id])
 
-  // Composite unique constraint: kombinasi nomor_surat + tanggal_surat harus unik
   @@unique([nomor_surat, tanggal_surat], name: "unique_nomor_tanggal")
   @@map("surat")
 }
 
-// Model untuk menyimpan file lampiran yang di-upload
 model Lampiran {
   id          String   @id @default(uuid())
   nama_file   String
@@ -80,8 +55,75 @@ model Lampiran {
   tipe_file   String
   ukuran_file Int
   id_surat    String
-  surat       Surat    @relation(fields: [id_surat], references: [id], onDelete: Cascade)
   uploaded_at DateTime @default(now())
+  surat       Surat    @relation(fields: [id_surat], references: [id], onDelete: Cascade)
 
   @@map("lampiran")
+}
+
+model ActivityLog {
+  id           String    @id @default(uuid())
+  userId       String
+  category     String
+  type         String
+  description  String
+  entityType   String?
+  entityId     String?
+  metadata     Json?
+  ipAddress    String?
+  userAgent    String?
+  status       String    @default("SUCCESS")
+  createdAt    DateTime  @default(now())
+  user         Pengguna  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([category])
+  @@index([type])
+  @@index([entityType])
+  @@index([status])
+  @@map("activity_log")
+}
+
+enum ArahSurat {
+  MASUK
+  KELUAR
+}
+
+enum TipeDokumen {
+  NOTA_DINAS
+  SURAT_BIASA
+  SPRIN
+  TELEGRAM
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+}
+
+enum ActivityType {
+  LOGIN
+  LOGOUT
+  CREATE_SURAT
+  UPDATE_SURAT
+  DELETE_SURAT
+  RESTORE_SURAT
+  PERMANENT_DELETE_SURAT
+  BULK_DELETE_SURAT
+  BULK_RESTORE_SURAT
+  BULK_PERMANENT_DELETE_SURAT
+  CREATE_USER
+  UPDATE_USER
+  DELETE_USER
+  RESTORE_USER
+  PERMANENT_DELETE_USER
+  BULK_RESTORE_USERS
+  BULK_PERMANENT_DELETE_USERS
+  UPDATE_PROFILE
+  CHANGE_PASSWORD
+  UPLOAD_PROFILE_PICTURE
+  UPLOAD_FILE
+  DELETE_FILE
+  PURGE_EXPIRED_TRASH
 }
