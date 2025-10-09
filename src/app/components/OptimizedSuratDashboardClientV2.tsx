@@ -42,6 +42,8 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
     searchQuery,
     fromDate,
     toDate,
+    suratDari,
+    kepada,
     filteredSurat,
     tipeCounts,
     tabCounts,
@@ -50,6 +52,8 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
     setSearchQuery,
     setFromDate,
     setToDate,
+    setSuratDari,
+    setKepada,
     resetFilters,
   } = useSuratFilters(suratList, formatEnumText);
 
@@ -91,14 +95,14 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
   // Clear selection ketika pindah halaman atau filter berubah
   useEffect(() => {
     clearSelection();
-  }, [page, activeArah, activeTipe, fromDate, toDate, searchQuery, clearSelection]);
+  }, [page, activeArah, activeTipe, fromDate, toDate, searchQuery, suratDari, kepada, clearSelection]);
 
   // Animation effect when filters change (but exclude pagination changes)
   useEffect(() => {
     setIsAnimating(true);
     const id = setTimeout(() => setIsAnimating(false), 220);
     return () => clearTimeout(id);
-  }, [activeArah, activeTipe, fromDate, toDate, searchQuery, sortField, sortOrder]);
+  }, [activeArah, activeTipe, fromDate, toDate, searchQuery, suratDari, kepada, sortField, sortOrder]);
 
   // Optimized event handlers
   const handleSearchChange = useCallback((value: string) => {
@@ -112,6 +116,14 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
   const handleToDateChange = useCallback((value: string) => {
     setToDate(value);
   }, [setToDate]);
+
+  const handleSuratDariChange = useCallback((value: string) => {
+    setSuratDari(value);
+  }, [setSuratDari]);
+
+  const handleKepadaChange = useCallback((value: string) => {
+    setKepada(value);
+  }, [setKepada]);
 
   const handleTipeChange = useCallback((tipe: string) => {
     setActiveTipe(tipe);
@@ -132,9 +144,13 @@ export default function OptimizedSuratDashboardClientV2({ suratId, suratList, ro
         searchQuery={searchQuery}
         fromDate={fromDate}
         toDate={toDate}
+        suratDari={suratDari}
+        kepada={kepada}
         onSearchChange={handleSearchChange}
         onFromDateChange={handleFromDateChange}
         onToDateChange={handleToDateChange}
+        onSuratDariChange={handleSuratDariChange}
+        onKepadaChange={handleKepadaChange}
         onResetFilters={resetFilters}
       />
 

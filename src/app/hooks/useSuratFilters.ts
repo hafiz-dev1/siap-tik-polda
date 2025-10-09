@@ -15,6 +15,8 @@ export function useSuratFilters(
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [fromDate, setFromDate] = useState<string>('');
   const [toDate, setToDate] = useState<string>('');
+  const [suratDari, setSuratDari] = useState<string>('');
+  const [kepada, setKepada] = useState<string>('');
 
   // Debounce search query
   useEffect(() => {
@@ -158,15 +160,30 @@ export function useSuratFilters(
 
       // Date filter
       const dateMatch = isDateInRange(surat.tanggal_diterima_dibuat, fromDate, toDate);
+      if (!dateMatch) return false;
 
-      return dateMatch;
+      // Surat Dari filter
+      if (suratDari && surat.asal_surat) {
+        const suratDariMatch = surat.asal_surat.toLowerCase().includes(suratDari.toLowerCase());
+        if (!suratDariMatch) return false;
+      }
+
+      // Kepada filter
+      if (kepada && surat.tujuan_surat) {
+        const kepadaMatch = surat.tujuan_surat.toLowerCase().includes(kepada.toLowerCase());
+        if (!kepadaMatch) return false;
+      }
+
+      return true;
     });
-  }, [suratList, activeTipe, activeArah, debouncedSearchQuery, fromDate, toDate, searchInSurat, isDateInRange]);
+  }, [suratList, activeTipe, activeArah, debouncedSearchQuery, fromDate, toDate, suratDari, kepada, searchInSurat, isDateInRange]);
 
   const resetFilters = useCallback(() => {
     setFromDate('');
     setToDate('');
     setSearchQuery('');
+    setSuratDari('');
+    setKepada('');
   }, []);
 
   return {
@@ -176,6 +193,8 @@ export function useSuratFilters(
     searchQuery,
     fromDate,
     toDate,
+    suratDari,
+    kepada,
     
     // Derived data
     filteredSurat,
@@ -188,6 +207,8 @@ export function useSuratFilters(
     setSearchQuery,
     setFromDate,
     setToDate,
+    setSuratDari,
+    setKepada,
     resetFilters,
   };
 }
