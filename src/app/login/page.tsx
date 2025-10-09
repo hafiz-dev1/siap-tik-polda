@@ -104,7 +104,8 @@ export default function LoginPage() {
             <div className="flex items-center justify-center mb-4">
               {logoError ? (
                 <div
-                  className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg transition-transform duration-500 hover:animate-spin-horizontal"
+                  className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg transition-all duration-700 hover:rotate-[360deg] hover:scale-110"
+                  style={{ transformStyle: 'preserve-3d' }}
                 >
                   TIK
                 </div>
@@ -112,7 +113,8 @@ export default function LoginPage() {
                 <img
                   src="/logo/TIK_POLRI.png"
                   alt="TIK POLRI Logo"
-                  className="w-20 h-20 object-contain transition-transform duration-2000 hover:animate-rotate-y"
+                  className="w-20 h-20 object-contain transition-all duration-2000 hover:rotate-y-360"
+                  style={{ transformStyle: 'preserve-3d' }}
                   onError={() => setLogoError(true)}
                   loading="eager"
                 />

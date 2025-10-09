@@ -85,7 +85,8 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
               <img
                 src="/logo/TIK_POLRI_navbar.png"
                 alt="TIK POLRI Logo"
-                className="w-8 h-8 object-contain transition-transform duration-1500 group-hover:animate-rotate-y"
+                className="w-8 h-8 object-contain transition-all duration-2000 group-hover:rotate-y-360"
+                style={{ transformStyle: 'preserve-3d' }}
               />
               <div className="block">
                 <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
@@ -155,11 +156,19 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
             {/* User info section for mobile - Compact */}
             <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700 mb-1 backdrop-blur-sm bg-white/5 dark:bg-gray-800/5 rounded-lg">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">
-                    {user.nama.charAt(0).toUpperCase()}
-                  </span>
-                </div>
+                {user.profilePictureUrl ? (
+                  <img
+                    src={user.profilePictureUrl}
+                    alt={`foto ${user.nama}`}
+                    className="w-7 h-7 rounded-lg object-cover ring-2 ring-gray-200 dark:ring-gray-600"
+                  />
+                ) : (
+                  <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">
+                      {user.nama.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
                 <div>
                   <p className="text-xs font-medium text-gray-900 dark:text-gray-100">
                     {user.nama}
