@@ -1,7 +1,7 @@
 // file: app/(app)/arsip/page.tsx
 
 import { Role } from '@prisma/client';
-import SuratDashboardClient from '@/app/components/SuratDashboardClient'; // Path impor ke komponen klien
+import SuratDashboardClient from '@/app/components/SuratDashboardClient';
 import LiveDateTime from '@/app/components/LiveDateTime';
 import { getSession } from '@/lib/session'; // Impor helper sesi
 import { prisma } from '@/lib/prisma';
