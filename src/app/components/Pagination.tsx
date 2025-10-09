@@ -42,7 +42,7 @@ const Pagination = memo(function Pagination({
             onChange={handlePageSizeChange}
             className="px-2.5 py-1.5 border rounded-md bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
           >
-            {[25, 50, 100].map((n) => (
+            {[25, 50, 100, 400].map((n) => (
               <option key={n} value={n}>
                 {n} / halaman
               </option>

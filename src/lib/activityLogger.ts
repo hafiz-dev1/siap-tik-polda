@@ -56,8 +56,22 @@ export async function logActivity(params: LogActivityParams) {
       },
     });
   } catch (error) {
+    // Enhanced error logging for production debugging
+    const errorDetails = {
+      message: 'Failed to log activity',
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      category: params.category,
+      type: params.type,
+      userId: params.userId,
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+    };
+    
+    console.error('🔴 ACTIVITY LOG ERROR:', JSON.stringify(errorDetails, null, 2));
+    
     // Log error tapi jangan throw agar tidak mengganggu operasi utama
-    console.error('Failed to log activity:', error);
+    // Dalam production, error ini bisa dikirim ke monitoring service (Sentry, etc.)
   }
 }
 

@@ -101,8 +101,19 @@ export async function getActivityLogs(params: GetActivityLogsParams = {}) {
       },
     };
   } catch (error) {
-    console.error('Error fetching activity logs:', error);
-    return { error: 'Failed to fetch activity logs' };
+    const errorDetails = {
+      message: 'Error fetching activity logs',
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      userId: session?.operatorId,
+      timestamp: new Date().toISOString(),
+    };
+    console.error('🔴 ERROR fetching activity logs:', JSON.stringify(errorDetails, null, 2));
+    
+    return { 
+      error: 'Failed to fetch activity logs',
+      details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+    };
   }
 }
 
@@ -192,8 +203,19 @@ export async function getActivityStats() {
       })),
     };
   } catch (error) {
-    console.error('Error fetching activity stats:', error);
-    return { error: 'Failed to fetch activity stats' };
+    const errorDetails = {
+      message: 'Error fetching activity stats',
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      userId: session?.operatorId,
+      timestamp: new Date().toISOString(),
+    };
+    console.error('🔴 ERROR fetching activity stats:', JSON.stringify(errorDetails, null, 2));
+    
+    return { 
+      error: 'Failed to fetch activity stats',
+      details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+    };
   }
 }
 
