@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { User2, Settings, LogOut, ChevronDown, Info, Activity } from 'lucide-react';
+import { User2, LogOut, ChevronDown, Info, Activity } from 'lucide-react';
 
 interface User {
   nama: string;
@@ -159,15 +159,6 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
             >
               <Info className="w-4 h-4 mr-3 flex-shrink-0" />
               <span>Tentang</span>
-            </Link>
-            
-            <Link
-              href="/settings"
-              className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-150 rounded-lg mx-1"
-              onClick={() => setIsOpen(false)}
-            >
-              <Settings className="w-4 h-4 mr-3 flex-shrink-0" />
-              <span>Pengaturan</span>
             </Link>
           </div>
 

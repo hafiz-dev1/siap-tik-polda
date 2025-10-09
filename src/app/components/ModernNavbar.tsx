@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Shield, FileText, Users, Trash2, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Shield, FileText, Users, Trash2, LayoutDashboard, Activity, Info } from 'lucide-react';
 import UserDropdown from './UserDropdown';
 import ThemeSwitcher from './ThemeSwitcher';
 import { useChromeOptimizations } from '@/app/hooks/useBrowserDetection';
@@ -152,31 +152,31 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
                WebkitBackdropFilter: 'blur(var(--navbar-backdrop-blur))'
              }}>
           <div className="px-2 pt-2 pb-3 space-y-1">
-            {/* User info section for mobile */}
-            <div className="px-3 py-3 border-b border-gray-200 dark:border-gray-700 mb-2 backdrop-blur-sm bg-white/5 dark:bg-gray-800/5 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">
+            {/* User info section for mobile - Compact */}
+            <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700 mb-1 backdrop-blur-sm bg-white/5 dark:bg-gray-800/5 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">
                     {user.nama.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  <p className="text-xs font-medium text-gray-900 dark:text-gray-100">
                     {user.nama}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400">
                     {user.role === 'SUPER_ADMIN' ? 'Super Admin' : user.role === 'ADMIN' ? 'Admin' : user.role}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Navigation items */}
+            {/* Navigation items - Compact */}
             {filteredNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 backdrop-blur-sm ${
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 backdrop-blur-sm ${
                   isActiveLink(item.href)
                     ? 'bg-blue-50/80 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 shadow-sm'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 hover:backdrop-blur-md'
@@ -188,23 +188,43 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
               </Link>
             ))}
 
-            {/* Mobile logout */}
-            <div className="pt-2 border-t border-gray-200 dark:border-gray-700 mt-2">
-              <Link
-                href="/profile"
-                className="flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-200 backdrop-blur-sm hover:backdrop-blur-md"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Shield className="w-4 h-4" />
-                <span>Profile Saya</span>
-              </Link>
+            {/* User Menu - Grid 2 Columns for compact layout */}
+            <div className="pt-1 border-t border-gray-200 dark:border-gray-700 mt-1">
+              <div className="grid grid-cols-3 gap-1 mb-1">
+                <Link
+                  href="/profile"
+                  className="flex flex-col items-center justify-center px-2 py-2 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-200 backdrop-blur-sm hover:backdrop-blur-md"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Shield className="w-4 h-4 mb-1" />
+                  <span className="text-[10px]">Profile</span>
+                </Link>
+
+                <Link
+                  href="/log-activity"
+                  className="flex flex-col items-center justify-center px-2 py-2 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-200 backdrop-blur-sm hover:backdrop-blur-md"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Activity className="w-4 h-4 mb-1" />
+                  <span className="text-[10px]">Log Aktivitas</span>
+                </Link>
+
+                <Link
+                  href="/about"
+                  className="flex flex-col items-center justify-center px-2 py-2 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-200 backdrop-blur-sm hover:backdrop-blur-md"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Info className="w-4 h-4 mb-1" />
+                  <span className="text-[10px]">Tentang</span>
+                </Link>
+              </div>
               
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   onLogout();
                 }}
-                className="flex items-center space-x-3 w-full px-3 py-3 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50/80 dark:hover:bg-red-900/30 transition-all duration-200 backdrop-blur-sm hover:backdrop-blur-md"
+                className="flex items-center justify-center space-x-2 w-full px-3 py-2 rounded-lg text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50/80 dark:hover:bg-red-900/30 transition-all duration-200 backdrop-blur-sm hover:backdrop-blur-md"
               >
                 <X className="w-4 h-4" />
                 <span>Keluar</span>
