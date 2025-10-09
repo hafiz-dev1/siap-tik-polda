@@ -169,39 +169,33 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                     <form ref={formRef} onSubmit={handleSubmit} className="max-h-[75vh] overflow-y-auto pr-2 space-y-4">
                     {/* Semua input diisi dengan defaultValue untuk mode Ubah */}
                     <div className="grid grid-cols-1 md:grid-cols-2 pt-2 gap-x-7 gap-y-3">
-                      <div className="flex items-center">
-                        <label htmlFor="nomor_agenda" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Nomor Agenda</label>
-                        <input type="text" name="nomor_agenda" id="nomor_agenda" defaultValue={suratToEdit?.nomor_agenda || undefined} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" placeholder="(opsional)"/>
+                      {/* Tipe Surat - Mobile: 1, Desktop: 1 */}
+                      <div className="flex items-center order-1">
+                        <label htmlFor="tipe_dokumen" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tipe Surat</label>
+                        <div className="relative w-full">
+                          <select name="tipe_dokumen" id="tipe_dokumen" required defaultValue={suratToEdit?.tipe_dokumen} className="pl-2 py-0.25 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm appearance-none pr-8">
+                            {TIPE_DOKUMEN.map(tipe => <option key={tipe} value={tipe}>{formatEnumText(tipe)}</option>)}
+                          </select>
+                          <svg className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
                       </div>
-                      <div className="flex items-center">
-                        <label htmlFor="nomor_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Nomor Surat</label>
-                        <input type="text" name="nomor_surat" id="nomor_surat" required defaultValue={suratToEdit?.nomor_surat} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                      {/* Arah Surat - Mobile: 2, Desktop: 2 */}
+                      <div className="flex items-center order-2">
+                        <label htmlFor="arah_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Arah Surat</label>
+                        <div className="relative w-full">
+                          <select name="arah_surat" id="arah_surat" required defaultValue={suratToEdit?.arah_surat} className="pl-2 py-0.25 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm appearance-none pr-8">
+                            {ARAH_SURAT.map(arah => <option key={arah} value={arah}>{formatEnumText(arah)}</option>)}
+                          </select>
+                          <svg className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
                       </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-3">
-                      <div className="flex items-center">
-                        <label htmlFor="tanggal_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tanggal Surat</label>
-                        <input type="date" name="tanggal_surat" id="tanggal_surat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_surat) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm cursor-pointer"/>
-                      </div>
-                      <div className="flex items-center">
-                        <label htmlFor="tanggal_diterima_dibuat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tgl Diterima</label>
-                        <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" defaultValue={suratToEdit?.tanggal_diterima_dibuat ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm cursor-pointer" placeholder="(opsional)"/>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-3">
-                      <div className="flex items-center">
-                        <label htmlFor="asal_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Asal Surat</label>
-                        <input type="text" name="asal_surat" id="asal_surat" required defaultValue={suratToEdit?.asal_surat} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" list="asal-surat-list"/>
-                        <datalist id="asal-surat-list">
-                          <option value="Bagian Umum" />
-                          <option value="Bagian Keuangan" />
-                          <option value="Bagian Perencanaan" />
-                          <option value="Bagian Operasi" />
-                          {/* Tambahkan opsi lain sesuai kebutuhan */}
-                        </datalist>
-                      </div>
-                      <div className="flex items-center">
-                        <label htmlFor="tujuan_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tujuan Surat</label>
+                      {/* Kepada - Mobile: 3, Desktop: 3 */}
+                      <div className="flex items-center order-3">
+                        <label htmlFor="tujuan_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Kepada</label>
                         <input type="text" name="tujuan_surat" id="tujuan_surat" required defaultValue={suratToEdit?.tujuan_surat} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" list="tujuan-surat-list"/>
                         <datalist id="tujuan-surat-list">
                           <option value="Bagian Umum" />
@@ -211,61 +205,70 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                           {/* Tambahkan opsi lain sesuai kebutuhan */}
                         </datalist>
                       </div>
-                    </div>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-3">
-                      <div className="flex items-center">
-                        <label htmlFor="arah_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Arah Surat</label>
-                        <div className="relative w-full">
-                          <select name="arah_surat" id="arah_surat" required defaultValue={suratToEdit?.arah_surat} className="pl-2 py-0.25 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm appearance-none pr-8 cursor-pointer">
-                            {ARAH_SURAT.map(arah => <option key={arah} value={arah}>{formatEnumText(arah)}</option>)}
-                          </select>
-                          <svg className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
+                      {/* Nomor - Mobile: 4, Desktop: 5 */}
+                      <div className="flex items-center order-4 md:order-5">
+                        <label htmlFor="nomor_agenda" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Nomor</label>
+                        <input type="text" name="nomor_agenda" id="nomor_agenda" defaultValue={suratToEdit?.nomor_agenda || undefined} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" placeholder="(opsional)"/>
                       </div>
-                      <div className="flex items-center">
-                        <label htmlFor="tipe_dokumen" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tipe Dokumen</label>
-                        <div className="relative w-full">
-                          <select name="tipe_dokumen" id="tipe_dokumen" required defaultValue={suratToEdit?.tipe_dokumen} className="pl-2 py-0.25 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm appearance-none pr-8 cursor-pointer">
-                            {TIPE_DOKUMEN.map(tipe => <option key={tipe} value={tipe}>{formatEnumText(tipe)}</option>)}
-                          </select>
-                          <svg className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
+                      {/* Surat dari - Mobile: 5, Desktop: 7 */}
+                      <div className="flex items-center order-5 md:order-7">
+                        <label htmlFor="asal_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Surat dari</label>
+                        <input type="text" name="asal_surat" id="asal_surat" required defaultValue={suratToEdit?.asal_surat} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" list="asal-surat-list"/>
+                        <datalist id="asal-surat-list">
+                          <option value="Bagian Umum" />
+                          <option value="Bagian Keuangan" />
+                          <option value="Bagian Perencanaan" />
+                          <option value="Bagian Operasi" />
+                          {/* Tambahkan opsi lain sesuai kebutuhan */}
+                        </datalist>
+                      </div>
+                      {/* Nomor Surat - Mobile: 6, Desktop: 4 */}
+                      <div className="flex items-center order-6 md:order-4">
+                        <label htmlFor="nomor_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Nomor Surat</label>
+                        <input type="text" name="nomor_surat" id="nomor_surat" required defaultValue={suratToEdit?.nomor_surat} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                      </div>
+                      {/* Tanggal - Mobile: 7, Desktop: 6 */}
+                      <div className="flex items-center order-7 md:order-6">
+                        <label htmlFor="tanggal_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tanggal Surat</label>
+                        <input type="date" name="tanggal_surat" id="tanggal_surat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_surat) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                      </div>
+                      {/* Tgl Diterima - Mobile: 8, Desktop: 8 */}
+                      <div className="flex items-center order-8">
+                        <label htmlFor="tanggal_diterima_dibuat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tgl Diterima</label>
+                        <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" defaultValue={suratToEdit?.tanggal_diterima_dibuat ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" placeholder="(opsional)"/>
                       </div>
                     </div>
                     <div>
                       <label htmlFor="perihal" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Perihal</label>
                       <textarea name="perihal" id="perihal" rows={2} required defaultValue={suratToEdit?.perihal} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"></textarea>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tujuan Disposisi</label>
-                      <div className="ml-3 grid grid-cols-2 gap-2.5">
-                        {TUJUAN_DISPOSISI.map((tujuan) => (
-                          <label key={tujuan} className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              name="tujuan_disposisi"
-                              value={tujuan}
-                              defaultChecked={suratToEdit?.tujuan_disposisi.includes(tujuan)}
-                              className="h-4 w-4 rounded border-gray-300 dark:border-gray-500 cursor-pointer focus:ring-2 focus:ring-indigo-500 checked:bg-indigo-600 checked:border-indigo-600 dark:checked:bg-indigo-500 dark:checked:border-indigo-500 bg-white dark:bg-gray-600"
-                            />
-                            <span className={`inline-block px-2.5 py-1 text-xs font-medium rounded-sm ${getTagColor(tujuan)}`}>
-                              {formatDispositionTarget(tujuan)}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                      {/* <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-                        Pilih satu atau lebih tujuan disposisi yang sesuai.
-                        </p> */}
-                    </div>
-                        <div>
-                          <label htmlFor="isi_disposisi" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Isi Disposisi</label>
-                          <textarea name="isi_disposisi" id="isi_disposisi" rows={2} required defaultValue={suratToEdit?.isi_disposisi} className="pl-2 mt-1 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"></textarea>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-7 gap-y-4">
+                      {/* Tujuan Disposisi - Kolom Kiri (1/3) */}
+                      <div className="md:col-span-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tujuan Disposisi</label>
+                        <div className="ml-3 grid grid-cols-1 gap-2.5">
+                          {TUJUAN_DISPOSISI.map((tujuan) => (
+                            <label key={tujuan} className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                name="tujuan_disposisi"
+                                value={tujuan}
+                                defaultChecked={suratToEdit?.tujuan_disposisi.includes(tujuan)}
+                                className="h-4 w-4 rounded border-gray-300 dark:border-gray-500 cursor-pointer focus:ring-2 focus:ring-indigo-500 checked:bg-indigo-600 checked:border-indigo-600 dark:checked:bg-indigo-500 dark:checked:border-indigo-500 bg-white dark:bg-gray-600"
+                              />
+                              <span className={`inline-block px-2.5 py-1 text-xs font-medium rounded-sm ${getTagColor(tujuan)}`}>
+                                {formatDispositionTarget(tujuan)}
+                              </span>
+                            </label>
+                          ))}
                         </div>
+                      </div>
+                      {/* Isi Disposisi - Kolom Kanan (2/3) */}
+                      <div className="md:col-span-2">
+                        <label htmlFor="isi_disposisi" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Isi Disposisi</label>
+                        <textarea name="isi_disposisi" id="isi_disposisi" required defaultValue={suratToEdit?.isi_disposisi} className="pl-2 ml-1 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm [field-sizing:content] min-h-[4.5rem] md:min-h-[9rem]"></textarea>
+                      </div>
+                    </div>
                     <div className={isEditMode ? 'hidden' : 'space-y-2'}>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="scan_surat">Upload Scan Surat (PDF, JPG, PNG)</label>
                         <div className="flex flex-wrap gap-2">

@@ -345,7 +345,7 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
           </h2>
           <button
             onClick={resetFilters}
-            className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 cursor-pointer"
+            className="text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 py-1.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-1 cursor-pointer"
           >
             <RefreshCw className="w-4 h-4" />
             Reset
@@ -509,7 +509,7 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
               <button
                 onClick={() => setShowClearModal(true)}
                 disabled={clearing}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white rounded-lg transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
               >
                 <Trash2 className="w-4 h-4" />
                 Clear Logs Lama
@@ -517,7 +517,7 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
               <button
                 onClick={() => setShowClearAllModal(true)}
                 disabled={clearing}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
               >
                 <Trash2 className="w-4 h-4" />
                 Clear Semua
@@ -529,7 +529,7 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
           <button
             onClick={handleExport}
             disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors duration-200 ml-auto cursor-pointer disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 ml-auto cursor-pointer disabled:cursor-not-allowed"
           >
             <Download className="w-4 h-4" />
             {exporting ? 'Mengekspor...' : 'Export CSV'}
@@ -551,10 +551,10 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
           <button
             onClick={handleRefresh}
             disabled={refreshing || loading}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 ${
               refreshing 
-                ? 'bg-blue-500 text-white cursor-not-allowed' 
-                : 'bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400 cursor-pointer disabled:cursor-not-allowed'
+                ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white cursor-not-allowed' 
+                : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white disabled:from-gray-400 disabled:to-gray-500 cursor-pointer disabled:cursor-not-allowed'
             }`}
             title={refreshing ? 'Sedang refresh...' : 'Refresh data'}
           >
@@ -802,14 +802,14 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
               <button
                 onClick={() => setShowClearModal(false)}
                 disabled={clearing}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
                 Batal
               </button>
               <button
                 onClick={handleClearLogs}
                 disabled={clearing}
-                className="flex-1 px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white rounded-lg transition-colors duration-200"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
                 {clearing ? 'Menghapus...' : 'Hapus'}
               </button>
@@ -843,14 +843,14 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
               <button
                 onClick={() => setShowClearAllModal(false)}
                 disabled={clearing}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
                 Batal
               </button>
               <button
                 onClick={handleClearAllLogs}
                 disabled={clearing}
-                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg transition-colors duration-200"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
                 {clearing ? 'Menghapus...' : 'Ya, Hapus Semua'}
               </button>

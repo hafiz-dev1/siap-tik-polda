@@ -84,8 +84,9 @@ export function useSuratFilters(
 
   // Memoized date filter function
   const isDateInRange = useCallback(
-    (suratDateInput: string | Date, fromDate: string, toDate: string) => {
+    (suratDateInput: string | Date | null, fromDate: string, toDate: string) => {
       if (!fromDate && !toDate) return true;
+      if (!suratDateInput) return false;
 
       const surat = suratDateInput instanceof Date ? suratDateInput : new Date(suratDateInput);
       if (isNaN(surat.getTime())) return false;

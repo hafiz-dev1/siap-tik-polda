@@ -490,7 +490,7 @@ className="
   hover:bg-blue-700             // Darker on hover
   text-white                    // White text
   rounded-lg                    // Rounded corners
-  transition-colors duration-200 // Smooth color transition
+  duration-200                  // Smooth transition duration
 "
 ```
 
@@ -503,7 +503,7 @@ className="
   text-white                    // White text
   cursor-not-allowed            // Not-allowed cursor
   rounded-lg                    // Rounded corners
-  transition-colors duration-200 // Smooth color transition
+  duration-200                  // Smooth transition duration
 "
 ```
 

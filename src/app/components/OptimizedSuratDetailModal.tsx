@@ -25,6 +25,20 @@ const OptimizedSuratDetailModal = memo(function OptimizedSuratDetailModal({
 }: OptimizedSuratDetailModalProps) {
   if (!surat) return null;
 
+  // Format date safely
+  const formatTanggalDiterima = (date: Date | null) => {
+    if (!date) return '-';
+    const d = new Date(date);
+    return `${d.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })} pukul ${d.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })} WIB`;
+  };
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -58,24 +72,48 @@ const OptimizedSuratDetailModal = memo(function OptimizedSuratDetailModal({
                 </DialogTitle>
 
                 <div className="max-h-[70vh] overflow-y-auto space-y-3 text-sm">
-                  {/* Detail Utama - 2 Kolom */}
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-                    {/* Nomor Agenda */}
-                    <div>
-                      <span className="text-gray-400 dark:text-gray-500 block mb-1">Nomor Agenda:</span>
-                      <p className="text-gray-200 dark:text-gray-300">{surat.nomor_agenda}</p>
+                  {/* Detail Utama - 2 Kolom dengan urutan yang disesuaikan */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+                    {/* Tipe Surat - Mobile: 1, Desktop: 1 */}
+                    <div className="order-1">
+                      <span className="text-gray-400 dark:text-gray-500 block mb-1">Tipe Surat:</span>
+                      <p className="text-gray-900 dark:text-gray-100 font-medium">{formatEnumText(surat.tipe_dokumen)}</p>
                     </div>
 
-                    {/* Nomor Surat */}
-                    <div>
+                    {/* Arah Surat - Mobile: 2, Desktop: 2 */}
+                    <div className="order-2">
+                      <span className="text-gray-400 dark:text-gray-500 block mb-1">Arah Surat:</span>
+                      <p className="text-gray-900 dark:text-gray-100 font-medium">{formatEnumText(surat.arah_surat)}</p>
+                    </div>
+
+                    {/* Kepada - Mobile: 3, Desktop: 3 */}
+                    <div className="order-3">
+                      <span className="text-gray-400 dark:text-gray-500 block mb-1">Kepada:</span>
+                      <p className="text-gray-900 dark:text-gray-100 font-medium">{surat.tujuan_surat}</p>
+                    </div>
+
+                    {/* Nomor - Mobile: 4, Desktop: 5 */}
+                    <div className="order-4 md:order-5">
+                      <span className="text-gray-400 dark:text-gray-500 block mb-1">Nomor:</span>
+                      <p className="text-gray-900 dark:text-gray-100 font-medium">{surat.nomor_agenda || '-'}</p>
+                    </div>
+
+                    {/* Surat dari - Mobile: 5, Desktop: 7 */}
+                    <div className="order-5 md:order-7">
+                      <span className="text-gray-400 dark:text-gray-500 block mb-1">Surat dari:</span>
+                      <p className="text-gray-900 dark:text-gray-100 font-medium">{surat.asal_surat}</p>
+                    </div>
+
+                    {/* Nomor Surat - Mobile: 6, Desktop: 4 */}
+                    <div className="order-6 md:order-4">
                       <span className="text-gray-400 dark:text-gray-500 block mb-1">Nomor Surat:</span>
-                      <p className="text-gray-200 dark:text-gray-300">{surat.nomor_surat}</p>
+                      <p className="text-gray-900 dark:text-gray-100 font-medium">{surat.nomor_surat}</p>
                     </div>
 
-                    {/* Tanggal Surat */}
-                    <div>
-                      <span className="text-gray-400 dark:text-gray-500 block mb-1">Tanggal Surat:</span>
-                      <p className="text-gray-200 dark:text-gray-300">
+                    {/* Tanggal - Mobile: 7, Desktop: 6 */}
+                    <div className="order-7 md:order-6">
+                      <span className="text-gray-400 dark:text-gray-500 block mb-1">Tanggal:</span>
+                      <p className="text-gray-900 dark:text-gray-100 font-medium">
                         {new Date(surat.tanggal_surat).toLocaleDateString('id-ID', {
                           day: 'numeric',
                           month: 'long',
@@ -84,79 +122,45 @@ const OptimizedSuratDetailModal = memo(function OptimizedSuratDetailModal({
                       </p>
                     </div>
 
-                    {/* Tanggal Diterima/Dibuat */}
-                    <div>
-                      <span className="text-gray-400 dark:text-gray-500 block mb-1">
-                        Tanggal {surat.arah_surat === 'MASUK' ? 'Diterima' : 'Dibuat'}:
-                      </span>
-                      <p className="text-gray-200 dark:text-gray-300">
-                        {new Date(surat.tanggal_diterima_dibuat).toLocaleDateString('id-ID', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })} pukul {new Date(surat.tanggal_diterima_dibuat).toLocaleTimeString('id-ID', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })} WIB
+                    {/* Tgl Diterima - Mobile: 8, Desktop: 8 */}
+                    <div className="order-8">
+                      <span className="text-gray-400 dark:text-gray-500 block mb-1">Tgl Diterima:</span>
+                      <p className="text-gray-900 dark:text-gray-100 font-medium">
+                        {formatTanggalDiterima(surat.tanggal_diterima_dibuat)}
                       </p>
-                    </div>
-
-                    {/* Asal Surat */}
-                    <div>
-                      <span className="text-gray-400 dark:text-gray-500 block mb-1">
-                        {surat.arah_surat === 'MASUK' ? 'Asal Surat' : 'Dari'}:
-                      </span>
-                      <p className="text-gray-200 dark:text-gray-300">{surat.asal_surat}</p>
-                    </div>
-
-                    {/* Tujuan Surat */}
-                    <div>
-                      <span className="text-gray-400 dark:text-gray-500 block mb-1">
-                        {surat.arah_surat === 'MASUK' ? 'Kepada' : 'Tujuan Surat'}:
-                      </span>
-                      <p className="text-gray-200 dark:text-gray-300">{surat.tujuan_surat}</p>
-                    </div>
-
-                    {/* Arah */}
-                    <div>
-                      <span className="text-gray-400 dark:text-gray-500 block mb-1">Arah:</span>
-                      <p className="text-gray-200 dark:text-gray-300">{formatEnumText(surat.arah_surat)}</p>
-                    </div>
-
-                    {/* Tipe Dokumen */}
-                    <div>
-                      <span className="text-gray-400 dark:text-gray-500 block mb-1">Tipe Dokumen:</span>
-                      <p className="text-gray-200 dark:text-gray-300">{formatEnumText(surat.tipe_dokumen)}</p>
                     </div>
                   </div>
 
                   {/* Perihal */}
                   <div>
                     <span className="text-gray-400 dark:text-gray-500 block mb-1">Perihal:</span>
-                    <p className="text-gray-200 dark:text-gray-300 whitespace-pre-wrap">{surat.perihal}</p>
+                    <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{surat.perihal}</p>
                   </div>
 
-                  {/* Tujuan Disposisi */}
-                  <div>
-                    <span className="text-gray-400 dark:text-gray-500 block mb-1">Tujuan Disposisi:</span>
-                    <div className="flex flex-wrap gap-2">
-                      {surat.tujuan_disposisi.map((tujuan) => (
-                        <span
-                          key={tujuan}
-                          className={`px-2 py-1 text-xs rounded-sm ${getTagColor(tujuan)}`}
-                          title={formatDispositionTarget(tujuan)}
-                        >
-                          {formatDispositionTarget(tujuan)}
-                        </span>
-                      ))}
+                  {/* Tujuan Disposisi & Isi Disposisi - 2 Kolom (1/3 : 2/3) */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-x-7 gap-y-4">
+                    {/* Tujuan Disposisi - Kolom Kiri (1/3) */}
+                    <div className="md:col-span-1">
+                      <span className="text-gray-400 dark:text-gray-500 block mb-2">Tujuan Disposisi:</span>
+                      <div className="flex flex-col gap-2">
+                        {surat.tujuan_disposisi.map((tujuan) => (
+                          <span
+                            key={tujuan}
+                            className={`inline-block px-2.5 py-1 text-xs font-medium rounded-sm ${getTagColor(tujuan)}`}
+                            title={formatDispositionTarget(tujuan)}
+                          >
+                            {formatDispositionTarget(tujuan)}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Isi Disposisi */}
-                  <div>
-                    <span className="text-gray-400 dark:text-gray-500 block mb-1">Isi Disposisi:</span>
-                    <div className="bg-gray-700 dark:bg-gray-700/50 p-3 rounded border border-gray-600 dark:border-gray-600">
-                      <p className="text-gray-200 dark:text-gray-300 whitespace-pre-wrap">{surat.isi_disposisi}</p>
+                    {/* Isi Disposisi - Kolom Kanan (2/3) */}
+                    <div className="md:col-span-2">
+                      <span className="text-gray-400 dark:text-gray-500 block mb-2">Isi Disposisi:</span>
+                      <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-sm border border-gray-200 dark:border-gray-600">
+                        <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{surat.isi_disposisi}</p>
+                      </div>
                     </div>
                   </div>
 
@@ -169,7 +173,7 @@ const OptimizedSuratDetailModal = memo(function OptimizedSuratDetailModal({
                           <button
                             key={lampiran.id}
                             onClick={() => window.open(lampiran.path_file, '_blank')}
-                            className="text-blue-400 hover:underline dark:text-blue-400 dark:hover:text-blue-300 text-sm cursor-pointer bg-transparent border-none p-0 block"
+                            className="text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300 text-sm cursor-pointer bg-transparent border-none p-0 block"
                           >
                             {lampiran.nama_file}
                           </button>

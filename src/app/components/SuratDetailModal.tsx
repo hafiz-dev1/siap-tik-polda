@@ -20,6 +20,13 @@ export default function SuratDetailModal({ surat, children }: Props) {
   // Fungsi helper untuk memformat teks enum agar mudah dibaca
   const formatEnumText = (text: string) => text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   
+  // Fungsi untuk memformat tanggal diterima dengan aman
+  const formatTanggalDiterima = (date: Date | null) => {
+    if (!date) return '-';
+    const d = new Date(date);
+    return `${d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} pukul ${d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`;
+  };
+  
   // Fungsi untuk memformat tujuan disposisi dengan nama lengkap
   const formatDispositionTarget = (target: string) => {
     const targetMap: Record<string, string> = {
@@ -95,7 +102,7 @@ export default function SuratDetailModal({ surat, children }: Props) {
                       </div>
                       <div>
                         <strong className="text-gray-400 dark:text-gray-500 block mb-1">Tanggal Diterima:</strong>
-                        <p className="text-gray-200 dark:text-gray-300">{new Date(surat.tanggal_diterima_dibuat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} pukul {new Date(surat.tanggal_diterima_dibuat).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</p>
+                        <p className="text-gray-200 dark:text-gray-300">{formatTanggalDiterima(surat.tanggal_diterima_dibuat)}</p>
                       </div>
                       <div>
                         <strong className="text-gray-400 dark:text-gray-500 block mb-1">Asal Surat:</strong>
