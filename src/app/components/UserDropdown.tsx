@@ -88,10 +88,10 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
           </div>
           
           <div className="hidden sm:block text-left">
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[120px]">
+            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[120px]">
               {user.nama}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs font-medium text-gray-700 dark:text-gray-400">
               {getRoleDisplayName(user.role)}
             </p>
           </div>
@@ -136,7 +136,7 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
           <div className="py-2 bg-white dark:bg-gray-800">
             <Link
               href="/profile"
-              className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-150 rounded-lg mx-1"
+              className="flex items-center px-4 py-3 text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-150 rounded-lg mx-1"
               onClick={() => setIsOpen(false)}
             >
               <User2 className="w-4 h-4 mr-3 flex-shrink-0" />
@@ -145,7 +145,7 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
             
             <Link
               href="/log-activity"
-              className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-150 rounded-lg mx-1"
+              className="flex items-center px-4 py-3 text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-150 rounded-lg mx-1"
               onClick={() => setIsOpen(false)}
             >
               <Activity className="w-4 h-4 mr-3 flex-shrink-0" />
@@ -154,7 +154,7 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
             
             <Link
               href="/about"
-              className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-150 rounded-lg mx-1"
+              className="flex items-center px-4 py-3 text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-150 rounded-lg mx-1"
               onClick={() => setIsOpen(false)}
             >
               <Info className="w-4 h-4 mr-3 flex-shrink-0" />
@@ -168,7 +168,7 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
                 setIsOpen(false);
                 onLogout();
               }}
-              className="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-300 transition-all duration-150 rounded-lg mx-1"
+              className="flex items-center w-full px-4 py-3 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-300 transition-all duration-150 rounded-lg mx-1"
             >
               <LogOut className="w-4 h-4 mr-3 flex-shrink-0" />
               <span>Keluar</span>

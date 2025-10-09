@@ -122,7 +122,7 @@ export default function LoginPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Selamat Datang</h1>
-              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Sistem Informasi Arsip POLDA</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Sistem Informasi Arsip Polda</p>
             </div>
           </div>
 
