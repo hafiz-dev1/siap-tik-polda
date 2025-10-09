@@ -146,7 +146,7 @@ export async function updateUser(userId: string, formData: FormData) {
 
     const targetUser = await prisma.pengguna.findUnique({
       where: { id: userId },
-      select: { role: true },
+      select: { role: true, username: true },
     });
 
     if (!targetUser) {
@@ -157,20 +157,17 @@ export async function updateUser(userId: string, formData: FormData) {
       return { error: 'Sesi tidak valid.' };
     }
 
-    if (targetUser.role === Role.SUPER_ADMIN && session.role !== Role.SUPER_ADMIN) {
-      return { error: 'Anda tidak dapat mengubah akun Super Admin.' };
+    // Proteksi: Tidak bisa mengubah akun superadmin atau role SUPER_ADMIN
+    if (targetUser.username === 'superadmin' || targetUser.role === Role.SUPER_ADMIN) {
+      return { error: 'Gagal: Akun Super Admin dilindungi dan tidak dapat diubah.' };
     }
 
     if (!nama) {
       return { error: 'Nama wajib diisi.' };
     }
 
-    if (role === Role.SUPER_ADMIN && userId !== session.operatorId) {
-      return { error: 'Hanya Super Admin aktif yang dapat mempertahankan peran Super Admin.' };
-    }
-
-    if (userId === session.operatorId && role !== Role.SUPER_ADMIN) {
-      return { error: 'Super Admin tidak dapat menurunkan perannya sendiri.' };
+    if (role === Role.SUPER_ADMIN) {
+      return { error: 'Gagal: Tidak dapat mengubah role menjadi Super Admin.' };
     }
 
     const dataToUpdate: Prisma.PenggunaUpdateInput = {
@@ -237,13 +234,9 @@ export async function deleteUser(userId: string) {
       return { error: 'Pengguna tidak ditemukan.' };
     }
 
-    // 3. Proteksi: Admin tidak bisa menghapus Super Admin
-    if (targetUser.role === Role.SUPER_ADMIN && session!.role !== Role.SUPER_ADMIN) {
-      return { error: 'Gagal: Anda tidak memiliki hak untuk menghapus akun Super Admin.' };
-    }
-
-    if (targetUser.role === Role.SUPER_ADMIN) {
-      return { error: 'Super Admin tidak dapat dihapus.' };
+    // 3. Proteksi: Tidak bisa menghapus akun superadmin atau role SUPER_ADMIN
+    if (targetUser.username === 'superadmin' || targetUser.role === Role.SUPER_ADMIN) {
+      return { error: 'Gagal: Akun Super Admin dilindungi dan tidak dapat dihapus.' };
     }
 
     await prisma.pengguna.update({
