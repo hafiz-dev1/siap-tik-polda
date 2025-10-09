@@ -247,6 +247,18 @@ export async function deleteBulkSurat(suratIds: string[]) {
         deletedAt: new Date(),
       },
     });
+
+    // Log activity
+    await logActivity({
+      userId: session.operatorId,
+      category: 'SURAT',
+      type: 'BULK_DELETE',
+      description: `Menghapus ${suratIds.length} surat sekaligus`,
+      metadata: {
+        count: suratIds.length,
+        suratIds,
+      },
+    });
   } catch (error) {
     console.error('Gagal menghapus surat secara bulk:', error);
     return { error: 'Gagal menghapus surat.' };
@@ -289,7 +301,7 @@ export async function updateSurat(suratId: string, formData: FormData) {
     const tujuan_disposisi = formData.getAll('tujuan_disposisi') as string[];
     const isi_disposisi = formData.get('isi_disposisi') as string;
     
-    await prisma.surat.update({
+    const updatedSurat = await prisma.surat.update({
       where: { id: suratId },
       data: {
         nomor_agenda,
@@ -303,6 +315,22 @@ export async function updateSurat(suratId: string, formData: FormData) {
         tipe_dokumen,
         tujuan_disposisi,
         isi_disposisi,
+      },
+    });
+
+    // Log activity
+    await logActivity({
+      userId: session.operatorId,
+      category: 'SURAT',
+      type: 'UPDATE',
+      description: ActivityDescriptions.SURAT_UPDATED(nomor_surat, perihal),
+      entityType: 'Surat',
+      entityId: suratId,
+      metadata: {
+        nomor_surat,
+        perihal,
+        arah_surat,
+        tipe_dokumen,
       },
     });
 
@@ -337,10 +365,31 @@ export async function restoreSurat(suratId: string) {
   }
 
   try {
+    const surat = await prisma.surat.findUnique({
+      where: { id: suratId },
+      select: { nomor_surat: true, perihal: true },
+    });
+
     await prisma.surat.update({
       where: { id: suratId },
       data: { deletedAt: null }, // Set deletedAt kembali ke NULL
     });
+
+    // Log activity
+    if (surat) {
+      await logActivity({
+        userId: session.operatorId,
+        category: 'TRASH',
+        type: 'RESTORE',
+        description: `Memulihkan surat "${surat.nomor_surat}" dari tempat sampah`,
+        entityType: 'Surat',
+        entityId: suratId,
+        metadata: {
+          nomor_surat: surat.nomor_surat,
+          perihal: surat.perihal,
+        },
+      });
+    }
   } catch (error) {
     return { error: 'Gagal memulihkan surat.' };
   }
@@ -371,6 +420,18 @@ export async function restoreBulkSurat(suratIds: string[]) {
       },
       data: { deletedAt: null }, // Set deletedAt kembali ke NULL
     });
+
+    // Log activity
+    await logActivity({
+      userId: session.operatorId,
+      category: 'TRASH',
+      type: 'BULK_RESTORE',
+      description: `Memulihkan ${suratIds.length} surat dari tempat sampah`,
+      metadata: {
+        count: suratIds.length,
+        suratIds,
+      },
+    });
   } catch (error) {
     console.error('Gagal memulihkan surat secara bulk:', error);
     return { error: 'Gagal memulihkan surat.' };
@@ -396,6 +457,8 @@ export async function deleteSuratPermanently(suratId: string) {
       where: { id: suratId },
       select: {
         id: true,
+        nomor_surat: true,
+        perihal: true,
         lampiran: {
           select: {
             path_file: true,
@@ -412,6 +475,18 @@ export async function deleteSuratPermanently(suratId: string) {
 
     await prisma.surat.delete({
       where: { id: suratId },
+    });
+
+    // Log activity
+    await logActivity({
+      userId: session.operatorId,
+      category: 'TRASH',
+      type: 'PERMANENT_DELETE',
+      description: `Menghapus permanen surat "${surat.nomor_surat}"`,
+      metadata: {
+        nomor_surat: surat.nomor_surat,
+        perihal: surat.perihal,
+      },
     });
   } catch (deleteError) {
     console.error('Gagal menghapus surat secara permanen:', deleteError);
@@ -463,6 +538,18 @@ export async function deleteBulkSuratPermanently(suratIds: string[]) {
     await prisma.surat.deleteMany({
       where: { id: { in: suratIds } },
     });
+
+    // Log activity
+    await logActivity({
+      userId: session.operatorId,
+      category: 'TRASH',
+      type: 'BULK_PERMANENT_DELETE',
+      description: `Menghapus permanen ${suratIds.length} surat sekaligus`,
+      metadata: {
+        count: suratIds.length,
+        suratIds,
+      },
+    });
   } catch (deleteError) {
     console.error('Gagal menghapus surat secara permanen (bulk):', deleteError);
     return { error: 'Gagal menghapus surat secara permanen.' };
@@ -484,10 +571,31 @@ export async function restoreUser(userId: string) {
   }
 
   try {
+    const user = await prisma.pengguna.findUnique({
+      where: { id: userId },
+      select: { username: true, nama: true },
+    });
+
     await prisma.pengguna.update({
       where: { id: userId },
       data: { deletedAt: null },
     });
+
+    // Log activity
+    if (user) {
+      await logActivity({
+        userId: session.operatorId,
+        category: 'USER',
+        type: 'RESTORE',
+        description: `Memulihkan akun pengguna "${user.username}" (${user.nama})`,
+        entityType: 'Pengguna',
+        entityId: userId,
+        metadata: {
+          username: user.username,
+          nama: user.nama,
+        },
+      });
+    }
   } catch (error) {
     console.error('Gagal memulihkan pengguna:', error);
     return { error: 'Gagal memulihkan akun pengguna.' };
@@ -513,9 +621,10 @@ export async function deleteUserPermanently(userId: string) {
   }
 
   try {
+    // 1. Ambil pengguna dan password hash-nya dari DB
     const user = await prisma.pengguna.findUnique({
       where: { id: userId },
-      select: { profilePictureUrl: true },
+      select: { profilePictureUrl: true, username: true, nama: true },
     });
 
     if (!user) {
@@ -539,6 +648,18 @@ export async function deleteUserPermanently(userId: string) {
 
     await prisma.pengguna.delete({
       where: { id: userId },
+    });
+
+    // Log activity
+    await logActivity({
+      userId: session.operatorId,
+      category: 'USER',
+      type: 'PERMANENT_DELETE',
+      description: `Menghapus permanen akun "${user.username}" (${user.nama})`,
+      metadata: {
+        username: user.username,
+        nama: user.nama,
+      },
     });
   } catch (error) {
     console.error('Gagal menghapus pengguna secara permanen:', error);
@@ -568,6 +689,18 @@ export async function restoreBulkUsers(userIds: string[]) {
     await prisma.pengguna.updateMany({
       where: { id: { in: userIds } },
       data: { deletedAt: null },
+    });
+
+    // Log activity
+    await logActivity({
+      userId: session.operatorId,
+      category: 'USER',
+      type: 'BULK_RESTORE',
+      description: `Memulihkan ${userIds.length} akun pengguna dari tempat sampah`,
+      metadata: {
+        count: userIds.length,
+        userIds,
+      },
     });
   } catch (error) {
     console.error('Gagal memulihkan pengguna secara bulk:', error);
@@ -630,6 +763,18 @@ export async function deleteBulkUsersPermanently(userIds: string[]) {
 
     await prisma.pengguna.deleteMany({
       where: { id: { in: userIds } },
+    });
+
+    // Log activity
+    await logActivity({
+      userId: session.operatorId,
+      category: 'USER',
+      type: 'BULK_PERMANENT_DELETE',
+      description: `Menghapus permanen ${userIds.length} akun pengguna sekaligus`,
+      metadata: {
+        count: userIds.length,
+        userIds,
+      },
     });
   } catch (error) {
     console.error('Gagal menghapus pengguna secara permanen (bulk):', error);

@@ -42,6 +42,7 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
   const [stats, setStats] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
@@ -50,6 +51,7 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
   
   // Filters
   const [categoryFilter, setCategoryFilter] = useState<ActivityCategory | ''>('');
@@ -68,13 +70,13 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
     if (isSuperAdmin) {
       loadUsers();
     }
-  }, [currentPage, categoryFilter, typeFilter, userFilter, startDate, endDate]);
+  }, [currentPage, pageSize, categoryFilter, typeFilter, userFilter, startDate, endDate]);
 
   const loadData = async () => {
     setLoading(true);
     const result = await getActivityLogs({
       page: currentPage,
-      limit: 50,
+      limit: pageSize,
       category: categoryFilter || undefined,
       type: typeFilter || undefined,
       userId: userFilter || undefined,
@@ -187,6 +189,49 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
     setClearing(false);
   };
 
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      
+      // Langsung panggil getActivityLogs dan getActivityStats tanpa loadData/loadStats
+      // untuk menghindari konflik setLoading
+      const [logsResult, statsResult] = await Promise.all([
+        getActivityLogs({
+          page: currentPage,
+          limit: pageSize,
+          category: categoryFilter || undefined,
+          type: typeFilter || undefined,
+          userId: userFilter || undefined,
+          startDate: startDate || undefined,
+          endDate: endDate || undefined,
+        }),
+        getActivityStats()
+      ]);
+
+      if (logsResult.logs) {
+        setLogs(logsResult.logs);
+        setTotalPages(logsResult.pagination.totalPages);
+        setTotal(logsResult.pagination.total);
+      }
+
+      if (!statsResult.error) {
+        setStats(statsResult);
+      }
+
+      toast.success('Data berhasil di-refresh', {
+        duration: 2000,
+        icon: '🔄',
+      });
+    } catch (error) {
+      toast.error('Gagal refresh data', {
+        duration: 2000,
+        icon: '❌',
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   // Filter logs by search query
   const filteredLogs = logs.filter(log => {
     if (!searchQuery) return true;
@@ -203,13 +248,13 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'SUCCESS':
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
       case 'FAILED':
-        return <XCircle className="w-5 h-5 text-red-500" />;
+        return <XCircle className="w-4 h-4 text-red-500" />;
       case 'WARNING':
-        return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+        return <AlertCircle className="w-4 h-4 text-yellow-500" />;
       default:
-        return <Activity className="w-5 h-5 text-gray-500" />;
+        return <Activity className="w-4 h-4 text-gray-500" />;
     }
   };
 
@@ -467,11 +512,31 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
       </div>
 
       {/* Activity Logs Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Riwayat Aktivitas ({total.toLocaleString()} total)
-          </h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Riwayat Aktivitas
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Total {total.toLocaleString()} aktivitas tercatat
+            </p>
+          </div>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing || loading}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
+              refreshing 
+                ? 'bg-blue-500 text-white cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400'
+            }`}
+            title={refreshing ? 'Sedang refresh...' : 'Refresh data'}
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </span>
+          </button>
         </div>
 
         {loading ? (
@@ -486,104 +551,183 @@ export default function ActivityLogClient({ session }: ActivityLogClientProps) {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full table-fixed">
                 <thead className="bg-gray-50 dark:bg-gray-900/50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="w-16 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      No.
+                    </th>
+                    <th className="w-32 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Waktu
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="w-40 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Pengguna
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="w-24 px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Kategori
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="w-28 px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Tipe
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Deskripsi
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="w-20 px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      IP Address
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {filteredLogs.map((log) => (
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                  {filteredLogs.map((log, index) => (
                     <tr
                       key={log.id}
                       className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
-                        {new Date(log.createdAt).toLocaleString('id-ID', {
-                          dateStyle: 'short',
-                          timeStyle: 'short',
-                        })}
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+                        {((currentPage - 1) * pageSize) + index + 1}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {log.user.nama}
-                        </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          @{log.user.username}
+                      <td className="px-4 py-3 text-xs text-gray-900 dark:text-gray-300">
+                        <div className="flex flex-col">
+                          <span className="font-medium">
+                            {new Date(log.createdAt).toLocaleDateString('id-ID', {
+                              day: '2-digit',
+                              month: 'short',
+                            })}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(log.createdAt).toLocaleTimeString('id-ID', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(log.category)}`}>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-col overflow-hidden">
+                          <span className="text-sm font-medium text-gray-900 dark:text-white truncate" title={log.user.nama}>
+                            {log.user.nama}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 truncate" title={log.user.username}>
+                            @{log.user.username}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3">
+                        <span className={`inline-flex px-2 py-0.5 text-[10px] font-semibold rounded-full whitespace-nowrap ${getCategoryColor(log.category)}`}>
                           {log.category}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-md ${getTypeColor(log.type)}`}>
-                          {log.type}
+                      <td className="px-3 py-3">
+                        <span className={`inline-flex px-2 py-0.5 text-[10px] font-semibold rounded-md whitespace-nowrap ${getTypeColor(log.type)}`}>
+                          {log.type.replace(/_/g, ' ')}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 max-w-md truncate">
-                        {log.description}
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                        <div className="line-clamp-2" title={log.description}>
+                          {log.description}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusIcon(log.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {log.ipAddress || '-'}
+                      <td className="px-3 py-3">
+                        <div className="flex items-center justify-center">
+                          {getStatusIcon(log.status)}
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div className="text-sm text-gray-700 dark:text-gray-300">
-                  Halaman {currentPage} dari {totalPages}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-                  >
-                    Sebelumnya
-                  </button>
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-                  >
-                    Selanjutnya
-                  </button>
-                </div>
-              </div>
-            )}
           </>
         )}
       </div>
+
+      {/* Pagination - Separate component like arsip */}
+      {!loading && filteredLogs.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-gray-200 dark:border-gray-700 text-sm">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600 dark:text-gray-400">Tampilkan:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="px-2.5 py-1.5 border rounded-md bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
+                >
+                  {[25, 50, 100].map((n) => (
+                    <option key={n} value={n}>
+                      {n} / halaman
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, total)} dari {total} item
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+                className={`w-9 h-9 flex items-center justify-center rounded border text-sm ${
+                  currentPage === 1
+                    ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
+                    : 'cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+                }`}
+                aria-label="First Page"
+              >
+                «
+              </button>
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className={`px-3 h-9 rounded border text-sm flex items-center ${
+                  currentPage === 1
+                    ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
+                    : 'cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+                }`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Prev
+              </button>
+              <span className="px-4 h-9 inline-flex items-center justify-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">
+                {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className={`px-3 h-9 rounded border text-sm flex items-center ${
+                  currentPage === totalPages
+                    ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
+                    : 'cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+                }`}
+              >
+                Next
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+                className={`w-9 h-9 flex items-center justify-center rounded border text-sm ${
+                  currentPage === totalPages
+                    ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600'
+                    : 'cursor-pointer bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+                }`}
+                aria-label="Last Page"
+              >
+                »
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Clear Logs Modal */}
       {showClearModal && (

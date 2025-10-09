@@ -7,6 +7,7 @@ import bcrypt from 'bcryptjs';
 import fs from 'fs/promises';
 import path from 'path';
 import { prisma } from '@/lib/prisma';
+import { logActivity, ActivityDescriptions } from '@/lib/activityLogger';
 
 /**
  * Memperbarui informasi dasar pengguna (nama, username, nrp_nip, foto profil)
@@ -36,6 +37,20 @@ export async function updateProfile(formData: FormData) {
     await prisma.pengguna.update({
       where: { id: session.operatorId },
       data: dataToUpdate,
+    });
+
+    // Log activity
+    await logActivity({
+      userId: session.operatorId,
+      category: 'PROFILE',
+      type: 'UPDATE',
+      description: ActivityDescriptions.PROFILE_UPDATED(username),
+      metadata: {
+        nama,
+        username,
+        nrp_nip: nrp_nip || undefined,
+        profilePictureUpdated: !!(profilePicture && profilePicture.size > 0),
+      },
     });
 
     revalidatePath('/(app)/layout', 'layout'); // Revalidasi layout untuk update nama di navbar
@@ -83,6 +98,17 @@ export async function changePassword(formData: FormData) {
     await prisma.pengguna.update({
       where: { id: session.operatorId },
       data: { password: hashedNewPassword },
+    });
+
+    // Log activity
+    await logActivity({
+      userId: session.operatorId,
+      category: 'PROFILE',
+      type: 'CHANGE_PASSWORD',
+      description: ActivityDescriptions.PASSWORD_CHANGED(user.username),
+      metadata: {
+        username: user.username,
+      },
     });
 
     return { success: 'Password berhasil diubah.' };

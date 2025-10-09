@@ -17,19 +17,19 @@ export default async function LogActivityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+    <div className="space-y-8 max-w-6xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-b border-gray-200 dark:border-gray-700 pb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white tracking-tight">
             Log Aktivitas
           </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Riwayat aktivitas pengguna dalam sistem
           </p>
         </div>
-
-        <ActivityLogClient session={session} />
       </div>
+
+      <ActivityLogClient session={session} />
     </div>
   );
 }

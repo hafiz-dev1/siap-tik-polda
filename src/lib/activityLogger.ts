@@ -19,7 +19,7 @@ export type ActivityType =
   | 'VIEW'
   | 'DOWNLOAD'
   | 'UPLOAD'
-  | 'PASSWORD_CHANGE'
+  | 'CHANGE_PASSWORD'
   | 'PROFILE_UPDATE'
   | 'OTHER';
 
@@ -101,8 +101,8 @@ export const ActivityDescriptions = {
   // Surat
   SURAT_CREATED: (nomorSurat: string, perihal: string) => 
     `Membuat surat baru: ${nomorSurat} - ${perihal}`,
-  SURAT_UPDATED: (nomorSurat: string) => 
-    `Mengupdate surat: ${nomorSurat}`,
+  SURAT_UPDATED: (nomorSurat: string, perihal: string) => 
+    `Mengupdate surat: ${nomorSurat} - ${perihal}`,
   SURAT_DELETED: (nomorSurat: string) => 
     `Menghapus surat ke trash: ${nomorSurat}`,
   SURAT_RESTORED: (nomorSurat: string) => 
@@ -123,10 +123,10 @@ export const ActivityDescriptions = {
   // User
   USER_CREATED: (username: string, nama: string) => 
     `Membuat user baru: ${username} (${nama})`,
-  USER_UPDATED: (username: string) => 
-    `Mengupdate user: ${username}`,
-  USER_DELETED: (username: string) => 
-    `Menghapus user ke trash: ${username}`,
+  USER_UPDATED: (username: string, nama: string) => 
+    `Mengupdate user: ${username} (${nama})`,
+  USER_DELETED: (username: string, nama: string) => 
+    `Menghapus user ke trash: ${username} (${nama})`,
   USER_RESTORED: (username: string) => 
     `Memulihkan user dari trash: ${username}`,
   USER_PERMANENT_DELETE: (username: string) => 
