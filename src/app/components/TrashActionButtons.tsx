@@ -79,7 +79,7 @@ export default function TrashActionButtons({ entityId, entityType, entityName, u
       {/* Tombol Pulihkan */}
       <button
         onClick={() => setIsRestoreModalOpen(true)}
-        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 text-sm font-medium"
+        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 text-sm font-medium cursor-pointer"
       >
         Pulihkan
       </button>
@@ -87,7 +87,7 @@ export default function TrashActionButtons({ entityId, entityType, entityName, u
       {/* Tombol Hapus Permanen */}
       <button
         onClick={() => setIsDeleteModalOpen(true)}
-        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
+        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium cursor-pointer"
       >
         Hapus Permanen
       </button>

@@ -47,7 +47,7 @@ export default function DeleteUserButton({ userId }: Props) {
       <button
         type="button"
         onClick={openModal}
-        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium transition-colors duration-200"
+        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium transition-colors duration-200 cursor-pointer"
       >
         Hapus
       </button>

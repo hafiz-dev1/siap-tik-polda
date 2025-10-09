@@ -183,7 +183,7 @@ const OptimizedSuratDetailModal = memo(function OptimizedSuratDetailModal({
                 <div className="mt-6 flex justify-end space-x-3">
                   <button
                     onClick={onClose}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                   >
                     Tutup
                   </button>

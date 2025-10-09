@@ -71,7 +71,7 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
       {/* User Avatar Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-3 p-2 rounded-xl transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+        className="flex items-center space-x-3 p-2 rounded-xl transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
@@ -168,7 +168,7 @@ export default function UserDropdown({ user, onLogout }: UserDropdownProps) {
                 setIsOpen(false);
                 onLogout();
               }}
-              className="flex items-center w-full px-4 py-3 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-300 transition-all duration-150 rounded-lg mx-1"
+              className="flex items-center w-full px-4 py-3 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-300 transition-all duration-150 rounded-lg mx-1 cursor-pointer"
             >
               <LogOut className="w-4 h-4 mr-3 flex-shrink-0" />
               <span>Keluar</span>

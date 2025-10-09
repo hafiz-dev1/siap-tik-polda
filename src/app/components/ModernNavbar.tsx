@@ -125,7 +125,7 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
           <div className="md:hidden flex items-center space-x-2">
             <button
               type="button"
-              className="p-2 rounded-lg text-gray-700 dark:text-gray-300 bg-gray-100/50 dark:bg-gray-800/50 hover:bg-blue-50 dark:hover:bg-gray-700 transition-all duration-200 border border-gray-200 dark:border-gray-700"
+              className="p-2 rounded-lg text-gray-700 dark:text-gray-300 bg-gray-100/50 dark:bg-gray-800/50 hover:bg-blue-50 dark:hover:bg-gray-700 transition-all duration-200 border border-gray-200 dark:border-gray-700 cursor-pointer"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-expanded="false"
             >
@@ -198,7 +198,7 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
               <div className="grid grid-cols-3 gap-2 mb-2">
                 <Link
                   href="/profile"
-                  className="flex flex-col items-center justify-center px-3 py-3 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100/30 dark:bg-gray-800/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-200 border border-gray-200 dark:border-gray-700"
+                  className="flex flex-col items-center justify-center px-3 py-3 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100/30 dark:bg-gray-800/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-200 border border-gray-200 dark:border-gray-700 cursor-pointer"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Shield className="w-5 h-5 mb-1.5" />
@@ -207,7 +207,7 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
 
                 <Link
                   href="/log-activity"
-                  className="flex flex-col items-center justify-center px-3 py-3 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100/30 dark:bg-gray-800/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-200 border border-gray-200 dark:border-gray-700"
+                  className="flex flex-col items-center justify-center px-3 py-3 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100/30 dark:bg-gray-800/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-200 border border-gray-200 dark:border-gray-700 cursor-pointer"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Activity className="w-5 h-5 mb-1.5" />
@@ -216,7 +216,7 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
 
                 <Link
                   href="/about"
-                  className="flex flex-col items-center justify-center px-3 py-3 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100/30 dark:bg-gray-800/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-200 border border-gray-200 dark:border-gray-700"
+                  className="flex flex-col items-center justify-center px-3 py-3 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100/30 dark:bg-gray-800/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-200 border border-gray-200 dark:border-gray-700 cursor-pointer"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Info className="w-5 h-5 mb-1.5" />
@@ -229,7 +229,7 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
                   setIsMobileMenuOpen(false);
                   onLogout();
                 }}
-                className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg text-sm font-semibold text-white bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-800 transition-all duration-200 shadow-md"
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg text-sm font-semibold text-white bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-800 transition-all duration-200 shadow-md cursor-pointer"
               >
                 <X className="w-5 h-5" />
                 <span>Keluar</span>

@@ -181,11 +181,11 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-3">
                       <div className="flex items-center">
                         <label htmlFor="tanggal_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tanggal Surat</label>
-                        <input type="date" name="tanggal_surat" id="tanggal_surat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_surat) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"/>
+                        <input type="date" name="tanggal_surat" id="tanggal_surat" required defaultValue={suratToEdit ? formatDateForInput(suratToEdit.tanggal_surat) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm cursor-pointer"/>
                       </div>
                       <div className="flex items-center">
                         <label htmlFor="tanggal_diterima_dibuat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tgl Diterima</label>
-                        <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" defaultValue={suratToEdit?.tanggal_diterima_dibuat ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" placeholder="(opsional)"/>
+                        <input type="datetime-local" name="tanggal_diterima_dibuat" id="tanggal_diterima_dibuat" defaultValue={suratToEdit?.tanggal_diterima_dibuat ? formatDateForInput(suratToEdit.tanggal_diterima_dibuat, true) : ''} className="pl-2 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm cursor-pointer" placeholder="(opsional)"/>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-7 gap-y-3">
@@ -216,7 +216,7 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                       <div className="flex items-center">
                         <label htmlFor="arah_surat" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Arah Surat</label>
                         <div className="relative w-full">
-                          <select name="arah_surat" id="arah_surat" required defaultValue={suratToEdit?.arah_surat} className="pl-2 py-0.25 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm appearance-none pr-8">
+                          <select name="arah_surat" id="arah_surat" required defaultValue={suratToEdit?.arah_surat} className="pl-2 py-0.25 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm appearance-none pr-8 cursor-pointer">
                             {ARAH_SURAT.map(arah => <option key={arah} value={arah}>{formatEnumText(arah)}</option>)}
                           </select>
                           <svg className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -227,7 +227,7 @@ export default function SuratFormModal({ suratToEdit, children }: Props) {
                       <div className="flex items-center">
                         <label htmlFor="tipe_dokumen" className="text-sm font-medium text-gray-700 dark:text-gray-300 w-27 flex-shrink-0">Tipe Dokumen</label>
                         <div className="relative w-full">
-                          <select name="tipe_dokumen" id="tipe_dokumen" required defaultValue={suratToEdit?.tipe_dokumen} className="pl-2 py-0.25 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm appearance-none pr-8">
+                          <select name="tipe_dokumen" id="tipe_dokumen" required defaultValue={suratToEdit?.tipe_dokumen} className="pl-2 py-0.25 block w-full rounded-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm appearance-none pr-8 cursor-pointer">
                             {TIPE_DOKUMEN.map(tipe => <option key={tipe} value={tipe}>{formatEnumText(tipe)}</option>)}
                           </select>
                           <svg className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">

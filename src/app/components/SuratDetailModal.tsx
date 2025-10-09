@@ -158,7 +158,7 @@ export default function SuratDetailModal({ surat, children }: Props) {
                   </div>
 
                   <div className="mt-6 flex justify-end gap-4 border-t dark:border-gray-700 pt-4">
-                    <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600" onClick={closeModal}>
+                    <button type="button" className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 cursor-pointer" onClick={closeModal}>
                       Tutup
                     </button>
                   </div>

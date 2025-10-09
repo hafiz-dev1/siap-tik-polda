@@ -10,7 +10,7 @@ export default function AboutPage() {
           Tentang S I A P
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-          Sistem Informasi Arsip POLDA (SIAP) adalah platform modern untuk mengelola 
+          Sistem Informasi Arsip Polda (SIAP) adalah platform modern untuk mengelola 
           dan mengarsipkan surat disposisi secara digital dengan aman dan efisien.
         </p>
       </div>
@@ -154,7 +154,7 @@ export default function AboutPage() {
             Administrator TIK POLDA.
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            © 2025 SIAD TIK POLDA. Sistem ini dikembangkan untuk internal Kepolisian Daerah.
+            © 2025 SIAP. Sistem ini dikembangkan untuk internal Kepolisian Daerah.
           </p>
         </div>
       </div>
