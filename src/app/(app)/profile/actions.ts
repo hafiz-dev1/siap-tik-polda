@@ -4,8 +4,6 @@
 import { getSession } from '@/lib/session';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
-import fs from 'fs/promises';
-import path from 'path';
 import { prisma } from '@/lib/prisma';
 import { logActivity, ActivityDescriptions } from '@/lib/activityLogger';
 
@@ -24,14 +22,19 @@ export async function updateProfile(formData: FormData) {
   const dataToUpdate: any = { nama, username, nrp_nip };
 
   try {
-    // Logika upload foto profil (sama seperti sebelumnya)
+    // ✅ Base64 encoding untuk serverless compatibility (Vercel)
     if (profilePicture && profilePicture.size > 0) {
+      // Validasi ukuran file (max 2MB untuk performa optimal)
+      if (profilePicture.size > 2 * 1024 * 1024) {
+        return { error: 'Ukuran foto maksimal 2MB' };
+      }
+
       const buffer = Buffer.from(await profilePicture.arrayBuffer());
-      const filename = `${session.operatorId}-${profilePicture.name.replace(/\s/g, '_')}`;
-      const uploadPath = path.join(process.cwd(), 'public/uploads/profiles', filename);
-      await fs.mkdir(path.dirname(uploadPath), { recursive: true });
-      await fs.writeFile(uploadPath, buffer);
-      dataToUpdate.profilePictureUrl = `/uploads/profiles/${filename}`;
+      const base64 = buffer.toString('base64');
+      const mimeType = profilePicture.type || 'image/jpeg';
+      
+      // Format Data URI: data:image/jpeg;base64,/9j/4AAQSkZJRg...
+      dataToUpdate.profilePictureUrl = `data:${mimeType};base64,${base64}`;
     }
 
     await prisma.pengguna.update({

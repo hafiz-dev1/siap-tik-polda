@@ -5,8 +5,6 @@ import { Prisma } from '@prisma/client';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import fs from 'fs/promises';
-import path from 'path';
 import { getSession } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { SURAT_TRASH_RETENTION_DAYS } from '@/lib/trashRetention';
@@ -18,25 +16,11 @@ type LampiranRecord = {
   path_file: string | null;
 };
 
+// ✅ Base64 Solution: File tidak disimpan di filesystem, jadi tidak perlu dihapus
 async function removeLampiranFiles(lampiranList: LampiranRecord[]) {
-  await Promise.all(
-    lampiranList
-      .map((lampiran) => lampiran.path_file)
-      .filter((filePath): filePath is string => Boolean(filePath))
-      .map(async (filePath) => {
-        const relativePath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
-        const absolutePath = path.join(process.cwd(), 'public', relativePath);
-
-        try {
-          await fs.unlink(absolutePath);
-        } catch (unlinkError) {
-          const nodeError = unlinkError as NodeJS.ErrnoException;
-          if (nodeError?.code !== 'ENOENT') {
-            console.warn('Gagal menghapus file lampiran surat:', absolutePath, unlinkError);
-          }
-        }
-      })
-  );
+  // No-op: Files are stored as Base64 in database, not in filesystem
+  // This function kept for backward compatibility but does nothing
+  return Promise.resolve();
 }
 
 /**
@@ -92,12 +76,16 @@ export async function createSurat(formData: FormData) {
       return { error: 'Gagal: Scan surat wajib diupload.' };
     }
 
+    // ✅ Validasi ukuran file (max 3MB untuk serverless)
+    if (scan_surat.size > 3 * 1024 * 1024) {
+      return { error: 'Ukuran file maksimal 3MB. Silakan kompres file terlebih dahulu.' };
+    }
+
+    // ✅ Base64 encoding untuk serverless compatibility (Vercel)
     const buffer = Buffer.from(await scan_surat.arrayBuffer());
-    const filename = `${Date.now()}-${scan_surat.name.replace(/\s/g, '_')}`;
-    const uploadPath = path.join(process.cwd(), 'public/uploads', filename);
-    await fs.mkdir(path.dirname(uploadPath), { recursive: true });
-    await fs.writeFile(uploadPath, buffer);
-    const publicPath = `/uploads/${filename}`;
+    const base64 = buffer.toString('base64');
+    const mimeType = scan_surat.type || 'application/pdf';
+    const publicPath = `data:${mimeType};base64,${base64}`;
 
     const newSurat = await prisma.surat.create({
       data: {
@@ -631,20 +619,7 @@ export async function deleteUserPermanently(userId: string) {
       return { error: 'Akun pengguna tidak ditemukan.' };
     }
 
-    if (user.profilePictureUrl) {
-      const profilePicturePath = user.profilePictureUrl.startsWith('/')
-        ? user.profilePictureUrl.slice(1)
-        : user.profilePictureUrl;
-      const absolutePath = path.join(process.cwd(), 'public', profilePicturePath);
-      try {
-        await fs.unlink(absolutePath);
-      } catch (unlinkError) {
-        const nodeError = unlinkError as NodeJS.ErrnoException;
-        if (nodeError?.code !== 'ENOENT') {
-          console.warn('Gagal menghapus file foto profil:', unlinkError);
-        }
-      }
-    }
+    // ✅ Base64 Solution: Profile picture stored in database, no file to delete
 
     await prisma.pengguna.delete({
       where: { id: userId },
@@ -741,25 +716,7 @@ export async function deleteBulkUsersPermanently(userIds: string[]) {
       return { error: 'Tidak ada akun pengguna yang ditemukan.' };
     }
 
-    // Hapus foto profil jika ada
-    await Promise.all(
-      users.map(async (user) => {
-        if (user.profilePictureUrl) {
-          const profilePicturePath = user.profilePictureUrl.startsWith('/')
-            ? user.profilePictureUrl.slice(1)
-            : user.profilePictureUrl;
-          const absolutePath = path.join(process.cwd(), 'public', profilePicturePath);
-          try {
-            await fs.unlink(absolutePath);
-          } catch (unlinkError) {
-            const nodeError = unlinkError as NodeJS.ErrnoException;
-            if (nodeError?.code !== 'ENOENT') {
-              console.warn('Gagal menghapus file foto profil:', unlinkError);
-            }
-          }
-        }
-      })
-    );
+    // ✅ Base64 Solution: Profile pictures stored in database, no files to delete
 
     await prisma.pengguna.deleteMany({
       where: { id: { in: userIds } },

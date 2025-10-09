@@ -13,7 +13,7 @@ model Pengguna {
   username          String        @unique
   password          String
   role              Role          @default(ADMIN)
-  profilePictureUrl String?
+  profilePictureUrl String?       @db.Text
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
   nrp_nip           String?
@@ -51,7 +51,7 @@ model Surat {
 model Lampiran {
   id          String   @id @default(uuid())
   nama_file   String
-  path_file   String
+  path_file   String   @db.Text
   tipe_file   String
   ukuran_file Int
   id_surat    String

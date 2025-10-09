@@ -3,8 +3,6 @@
 import { Role, Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
-import fs from 'fs/promises';
-import path from 'path';
 import { getSession } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { logActivity, ActivityDescriptions } from '@/lib/activityLogger';
@@ -77,15 +75,17 @@ export async function createUser(formData: FormData) {
     const hashedPassword = await bcrypt.hash(password, 10);
     let profilePictureUrl: string | undefined = undefined;
 
-    // Logika upload foto profil (hanya saat membuat baru)
+    // ✅ Base64 encoding untuk serverless compatibility (Vercel)
     if (profilePicture && profilePicture.size > 0) {
+      // Validasi ukuran file (max 2MB)
+      if (profilePicture.size > 2 * 1024 * 1024) {
+        return { error: 'Ukuran foto maksimal 2MB' };
+      }
+
       const buffer = Buffer.from(await profilePicture.arrayBuffer());
-      const filename = `${Date.now()}-${profilePicture.name.replace(/\s/g, '_')}`;
-      const uploadPath = path.join(process.cwd(), 'public/uploads/profiles', filename);
-      
-      await fs.mkdir(path.dirname(uploadPath), { recursive: true });
-      await fs.writeFile(uploadPath, buffer);
-      profilePictureUrl = `/uploads/profiles/${filename}`;
+      const base64 = buffer.toString('base64');
+      const mimeType = profilePicture.type || 'image/jpeg';
+      profilePictureUrl = `data:${mimeType};base64,${base64}`;
     }
 
     await prisma.pengguna.create({
