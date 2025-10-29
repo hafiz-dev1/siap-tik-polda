@@ -208,7 +208,11 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
               <div className="grid grid-cols-3 gap-2 mb-2">
                 <Link
                   href="/profile"
-                  className="flex flex-col items-center justify-center px-3 py-3 rounded-md text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100/30 dark:bg-gray-800/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-200 border border-gray-200 dark:border-gray-700 cursor-pointer"
+                  className={`flex flex-col items-center justify-center px-3 py-3 rounded-md text-sm font-semibold transition-all duration-200 border cursor-pointer ${
+                    pathname === '/profile'
+                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700'
+                      : 'text-gray-700 dark:text-gray-300 bg-gray-100/30 dark:bg-gray-800/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 border-gray-200 dark:border-gray-700'
+                  }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Shield className="w-5 h-5 mb-1.5" />
@@ -217,7 +221,11 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
 
                 <Link
                   href="/log-activity"
-                  className="flex flex-col items-center justify-center px-3 py-3 rounded-md text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100/30 dark:bg-gray-800/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-200 border border-gray-200 dark:border-gray-700 cursor-pointer"
+                  className={`flex flex-col items-center justify-center px-3 py-3 rounded-md text-sm font-semibold transition-all duration-200 border cursor-pointer ${
+                    pathname === '/log-activity'
+                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700'
+                      : 'text-gray-700 dark:text-gray-300 bg-gray-100/30 dark:bg-gray-800/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 border-gray-200 dark:border-gray-700'
+                  }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Activity className="w-5 h-5 mb-1.5" />
@@ -226,7 +234,11 @@ export default function ModernNavbar({ user, onLogout }: ModernNavbarProps) {
 
                 <Link
                   href="/about"
-                  className="flex flex-col items-center justify-center px-3 py-3 rounded-md text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100/30 dark:bg-gray-800/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 transition-all duration-200 border border-gray-200 dark:border-gray-700 cursor-pointer"
+                  className={`flex flex-col items-center justify-center px-3 py-3 rounded-md text-sm font-semibold transition-all duration-200 border cursor-pointer ${
+                    pathname === '/about'
+                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700'
+                      : 'text-gray-700 dark:text-gray-300 bg-gray-100/30 dark:bg-gray-800/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 border-gray-200 dark:border-gray-700'
+                  }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Info className="w-5 h-5 mb-1.5" />
