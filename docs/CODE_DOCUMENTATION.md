@@ -1,9 +1,9 @@
 
-# Dokumentasi Kode Aplikasi SIAD TIK POLDA
+# Dokumentasi Kode Aplikasi SIAP (Sistem Informasi Arsip Polda)
 
 ## 1. Pendahuluan
 
-Dokumen ini memberikan analisis dan dokumentasi teknis dari kode sumber aplikasi **SIAD TIK POLDA**. Tujuannya adalah untuk memberikan pemahaman yang jelas tentang arsitektur, fungsionalitas, dan alur kerja aplikasi kepada pengembang.
+Dokumen ini memberikan analisis dan dokumentasi teknis dari kode sumber aplikasi **SIAP**. Tujuannya adalah untuk memberikan pemahaman yang jelas tentang arsitektur, fungsionalitas, dan alur kerja aplikasi kepada pengembang.
 
 Aplikasi ini dibangun menggunakan **Next.js (App Router)**, **TypeScript**, **Prisma** sebagai ORM, dan **PostgreSQL** sebagai database.
 
